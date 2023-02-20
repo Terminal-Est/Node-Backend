@@ -18,9 +18,4 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-dbapi.query('s3172455@student.rmit.edu.au', function(result){
-    console.log(result);
-});
-
-
 module.exports = app;

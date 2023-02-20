@@ -1,7 +1,7 @@
-var passhash = require('password-hash');
+var bcrypt = require('bcrypt');
+var dbapi = require('../dbapi/dbapi');
 
-function generateHash(password) {
-    var hashedPass = passhash.generate(password);
-    return hashedPass;
-
+function hashPassword(uid, password) {
+    const saltRounds = 10;
+     
 }

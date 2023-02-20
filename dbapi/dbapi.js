@@ -14,13 +14,13 @@ const connection = () => {
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-function queryUser(userInfo) {
+function queryUser(table, column, search) {
     return new Promise(function(resolve, reject) {
-        let table = string.userInfo["table"];
-        let column = userInfo["column"];
-        let search = userInfo["search"];
-        let con = connection()
-        let sql = mysql.format('SELECT * FROM ?? WHERE ?? = ?', [table, column, search]);
+        this.table = table;
+        this.column = column; 
+        this.search = search; 
+        const con = connection()
+        const sql = mysql.format('SELECT * FROM ?? WHERE ?? = ?', [this.table, this.column, this.search]);
         con.query(
             sql, 
             function(error, result) {
@@ -32,15 +32,14 @@ function queryUser(userInfo) {
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-function setUserState(userInfo) {
+function setUserState(userId, loggedIn) {
     return new Promise(function(resolve, reject) {
-        let con = connection();
-        let uid = userInfo["userId"];
-        let loggedIn = userInfo["loggedIn"];
-        let sql = 'UPDATE user_state SET logged_in = ? WHERE user_id = ?';
+        const con = connection();
+        this.userId = userId;
+        this.loggedIn = loggedIn;
+        const sql = mysql.format('UPDATE user_state SET logged_in = ? WHERE user_id = ?', [this.loggedIn, this.userId]);
         con.query(
             sql,
-            [loggedIn, uid],
             function(error, result) {
                return error ? reject(error) : resolve(result);
             }
@@ -51,21 +50,17 @@ function setUserState(userInfo) {
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-async function setPassHash(userInfo) {
-    let con = connection();
-    let uid = userInfo["user_id"];
-    let hashPass = userInfo["pass_hash"];
-    let queryInfo = {
-        "table": "user_password",
-        "column": "user_id",
-        "search": uid
-    }
-    var res = await queryUser(queryInfo, /**Replace this**/"test").then(data => {
+async function setPassHash(userId, hashPass) {
+    const con = connection();
+    this.userId = userId;
+    this.hashPass = hashPass;
+    const outer = this;
+    const res = await queryUser("user_password", "user_id", this.userId).then(data => {
         return data;
     });
     return new Promise(function(resolve, reject) { 
         if (res[0] == null) {
-            let sql = mysql.format('INSERT INTO ?? SET user_id = ?, pass_hash = ?', ['user_password', uid, hashPass]);
+            const sql = mysql.format('INSERT INTO ?? SET user_id = ?, pass_hash = ?', ['user_password', outer.userId, outer.hashPass]);
             con.query(
                 sql,
                 function(error, result) {
@@ -73,7 +68,7 @@ async function setPassHash(userInfo) {
                 }
             );
         } else {
-            let sql = mysql.format('UPDATE ?? SET pass_hash = ? WHERE user_id = ?', ['user_password', hashPass, uid]);
+            const sql = mysql.format('UPDATE ?? SET pass_hash = ? WHERE user_id = ?', ['user_password', outer.hashPass, outer.userId]);
             con.query(
                 sql,
                 function(error, result) {
@@ -85,16 +80,16 @@ async function setPassHash(userInfo) {
     });
 }
 
-function addUser(userInfo) {
+function addUser(userId, org, admin, auth, userName) {
     return new Promise(function(resolve, reject) {
-        let con = connection();
-        let user = userInfo["userId"];
-        let org = userInfo["org"];
-        let admin = userInfo["admin"];
-        let auth = userInfo["auth"];
-        let userName = userInfo["userName"];
-        let sql = mysql.format('INSERT INTO user SET id = ?, organisation = ?, admin = ?, authenticated = ?, username = ?'
-                                , [user, org, admin, auth, userName]);
+        const con = connection();
+        this.userId = userId;
+        this.org = org;
+        this.admin = admin;
+        this.auth = auth;
+        this.userName = userName;
+        const sql = mysql.format('INSERT INTO user SET id = ?, organisation = ?, admin = ?, authenticated = ?, username = ?'
+                                , [this.userId, this.org, this.admin, this.auth, this.userName]);
         con.query(
             sql,
             function(error, result) {
@@ -105,4 +100,51 @@ function addUser(userInfo) {
     });
 }
 
-module.exports = { queryUser, setUserState, setPassHash, addUser }; 
+async function setUserToken(userId, column, token) {
+    const con = connection();
+    this.userId = userId;
+    this.token = token;
+    this.column = column;
+    const outer = this;
+    const res = await queryUser("user_tokens", "user_id", this.userId).then(data => {
+        return data;
+    });
+    return new Promise(function(resolve, reject) { 
+        if (res[0] == null) {
+            const sql = mysql.format('INSERT INTO ?? SET user_id = ?, ?? = ?', ['user_tokens', outer.userId, outer.column, outer.token]);
+            con.query(
+                sql,
+                function(error, result) {
+                    return error ? reject(error) : resolve(result);
+                }
+            );
+        } else {
+            const sql = mysql.format('UPDATE ?? SET ?? = ? WHERE user_id = ?', ['user_tokens', outer.column, outer.token, outer.userId]);
+            con.query(
+                sql,
+                function(error, result) {
+                    return error ? reject(error) : resolve(result);
+                }
+            );
+        }
+        con.end();
+    });
+}
+
+function setUserAthenticated(userId, auth) {
+    return new Promise(function(resolve, reject) {
+        const con = connection();
+        this.userId = userId;
+        this.auth = auth;
+        const sql = mysql.format('UPDATE user SET authenticated = ? WHERE id = ?', [this.auth, this.userId]);
+        con.query(
+            sql,
+            function(error, result) {
+                return error ? reject(error) : resolve(result);
+            }
+        );
+        con.end();
+    });
+}
+
+module.exports = { queryUser, setUserState, setPassHash, addUser, setUserToken, setUserAthenticated }; 

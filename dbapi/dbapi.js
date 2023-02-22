@@ -1,4 +1,5 @@
 var mysql = require('mysql');
+var bcrypt = require('bcrypt');
 
 // TODO: Add exception handling to queries where the db engine might return an exception.
 
@@ -59,24 +60,34 @@ async function setPassHash(userId, hashPass) {
         return data;
     });
     return new Promise(function(resolve, reject) { 
-        if (res[0] == null) {
-            const sql = mysql.format('INSERT INTO ?? SET user_id = ?, pass_hash = ?', ['user_password', outer.userId, outer.hashPass]);
-            con.query(
-                sql,
-                function(error, result) {
-                    return error ? reject(error) : resolve(result);
-                }
-            );
-        } else {
-            const sql = mysql.format('UPDATE ?? SET pass_hash = ? WHERE user_id = ?', ['user_password', outer.hashPass, outer.userId]);
-            con.query(
-                sql,
-                function(error, result) {
-                    return error ? reject(error) : resolve(result);
-                }
-            );
+        const saltRounds = 10;
+        const writeDb = (pass) => {
+            if (res[0] == null) {
+                const sql = mysql.format('INSERT INTO ?? SET user_id = ?, pass_hash = ?', ['user_password', outer.userId, pass]);
+                con.query(
+                    sql,
+                    function(error, result) {
+                        return error ? reject(error) : resolve(result);
+                    }
+                );
+            } else {
+                const sql = mysql.format('UPDATE ?? SET pass_hash = ? WHERE user_id = ?', ['user_password', pass, outer.userId]);
+                con.query(
+                    sql,
+                    function(error, result) {
+                        return error ? reject(error) : resolve(result);
+                    }
+                );
+            }
+            con.end();
         }
-        con.end();
+        bcrypt.genSalt(saltRounds, function(error, salt) {
+            if (error) reject(error);
+            bcrypt.hash(outer.hashPass, salt, function(error, hash) {
+                if (error) reject(error);
+                writeDb(hash);
+            });
+        });
     });
 }
 

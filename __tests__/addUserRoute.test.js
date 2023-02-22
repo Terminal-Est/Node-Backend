@@ -13,7 +13,7 @@ describe("POST /addUser", () => {
         }
     it("Should respond 200", async () => {
         const response = await request(baseURL).post("/addUser").send(values);
-        expect(response.statusCode).toBe(400);
+        expect(response.statusCode).toBe(200);
         console.log(response.body);
     })
 });

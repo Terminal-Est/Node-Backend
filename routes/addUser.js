@@ -33,7 +33,7 @@ router.post('/addUser', function(req, res, next) {
         res.status(200).json({
             "Message": "User Added Successfully.", 
             "User Database Updated": res.locals.handleFulfilled,
-            "Hased Pass Success": handleFulfilled
+            "Hashed Pass Success": handleFulfilled
         });
     }, handleRejected => {
         res.status(400).json({
@@ -42,7 +42,7 @@ router.post('/addUser', function(req, res, next) {
         });
     }).catch(error => {
         res.status(400).json({
-            "Message": "Hasing Password Error", 
+            "Message": "Hashing Password Error", 
             "Stack Trace": error
         });
     });

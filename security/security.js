@@ -2,25 +2,32 @@ var dbapi = require('../dbapi/dbapi');
 var forge = require('node-forge');
 var jwt = require('jsonwebtoken');
 var jose = require('jose');
+var app = require('../app');
 
-function getRSAKeypair() {
-    return new Promise(function(resolve, reject) {
-        async function getKeypair() {
-            const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
-            const pemKey = {
-                publicKey: publicKey,
-                privateKey: privateKey
-            }
-            return error ? reject(error) : resolve(pemKey);
-        }       
-    });
+async function getRSAKeypair() {  
+    const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
+    const pemPubKey = await jose.exportSPKI(publicKey);
+    const pemPrivateKey = await jose.exportPKCS8(privateKey);
+    // move this to create JWK endpoint.
+    // const pubKeyJwk = await jose.exportJWK(publicKey);
+    return { public: pemPubKey, private: pemPrivateKey };
 }
 
-
-function getAuthJWT(email, privateKey) {
+async function verifyToken(jwt, spki) {
+    const alg = 'RS256';
+    try {
+        const publicKey = await jose.importSPKI(spki, alg);
+        const { payload, protectedHeader } = await jose.jwtVerify(jwt, publicKey);
+        return { payload: payload, header: protectedHeader };
+    } catch(error) {
+        throw error;
+    }
+}
+           
+function refreshAuthJWT(email, privateKey) {
     return new Promise(function(resolve, reject) {
         jwt.sign({
-            exp: Math.floor(Date.now() / 1000) + 60,
+            exp: Math.floor(Date.now() / 1000) + 60 * 60,
             sub: email,
             iat: Math.floor(Date.now() / 1000)
         },
@@ -30,9 +37,8 @@ function getAuthJWT(email, privateKey) {
         },
         function(error, token) {
             return error ? reject(error) : resolve(token);
-        }
-        );
+        });
     })
 }
 
-module.exports = { getRSAKeypair, getAuthJWT };
+module.exports = { getRSAKeypair, refreshAuthJWT, verifyToken };

@@ -8,24 +8,20 @@ router.post('/addUser', function(req, res, next) {
     const admin = req.body.admin;
     const auth = req.body.auth;
     const userName = req.body.username;
- 
-    const addToDatabase = function () {
-        dbapi.addUser(uid, org, admin, auth, userName).then(handleFulfilled => {
-           res.locals.handleFulfilled = handleFulfilled;
-           next();
-        }, handleRejected => {
-            res.status(400).json({
-                "Message": "User Add Promise Rejected.", 
-                "data": handleRejected
-            });
-        }).catch(error => { 
-            res.status(400).json({
-                "Message": "Add User Error", 
-                "Stack Trace": error.message
-            });
+    dbapi.addUser(uid, org, admin, auth, userName).then(handleFulfilled => {
+        res.locals.handleFulfilled = handleFulfilled;
+        next();
+    }, handleRejected => {
+        res.status(400).json({
+            "Message": "User Add Promise Rejected.", 
+            "data": handleRejected
         });
-    }
-    addToDatabase();
+    }).catch(error => { 
+        res.status(400).json({
+            "Message": "Add User Error", 
+            "Stack Trace": error.message
+        });
+    });
 }, function (req, res) {
     const uid = req.body.userId;
     const password = req.body.password;

@@ -51,9 +51,10 @@ function setUserState(userId, loggedIn) {
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-async function setPassHash(userId, hashPass) {
+async function setPassHash(userId, org, hashPass) {
     const con = connection();
     this.userId = userId;
+    this.org = org;
     this.hashPass = hashPass;
     const outer = this;
     const res = await queryUser("user_password", "user_id", this.userId).then(data => {
@@ -63,7 +64,7 @@ async function setPassHash(userId, hashPass) {
         const saltRounds = 10;
         const writeDb = (pass) => {
             if (res[0] == null) {
-                const sql = mysql.format('INSERT INTO ?? SET user_id = ?, pass_hash = ?', ['user_password', outer.userId, pass]);
+                const sql = mysql.format('INSERT INTO ?? SET user_id = ?, organisation = ?, pass_hash = ?', ['user_password', outer.userId, outer.org, pass]);
                 con.query(
                     sql,
                     function(error, result) {
@@ -71,7 +72,7 @@ async function setPassHash(userId, hashPass) {
                     }
                 );
             } else {
-                const sql = mysql.format('UPDATE ?? SET pass_hash = ? WHERE user_id = ?', ['user_password', pass, outer.userId]);
+                const sql = mysql.format('UPDATE ?? SET pass_hash = ? WHERE user_id = ? AND organisation = ?', ['user_password', pass, outer.userId, outer.org]);
                 con.query(
                     sql,
                     function(error, result) {

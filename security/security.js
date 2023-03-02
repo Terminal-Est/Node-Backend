@@ -1,16 +1,25 @@
 var dbapi = require('../dbapi/dbapi');
-var forge = require('node-forge');
 var jwt = require('jsonwebtoken');
 var jose = require('jose');
-var app = require('../app');
+var fs = require('fs');
 
 async function getRSAKeypair() {  
-    const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
-    const pemPubKey = await jose.exportSPKI(publicKey);
-    const pemPrivateKey = await jose.exportPKCS8(privateKey);
-    // move this to create JWK endpoint.
-    // const pubKeyJwk = await jose.exportJWK(publicKey);
-    return { public: pemPubKey, private: pemPrivateKey };
+    const { publicKey1, privateKey1 } = await jose.generateKeyPair('RS256');
+    const { publicKey2, privateKey2 } = await jose.generateKeyPair('RS256');
+    const pemPubKey1 = await jose.exportSPKI(publicKey1);
+    const pemPrivateKey1 = await jose.exportPKCS8(privateKey1);
+    const pemPubKey2 = await jose.exportSPKI(publicKey2);
+    const pemPrivateKey2 = await jose.exportPKCS8(privateKey2);
+    const pubKeyJwk1 = await jose.exportJWK(publicKey1);
+    const pubKeyJwk2 = await jose.exportJWK(publicKey2);
+    pubKeyJwk1.kid = await jose.calculateJwkThumbprint(pubKeyJwk, 'sha256');
+    pubKeyJwk2.kid = await jose.calculateJwkThumbprint(pubKeyJwk, 'sha256');
+
+    const keySet1 = {
+        public: 
+    }
+
+    return ;
 }
 
 async function verifyToken(jwt, spki) {

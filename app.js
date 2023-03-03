@@ -21,19 +21,26 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //TODO: Add some error checking here.
-const rsa = () =>  {
-    security.getRSAKeypair().then(handleFulfilled => {
-        app.set('KeySet1', { public: handleFulfilled.public, 
-                            private: handleFulfilled.private,
-                            jwk: handleFulfilled.jwk});
-
-    })
+const rsa1 = () =>  {
+    security.getRSAKeypairs().then(handleFulfilled => { 
+        app.set('KeySet1', handleFulfilled.keyPair);
+        app.set('jwk1', handleFulfilled.jwk);
+    });
 }
-  
-rsa();
 
-cron.schedule('* * * * *', () => {
-    rsa();
+const rsa2 = () => {
+    security.getRSAKeypairs().then(handleFulfilled => {
+        app.set('KeySet2', handleFulfilled.keyPair);
+        app.set('jwk2', handleFulfilled.jwk);
+    });
+}
+
+rsa1();
+rsa2();
+
+cron.schedule('*/5 * * * *', () => {
+    rsa1();
+    rsa2();
 });
     
 app.use('/', indexRouter);

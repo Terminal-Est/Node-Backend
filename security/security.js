@@ -1,44 +1,51 @@
 var dbapi = require('../dbapi/dbapi');
 var jwt = require('jsonwebtoken');
 var jose = require('jose');
-var fs = require('fs');
 
-async function getRSAKeypair() {  
-    const { publicKey1, privateKey1 } = await jose.generateKeyPair('RS256');
-    const { publicKey2, privateKey2 } = await jose.generateKeyPair('RS256');
-    const pemPubKey1 = await jose.exportSPKI(publicKey1);
-    const pemPrivateKey1 = await jose.exportPKCS8(privateKey1);
-    const pemPubKey2 = await jose.exportSPKI(publicKey2);
-    const pemPrivateKey2 = await jose.exportPKCS8(privateKey2);
-    const pubKeyJwk1 = await jose.exportJWK(publicKey1);
-    const pubKeyJwk2 = await jose.exportJWK(publicKey2);
-    pubKeyJwk1.kid = await jose.calculateJwkThumbprint(pubKeyJwk, 'sha256');
-    pubKeyJwk2.kid = await jose.calculateJwkThumbprint(pubKeyJwk, 'sha256');
+async function getRSAKeypairs() {  
+    const keys = async () => {
+        const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
+        return { publicKey, privateKey };
+    } 
 
-    const keySet1 = {
-        public: 
+    const keySet = await keys();
+    const pemPubKey = await jose.exportSPKI(keySet.publicKey);
+    const pemPrivateKey = await jose.exportPKCS8(keySet.privateKey);
+    const pubKeyJwk = await jose.exportJWK(keySet.publicKey);
+    
+    pubKeyJwk.kid = await jose.calculateJwkThumbprint(pubKeyJwk, 'sha256');
+    pubKeyJwk.alg = 'RS256';
+    
+    const keyPair = {
+        public: pemPubKey,
+        private: pemPrivateKey
     }
 
-    return ;
+    return { keyPair: keyPair, jwk: pubKeyJwk };
 }
 
-async function verifyToken(jwt, spki) {
-    const alg = 'RS256';
+async function verifyToken(jwt, jwk) {
     try {
-        const publicKey = await jose.importSPKI(spki, alg);
+        const alg = 'RS256';
+        const decodedJwt = jose.decodeJwt(jwt);
+        const kid = decodedJwt.kid;
+        
+        const publicKey = await jose.importJWK(jwk, 'RS256'); 
         const { payload, protectedHeader } = await jose.jwtVerify(jwt, publicKey);
+        
         return { payload: payload, header: protectedHeader };
     } catch(error) {
         throw error;
     }
 }
-           
-function refreshAuthJWT(email, privateKey) {
+
+function refreshAuthJWT(email, privateKey, kid) {
     return new Promise(function(resolve, reject) {
         jwt.sign({
             exp: Math.floor(Date.now() / 1000) + 60 * 60,
             sub: email,
-            iat: Math.floor(Date.now() / 1000)
+            iat: Math.floor(Date.now() / 1000),
+            kid: kid
         },
         privateKey,
         {
@@ -50,4 +57,4 @@ function refreshAuthJWT(email, privateKey) {
     })
 }
 
-module.exports = { getRSAKeypair, refreshAuthJWT, verifyToken };
+module.exports = { getRSAKeypairs, refreshAuthJWT, verifyToken };

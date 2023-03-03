@@ -5,28 +5,47 @@ var router = express.Router();
 // TODO: Build this route as first call on API requests.
 router.post('/getJWT', function(req, res, next) {
     const jwt = req.body.token;
-    const publicKey = req.app.get('PublicKey');
-    security.verifyToken(jwt, publicKey).then(handleFulfilled => {
+    const jwk = req.app.get('jwk1');
+    security.verifyToken(jwt, jwk).then(handleFulfilled => {
         const payload = handleFulfilled.payload;
         res.locals.uid = payload.sub;
         next();
-    }).catch(handleRejected => {
+    }, handleRejected => {
         res.status(400).json({
-            "Message": "JWT failed to validate.",
-            "payload": handleRejected
+            "Message": "Jwt failed to validate",
+            "Payload": handleRejected
+        });
+    }).catch(error => {
+        res.status(500).json({
+            "Message": "Exception whilst processing jwt.",
+            "Exception": error
         });
     });
 }, function(req, res, next) {
     const uid = res.locals.uid;
-    const privateKey = req.app.get('PrivateKey');
-    security.refreshAuthJWT(uid, privateKey).then(handleFulfilled => {
+    const jwk = req.app.get('jwk1');
+    var keySet;
+    var kid;
+    
+    keySet = req.app.get('KeySet1');
+    kid = jwk.kid;
+   
+    security.refreshAuthJWT(uid, keySet.private, kid).then(handleFulfilled => {
         res.locals.jwt = handleFulfilled;
-        next();
+        res.status(200).json({
+            "token": handleFulfilled
+        });  
+        //next();
     }, handleRejected => {
         res.status(400).json({
             "Message": "Token Generation Error",
-            "data": handleRejected
+            "Payload": handleRejected
         })
+    }).catch(error => {
+        res.status(500).json({
+            "Message": "Exception whilst generating token.",
+            "Exception": error
+        });
     });
 });
 

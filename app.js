@@ -82,7 +82,7 @@ setRSA('KeySet2', 'jwk2').then(handleFulfilled => {
     updateJWKendpoint(jwk, 1);
 });
 
-var getRSA1 = cron.schedule('*/2 * * * *', () => {
+var getRSA1 = cron.schedule('20 * * * *', () => {
     setRSA('KeySet1', 'jwk1').then(handleFulfilled => {
         const jwk = handleFulfilled;
         updateJWKendpoint(jwk, 0);
@@ -92,7 +92,7 @@ var getRSA1 = cron.schedule('*/2 * * * *', () => {
     timezone: "Australia/Melbourne"
 });
 
-var getRSA2 = cron.schedule('*/4 * * * *', () => {
+var getRSA2 = cron.schedule('50 * * * *', () => {
     setRSA('KeySet2', 'jwk2').then(handleFulfilled => {
         const jwk = handleFulfilled;
         updateJWKendpoint(jwk, 1);

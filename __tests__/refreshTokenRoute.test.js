@@ -2,28 +2,25 @@ const { jest: requiredJest, describe } = require('@jest/globals');
 const request = require('supertest');
 const baseURL = "http://localhost:3000";
 
-var token = "eyJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2NzgxMDk0MzgsInN1YiI6ImZvb0BiYXIuY29tIiwiZXhwIjoxNjc4MTExMjM4LCJraWQiOiJYNXVvRHk3RVQzdXp3cjFwQ25Da01OWmZjM2VaSjVRVVVCOTlnV3llMlJrIn0.MykXzB9eTwb8mq-33nux8E7J2XJFXln4oSdeye5frr5Z9g7HjpRj-GATGWnjZqn-dvgw0J6HR-qE54KRQ4eSNBWp9Vv6ibB3c0XGRg5tghzt27YbXsmLPHVGZC2yXjfSfewTXLziZQGQxq1RwVtaxAQO7t_EH73U4d1CYwxKETUgHoUceUohqmNz8Qb_fpsYvYGm-1HaXRLEXIckTkfEYhGVEqXS26_cCfPNc5lwSB78WkNOkvQN1jdHlyHwTgGuxzujnrDwC3yVxSwUqy8lfvp36xz7QIQqfIZfu3-Q_I4nJPDqbfPKyg7sL0HHEvSpbyJFXkYWMmnkTIDzOyf8tg";
+var jwt = "eyJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2NzgxMzc4MjQsInN1YiI6ImZvb0BiYXIuY29tIiwiZXhwIjoxNjc4MTM5NjI0LCJraWQiOiJMaDRRa2RtNE0zWXRLV09lZzU5aWY3em5NWUZuX3hKek9Sb3FXUmIzMHk4In0.tGHC3yBYrbXhdq981QAT0ThbtOXfB1WM4HN7X4xndxOlBZWR0zpoNlIhCmioMzIUP2lIS0UAnM_WZyrBTxrMpU7hBJPxRFsgXJjyKmCkPvoUUn1cwgObTc8Mf5xHSg3KWrTzJPZTf_81b5MrCzAROaVnSMLrpQYkvuLd8eqE7wi9dNRA5FwKhKcw0kIqK4_F-0rHJAtfin0qer4tDxtCwoTWZTHVRRqnEVxjBOc_l-T6VOH5aDdIuChU6NBKfxaVtdqRFOEGFqZVkuoZF41wKQDm4vOsMB5B8SLd5uHF8Ka-rNWcnco6bkVOvPj6EY_28g2hg7bHlCwj3-roGHJy5g";
 
-describe("POST /getJWT", () => {
-    var values = {
-            "token": token
-        }
+describe("POST /validateJWT", () => {
     test("Should respond 200", async () => {
-        const response = await request(baseURL).post("/getJWT").send(values);
-        const token = (response.body);
-        console.log(token);
-        expect(response.statusCode).toBe(400);
+        const response = await request(baseURL).post("/validateJWT").set({ Authorization: jwt });
+        jwt = (response.body.token);
+        console.log(jwt);
+        expect(response.statusCode).toBe(200);
     });
     test("Should respond 200", async () => {
-        const response = await request(baseURL).post("/getJWT").send(values);
-        const token = (response.body);
-        console.log(token);
-        expect(response.statusCode).toBe(400); 
+        const response = await request(baseURL).post("/validateJWT").set({ Authorization: jwt });
+        jwt = (response.body.token);
+        console.log(jwt);
+        expect(response.statusCode).toBe(200); 
     });
     test("Should respond 200", async () => {
-        const response = await request(baseURL).post("/getJWT").send(values);
-        const token = (response.body);
-        console.log(token);
-        expect(response.statusCode).toBe(400); 
+        const response = await request(baseURL).post("/validateJWT").set({ Authorization: jwt });
+        jwt = (response.body.token);
+        console.log(jwt);
+        expect(response.statusCode).toBe(200); 
     });
 });

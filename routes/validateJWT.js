@@ -4,8 +4,10 @@ var logFile = require('../utils/logging')
 var router = express.Router();
 
 // TODO: Thorough unit testing to validate proper rotation mechanisms.
-router.post('/getJWT', function(req, res, next) {
-    const jwt = req.body.token;
+// TODO: Add fault codes for front end.
+// First validate user JWT, if any error occours, send appropriate repsonse.
+router.post('/validateJWT', function(req, res, next) {
+    const jwt = req.headers.authorization;
     const jwk1 = req.app.get('jwk1');
     const jwk2 = req.app.get('jwk2');
     security.verifyToken(jwt, jwk1, jwk2).then(handleFulfilled => {
@@ -24,6 +26,9 @@ router.post('/getJWT', function(req, res, next) {
         });
         logFile.logToFile(error);
     });
+// TODO: Add fault codes for front end.
+// TODO: Currently next middleware router is disabled. Uncomment and remove response.
+// After validiation, issue new JWT.
 }, function(req, res, next) {
     const uid = res.locals.uid;
     var jwk;
@@ -38,7 +43,7 @@ router.post('/getJWT', function(req, res, next) {
         jwk = req.app.get('jwk1');
         kid = jwk.kid;
     }
-    security.refreshAuthJWT(uid, keySet.private, kid).then(handleFulfilled => {
+    security.getAuthJWT(uid, keySet.private, kid).then(handleFulfilled => {
         res.locals.jwt = handleFulfilled;
         res.status(200).json({
             "token": handleFulfilled

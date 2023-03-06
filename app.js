@@ -4,13 +4,12 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cron = require('node-cron');
 var fs = require('fs');
-var jose = require('jose');
 var security = require('./security/security');
 var fileLogging = require('./utils/logging');
 
 var indexRouter = require('./routes/index');
 var addUserRouter = require('./routes/addUser');
-var getJWTRouter = require('./routes/getJWT');
+var validateJWTRouter = require('./routes/validateJWT');
 var loginRouter = require('./routes/login');
 var jwksRouter = require('./routes/jwks');
 
@@ -24,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/', addUserRouter);
-app.use('/', getJWTRouter);
+app.use('/', validateJWTRouter);
 app.use('/', loginRouter);
 app.use('/', jwksRouter);
 
@@ -42,7 +41,7 @@ function getKeyPair1() {
         security.updateJWKendpoint(handleFulfilled.jwk, 0);
         fileLogging.logToFile('KeySet1 updated');
         const keyPair = app.get('KeySet1');
-        security.refreshAuthJWT('foo@bar.com', keyPair.private, handleFulfilled.jwk.kid).then(handleFulfilled => {
+        security.getAuthJWT('foo@bar.com', keyPair.private, handleFulfilled.jwk.kid).then(handleFulfilled => {
             fileLogging.logToFile(handleFulfilled); 
         });  
     }).catch(error => {

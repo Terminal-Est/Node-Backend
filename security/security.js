@@ -2,6 +2,7 @@ var dbapi = require('../dbapi/dbapi');
 var jose = require('jose');
 var fs = require('fs');
 
+// Return RSA Keypair.
 function getRSAKeypairs() { 
     return new Promise(async function(resolve){
         const keys = async () => {
@@ -22,6 +23,7 @@ function getRSAKeypairs() {
     }); 
 }
 
+// Process JWT signature.
 async function verifyToken(jwt, jwk1, jwk2) {
     var jwk;
     const alg = 'RS256';
@@ -37,7 +39,8 @@ async function verifyToken(jwt, jwk1, jwk2) {
     return { payload: payload, header: protectedHeader };
 }
 
-function refreshAuthJWT(email, key, kid) {
+// Issue new JWT.
+function getAuthJWT(email, key, kid) {
     const alg = 'RS256';
     return new Promise(async function(resolve, reject) {
         const privateKey = await jose.importPKCS8(key, alg);
@@ -67,4 +70,8 @@ function updateJWKendpoint (jwk, jwkToUpdate) {
     }
 }
 
-module.exports = { refreshAuthJWT, verifyToken, getRSAKeypairs, updateJWKendpoint };
+function userLogin (userId, password) {
+
+}
+
+module.exports = { getAuthJWT, verifyToken, getRSAKeypairs, updateJWKendpoint };

@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cron = require('node-cron');
 var fs = require('fs');
 var jose = require('jose');
+var security = require('./security/security');
+var fileLogging = require('./utils/logging');
 
 var indexRouter = require('./routes/index');
 var addUserRouter = require('./routes/addUser');
@@ -46,14 +48,10 @@ async function getRSAKeypairs() {
     return { keyPair: keyPair, jwk: pubKeyJwk };
 }
 
-const setRSA = async (keySet, jwk) => {
+const getRSA = async () => {
     return new Promise(function(resolve, reject) {
         getRSAKeypairs().then(handleFulfilled => {
-            app.set(keySet, handleFulfilled.keyPair);
-            app.set(jwk, handleFulfilled.jwk);
-            const date = new Date();
-            console.log(keySet + ' updated... ' + date.toString());
-            return resolve(handleFulfilled.jwk);
+            return resolve(handleFulfilled);
         }).catch(error => {
             return reject(error);
         });
@@ -62,30 +60,47 @@ const setRSA = async (keySet, jwk) => {
 
 const updateJWKendpoint = (jwk, jwkToUpdate) => {
     const data = jwk;
-    const fileContents = fs.readFileSync('./public/Keys.json', 'utf8');
-    var fileJSON = JSON.parse(fileContents);
-    fileJSON.keys[jwkToUpdate] = jwk;
-    console.log(fileJSON.keys[jwkToUpdate]);
-    fs.writeFile('./public/keys.json', JSON.stringify(fileJSON, null, '\t'), (error) => {
-        if (error) console.log(error);
-    });
-
+    try {
+        const fileContents = fs.readFileSync('./public/Keys.json', 'utf8');
+        var fileJSON = JSON.parse(fileContents);
+        fileJSON.keys[jwkToUpdate] = jwk;
+        fs.writeFileSync('./public/keys.json', JSON.stringify(fileJSON, null, '\t'));
+    } catch (e) {
+        fileLogging.logToFile(e);
+    }
 }
 
 // Init keypairs
-setRSA('KeySet1', 'jwk1').then(handleFulfilled => {
-    const jwk = handleFulfilled;
-    updateJWKendpoint(jwk, 0);
+getRSA().then(handleFulfilled => {
+    app.set('KeySet1', handleFulfilled.keyPair);
+    app.set('jwk1', handleFulfilled.jwk);
+    updateJWKendpoint(handleFulfilled.jwk, 0);
+    fileLogging.logToFile('KeySet1 updated');
+    const keyPair = app.get('KeySet1');
+    security.refreshAuthJWT('foo@bar.com', keyPair.private).then(handleFulfilled => {
+        fileLogging.logToFile(handleFulfilled); 
+    });  
+}).catch(error => {
+    fileLogging.logToFile(error);;
 });
-setRSA('KeySet2', 'jwk2').then(handleFulfilled => {
-    const jwk = handleFulfilled;
-    updateJWKendpoint(jwk, 1);
+
+getRSA().then(handleFulfilled => {
+    app.set('KeySet2', handleFulfilled.keyPair);
+    app.set('jwk2', handleFulfilled.jwk);
+    updateJWKendpoint(handleFulfilled.jwk, 1);
+    fileLogging.logToFile('KeySet1 updated');
+}).catch(error => {
+    fileLogging.logToFile(error);;
 });
 
 var getRSA1 = cron.schedule('20 * * * *', () => {
-    setRSA('KeySet1', 'jwk1').then(handleFulfilled => {
-        const jwk = handleFulfilled;
-        updateJWKendpoint(jwk, 0);
+    getRSA().then(handleFulfilled => {
+        app.set('KeySet1', handleFulfilled.keyPair);
+        app.set('jwk1', handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 0);
+        fileLogging.logToFile('KeySet1 updated');
+    }).catch(error => {
+        fileLogging.logToFile(error);;
     });
 }, {
     scheduled: true,
@@ -93,41 +108,31 @@ var getRSA1 = cron.schedule('20 * * * *', () => {
 });
 
 var getRSA2 = cron.schedule('50 * * * *', () => {
-    setRSA('KeySet2', 'jwk2').then(handleFulfilled => {
-        const jwk = handleFulfilled;
-        updateJWKendpoint(jwk, 1);
+    getRSA().then(handleFulfilled => {
+        app.set('KeySet1', handleFulfilled.keyPair);
+        app.set('jwk1', handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 0);
+        fileLogging.logToFile('KeySet1 updated');
+        const keyPair = app.get('KeySet1');
+        const token = security.refreshAuthJWT('foo@bar.com', keyPair.private, handleFulfilled.kid);
+        fileLogging.logToFile(token);
+    }).catch(error => {
+        fileLogging.logToFile(error);;
     });
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
 });
 
-var useRSA1 = cron.schedule('* * * * *', () => {
-    app.set('switchRSA', true);
-}, {
-    scheduled: true,
-    timezone: "Australia/Melbourne"
-});
-
-var useRSA2 = cron.schedule('* * * * *', () => {
-    app.set('switchRSA', false);
-}, {
-    scheduled: true,
-    timezone: "Australia/Melbourne"
-});
-
+// TODO: Add admin path for stopping starting RSA rotation
 function startRsaRotation() {
     getRSA1.start();
     getRSA2.start();
-    useRSA1.start();
-    useRSA2.start();
 }
 
 function stopRsaRotation() {
     getRSA1.stop();
     getRSA2.stop();
-    useRSA1.stop();
-    useRSA2.stop();
 }
 
 startRsaRotation();

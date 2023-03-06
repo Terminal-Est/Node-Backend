@@ -2,7 +2,6 @@ var dbapi = require("../dbapi/dbapi");
 
 describe("Get result of query", () => {
     test("Should return a query", async () => {
-        var i = 0;
         let userInfo = {
             "table": "user",
             "column": "id",
@@ -12,6 +11,5 @@ describe("Get result of query", () => {
             return data;
         });
         console.log(res);
-        i++;
     })
 });

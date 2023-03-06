@@ -1,20 +1,32 @@
+const { jest: requiredJest, describe } = require('@jest/globals');
 const request = require('supertest');
 const baseURL = "http://localhost:3000";
 
-describe("POST /getJWT", () => {
-    
-    var loop = 0;
-    var values = {
-            "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Nzc4MjA5NjAsInN1YiI6ImpvaG5Ac21pdGguY29tIiwiaWF0IjoxNjc3ODE3MzYwLCJraWQiOiJmbEpVMnE3cThZOFpaOXA4WjhfS0QyWDM3OTM4b25MNWJuMERUbkpKd05nIn0.DHR318DOk2wKhQphSV1DUlWyJw6EqSzkzOU7O0O1DU9LfWVlVe2N7K0zd0TJiw_V4FQL75Y3uw9IpIKyPvigdRePyI3EZAO7NL2FYiponAEqoOE3XPl-GbeXsINPknRXwcPODCmM2zE82LyFz2KQPtMMI-WTTiBoCgzs1pTktblN9szvOgjnhRgrd_fb9w8s1lv3i41ysP2gGJZe3qGerNASqigXdTldbuqPKGWG9FI2QJMwlEQfwOjVxESpWY1GZlDsMJRNWHJnh2-cuM8AXUJPZ7m3xdDfFBp0OqMsrQADCTj0Abn6XOD0nFdoadEADTltq_uGPHLQkid7KDiK1A"
-        }
+var token = "eyJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2NzgwNzcyNzEsInN1YiI6ImZvb0BiYXIuY29tIiwiZXhwIjoxNjc4MDc5MDcxfQ.rHANQSS2iutSgDRfNW0p5JImf4DOm_lym6M06H7-ZGywSpZwDh9hjd8xs4VBsy5Y4qLG5RcoE0J-Je5S-tAlh2bhaOOi5SROrH7FbJJowgeh6WTHk7HrxOI6lpdIViGtwGU8gThGajFVr2BSZ6kBnSTbe5CphSqAqGBgh0BpjB8tm-bqetuiPFoZLL6A_Ohz8-ZgTfq5pRCTZ7OLLPa3A5k60zXOXR54GmHueyaAL7MPgxfy4n3XifNsE1HMsx87RjTI0RSHBcu88XqqddDfFIuNRTaH6nc5y7Z7G-x63KDQ09oHkFMThj6T379-_ulLNs4BjVlPv3_rs9dCRdjq_A";
 
-    while(loop < 10) {
-        it("Should respond 200", async () => {
-                const response = await request(baseURL).post("/getJWT").send(values);
-                console.log(response.body);
-                values = response.body;
-                expect(response.statusCode).toBe(200); 
-        });
-        loop++; 
-    }
+describe("POST /getJWT", () => {
+    var values = {
+            "token": token
+        }
+    test("Should respond 200", async () => {
+        requiredJest.setTimeout(() => {}, 10000);
+        const response = await request(baseURL).post("/getJWT").send(values);
+        const token = (response.body.token);
+        console.log(token);
+        expect(response.statusCode).toBe(200);
+    });
+    test("Should respond 200", async () => {
+        requiredJest.setTimeout(() => {}, 10000);
+        const response = await request(baseURL).post("/getJWT").send(values);
+        const token = (response.body.token);
+        console.log(token);
+        expect(response.statusCode).toBe(200); 
+    });
+    test("Should respond 200", async () => {
+        requiredJest.setTimeout(() => {}, 10000);
+        const response = await request(baseURL).post("/getJWT").send(values);
+        const token = (response.body.token);
+        console.log(token);
+        expect(response.statusCode).toBe(200); 
+    });
 });

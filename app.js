@@ -30,95 +30,47 @@ app.use('/', jwksRouter);
 
 app.set('switchRSA', true);
 
-async function getRSAKeypairs() {  
-    const keys = async () => {
-        const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
-        return { publicKey, privateKey };
-    } 
-    const keySet = await keys();
-    const pemPubKey = await jose.exportSPKI(keySet.publicKey);
-    const pemPrivateKey = await jose.exportPKCS8(keySet.privateKey);
-    const pubKeyJwk = await jose.exportJWK(keySet.publicKey);
-    pubKeyJwk.kid = await jose.calculateJwkThumbprint(pubKeyJwk, 'sha256');
-    pubKeyJwk.alg = 'RS256';
-    const keyPair = {
-        public: pemPubKey,
-        private: pemPrivateKey
-    }
-    return { keyPair: keyPair, jwk: pubKeyJwk };
-}
+// Init RSA keypairs.
+getKeyPair1();
+getKeyPair2();
 
-const getRSA = async () => {
-    return new Promise(function(resolve, reject) {
-        getRSAKeypairs().then(handleFulfilled => {
-            return resolve(handleFulfilled);
-        }).catch(error => {
-            return reject(error);
-        });
-    });
-}
-
-const updateJWKendpoint = (jwk, jwkToUpdate) => {
-    const data = jwk;
-    try {
-        const fileContents = fs.readFileSync('./public/Keys.json', 'utf8');
-        var fileJSON = JSON.parse(fileContents);
-        fileJSON.keys[jwkToUpdate] = jwk;
-        fs.writeFileSync('./public/keys.json', JSON.stringify(fileJSON, null, '\t'));
-    } catch (e) {
-        fileLogging.logToFile(e);
-    }
-}
-
-// Init keypairs
-getRSA().then(handleFulfilled => {
-    app.set('KeySet1', handleFulfilled.keyPair);
-    app.set('jwk1', handleFulfilled.jwk);
-    updateJWKendpoint(handleFulfilled.jwk, 0);
-    fileLogging.logToFile('KeySet1 updated');
-    const keyPair = app.get('KeySet1');
-    security.refreshAuthJWT('foo@bar.com', keyPair.private).then(handleFulfilled => {
-        fileLogging.logToFile(handleFulfilled); 
-    });  
-}).catch(error => {
-    fileLogging.logToFile(error);;
-});
-
-getRSA().then(handleFulfilled => {
-    app.set('KeySet2', handleFulfilled.keyPair);
-    app.set('jwk2', handleFulfilled.jwk);
-    updateJWKendpoint(handleFulfilled.jwk, 1);
-    fileLogging.logToFile('KeySet1 updated');
-}).catch(error => {
-    fileLogging.logToFile(error);;
-});
-
-var getRSA1 = cron.schedule('20 * * * *', () => {
-    getRSA().then(handleFulfilled => {
+function getKeyPair1() {
+    security.getRSAKeypairs().then(handleFulfilled => {
         app.set('KeySet1', handleFulfilled.keyPair);
         app.set('jwk1', handleFulfilled.jwk);
-        updateJWKendpoint(handleFulfilled.jwk, 0);
+        app.set('onKey2', false);
+        security.updateJWKendpoint(handleFulfilled.jwk, 0);
         fileLogging.logToFile('KeySet1 updated');
+        const keyPair = app.get('KeySet1');
+        security.refreshAuthJWT('foo@bar.com', keyPair.private, handleFulfilled.jwk.kid).then(handleFulfilled => {
+            fileLogging.logToFile(handleFulfilled); 
+        });  
     }).catch(error => {
         fileLogging.logToFile(error);;
     });
+}
+
+function getKeyPair2() {
+    security.getRSAKeypairs().then(handleFulfilled => {
+        app.set('KeySet2', handleFulfilled.keyPair);
+        app.set('jwk2', handleFulfilled.jwk);
+        app.set('onKey2', true);
+        security.updateJWKendpoint(handleFulfilled.jwk, 1);
+        fileLogging.logToFile('KeySet2 updated');
+    }).catch(error => {
+        fileLogging.logToFile(error);;
+    });
+}
+
+var getRSA1 = cron.schedule('20 * * * *', () => {
+    getKeyPair1();
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
 });
 
 var getRSA2 = cron.schedule('50 * * * *', () => {
-    getRSA().then(handleFulfilled => {
-        app.set('KeySet1', handleFulfilled.keyPair);
-        app.set('jwk1', handleFulfilled.jwk);
-        updateJWKendpoint(handleFulfilled.jwk, 0);
-        fileLogging.logToFile('KeySet1 updated');
-        const keyPair = app.get('KeySet1');
-        const token = security.refreshAuthJWT('foo@bar.com', keyPair.private, handleFulfilled.kid);
-        fileLogging.logToFile(token);
-    }).catch(error => {
-        fileLogging.logToFile(error);;
-    });
+   getKeyPair2();
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
@@ -135,6 +87,7 @@ function stopRsaRotation() {
     getRSA2.stop();
 }
 
+// Start RSA rotation.
 startRsaRotation();
     
 module.exports = app;

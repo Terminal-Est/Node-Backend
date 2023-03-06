@@ -5,8 +5,9 @@ var router = express.Router();
 
 router.post('/getJWT', function(req, res, next) {
     const jwt = req.body.token;
-    const jwk = req.app.get('jwk1');
-    security.verifyToken(jwt, jwk).then(handleFulfilled => {
+    const jwk1 = req.app.get('jwk1');
+    const jwk2 = req.app.get('jwk2');
+    security.verifyToken(jwt, jwk1, jwk2).then(handleFulfilled => {
         const payload = handleFulfilled.payload;
         res.locals.uid = payload.sub;
         next();
@@ -24,14 +25,19 @@ router.post('/getJWT', function(req, res, next) {
     });
 }, function(req, res, next) {
     const uid = res.locals.uid;
-    const jwk = req.app.get('jwk1');
+    var jwk;
     var keySet;
     var kid;
-    
-    keySet = req.app.get('KeySet1');
-    kid = jwk.kid;
-   
-    security.refreshAuthJWT(uid, keySet.private).then(handleFulfilled => {
+    if(req.app.get('onKey2')) {
+        keySet = req.app.get('KeySet2');
+        jwk = req.app.get('jwk2');
+        kid = jwk.kid;
+    } else {
+        keySet = req.app.get('KeySet1');
+        jwk = req.app.get('jwk1');
+        kid = jwk.kid;
+    }
+    security.refreshAuthJWT(uid, keySet.private, kid).then(handleFulfilled => {
         res.locals.jwt = handleFulfilled;
         res.status(200).json({
             "token": handleFulfilled

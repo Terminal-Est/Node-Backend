@@ -3,6 +3,7 @@ var security = require('../security/security')
 var logFile = require('../utils/logging')
 var router = express.Router();
 
+// TODO: Thorough unit testing to validate proper rotation mechanisms.
 router.post('/getJWT', function(req, res, next) {
     const jwt = req.body.token;
     const jwk1 = req.app.get('jwk1');

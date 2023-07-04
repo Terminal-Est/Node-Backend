@@ -1,12 +1,10 @@
-var express = require('express');
 var security = require('../security/security')
 var logFile = require('../utils/logging')
-var router = express.Router();
 
 // TODO: Thorough unit testing to validate proper rotation mechanisms.
 // TODO: Add fault codes for front end.
 // First validate user JWT, if any error occours, send appropriate repsonse.
-router.post('/validateJWT', function(req, res, next) {
+const validateJWT = function(req, res, next) {
     const jwt = req.headers.authorization;
     const jwk1 = req.app.get('jwk1');
     const jwk2 = req.app.get('jwk2');
@@ -18,7 +16,7 @@ router.post('/validateJWT', function(req, res, next) {
         res.status(400).json({
             "Message": "Jwt failed to validate",
             "Payload": handleRejected
-        });;
+        });
     }).catch(error => {
         res.status(500).json({
             "Message": "Exception whilst processing jwt.",
@@ -26,10 +24,12 @@ router.post('/validateJWT', function(req, res, next) {
         });
         logFile.logToFile(error);
     });
+}
+
 // TODO: Add fault codes for front end.
 // TODO: Currently next middleware router is disabled. Uncomment and remove response.
-// After validiation, issue new JWT.
-}, function(req, res, next) {
+// After validiation, issue new JWT. 
+const issueJWT = function(req, res, next) {
     const uid = res.locals.uid;
     var jwk;
     var keySet;
@@ -45,10 +45,7 @@ router.post('/validateJWT', function(req, res, next) {
     }
     security.getAuthJWT(uid, keySet.private, kid).then(handleFulfilled => {
         res.locals.jwt = handleFulfilled;
-        res.status(200).json({
-            "token": handleFulfilled
-        });  
-        //next();
+        next();  
     }, handleRejected => {
         res.status(400).json({
             "Message": "Token Generation Error",
@@ -61,6 +58,6 @@ router.post('/validateJWT', function(req, res, next) {
         });
         logFile.logToFile(error);
     });
-});
+}
 
-module.exports = router;
+module.exports = { validateJWT, issueJWT };

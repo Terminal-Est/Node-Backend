@@ -25,7 +25,8 @@ router.post('/addUser', function(req, res, next) {
 }, function (req, res) {
     const uid = req.body.userId;
     const password = req.body.password;
-    dbapi.setPassHash(uid, password).then(handleFulfilled => {
+    const org = req.body.org;
+    dbapi.setPassHash(uid, org, password).then(handleFulfilled => {
         res.status(200).json({
             "Message": "User Added Successfully.", 
             "User Database Updated": res.locals.handleFulfilled,

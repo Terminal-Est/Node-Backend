@@ -1,17 +1,20 @@
+//TODO: Add CORS, react server origin.
+
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cron = require('node-cron');
-var fs = require('fs');
 var security = require('./security/security');
 var fileLogging = require('./utils/logging');
+var jwtHandler = require('./routes/validateJWT');
+var mqttapi = require('./dbapi/mqttapi')
 
 var indexRouter = require('./routes/index');
 var addUserRouter = require('./routes/addUser');
-var validateJWTRouter = require('./routes/validateJWT');
 var loginRouter = require('./routes/login');
 var jwksRouter = require('./routes/jwks');
+var testRouter = require('./routes/test');
 
 var app = express();
 
@@ -20,14 +23,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/', indexRouter);
 app.use('/', addUserRouter);
-app.use('/', validateJWTRouter);
 app.use('/', loginRouter);
 app.use('/', jwksRouter);
-
+app.use('/', jwtHandler.validateJWT, jwtHandler.issueJWT, testRouter);
 app.set('switchRSA', true);
+
+mqttapi.client;
+mqttapi.msg;
+mqttapi.pub;
 
 // Init RSA keypairs.
 getKeyPair1();
@@ -40,12 +45,8 @@ function getKeyPair1() {
         app.set('onKey2', false);
         security.updateJWKendpoint(handleFulfilled.jwk, 0);
         fileLogging.logToFile('KeySet1 updated');
-        const keyPair = app.get('KeySet1');
-        security.getAuthJWT('foo@bar.com', keyPair.private, handleFulfilled.jwk.kid).then(handleFulfilled => {
-            fileLogging.logToFile(handleFulfilled); 
-        });  
     }).catch(error => {
-        fileLogging.logToFile(error);;
+        fileLogging.logToFile(error);
     });
 }
 
@@ -57,7 +58,7 @@ function getKeyPair2() {
         security.updateJWKendpoint(handleFulfilled.jwk, 1);
         fileLogging.logToFile('KeySet2 updated');
     }).catch(error => {
-        fileLogging.logToFile(error);;
+        fileLogging.logToFile(error);
     });
 }
 

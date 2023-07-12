@@ -30,9 +30,7 @@ app.use('/', jwksRouter);
 app.use('/', jwtHandler.validateJWT, jwtHandler.issueJWT, testRouter);
 app.set('switchRSA', true);
 
-mqttapi.client;
-mqttapi.msg;
-mqttapi.pub;
+mqttapi.pub();
 
 // Init RSA keypairs.
 getKeyPair1();

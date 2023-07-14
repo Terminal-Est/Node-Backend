@@ -34,7 +34,7 @@ const issueJWT = function(req, res, next) {
     var jwk;
     var keySet;
     var kid;
-    if(req.app.get('onKey2')) {
+    if (req.app.get('onKey2')) {
         keySet = req.app.get('KeySet2');
         jwk = req.app.get('jwk2');
         kid = jwk.kid;

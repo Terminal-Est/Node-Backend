@@ -66,7 +66,7 @@ async function setPassHash(userId, org, hashPass) {
     return new Promise(function(resolve, reject) { 
         const saltRounds = 10;
         const writeDb = (pass) => {
-            if (res[0] == null) {
+            if (res[0] === null) {
                 const sql = mysql.format('INSERT INTO user_password SET user_id = ?, organisation = ?, pass_hash = ?', 
                 [outer.userId, outer.org, pass]);
                 con.query(

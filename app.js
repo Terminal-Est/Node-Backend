@@ -9,7 +9,6 @@ var security = require('./security/security');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 var mqttapi = require('./dbapi/mqttapi')
-
 var indexRouter = require('./routes/index');
 var addUserRouter = require('./routes/addUser');
 var loginRouter = require('./routes/login');

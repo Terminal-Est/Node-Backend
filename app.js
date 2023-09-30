@@ -66,7 +66,7 @@ var getRSA1 = cron.schedule('20 * * * *', () => {
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
-});
+});            
 
 var getRSA2 = cron.schedule('50 * * * *', () => {
    getKeyPair2();

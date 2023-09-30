@@ -1,6 +1,7 @@
 var dbapi = require('../dbapi/dbapi');
 var jose = require('jose');
 var fs = require('fs');
+var bcrypt = require('bcrypt');
 
 // Return RSA Keypair.
 function getRSAKeypairs() { 
@@ -58,7 +59,7 @@ function getAuthJWT(email, key, kid) {
     })
 }
 
-function updateJWKendpoint (jwk, jwkToUpdate) {
+function updateJWKendpoint(jwk, jwkToUpdate) {
     const data = jwk;
     try {
         const fileContents = fs.readFileSync('./public/Keys.json', 'utf8');
@@ -70,8 +71,28 @@ function updateJWKendpoint (jwk, jwkToUpdate) {
     }
 }
 
-function userLogin (userId, password) {
-
+async function userLogin(userId, org, password) {
+    this.userId = userId;
+    this.org = org;
+    this.password = password;
+    var invalidUser = false;
+    const res = await dbapi.queryUser("user_password", this.userId, this.org).then(data => {
+        return data;
+    });
+    if (res[0] == null) {
+        invalidUser = true;
+    } else {
+        var compResult = await bcrypt.compare(password, res[0].pass_hash);
+    };
+    return new Promise(function(resolve, reject) {
+        if (invalidUser) {
+            reject("Invalid username or organisation");
+        } else if (!invalidUser && compResult) {
+            resolve({login: true});
+        } else if (!invalidUser && !compResult) {
+            reject("Invalid password");
+        }
+    });
 }
 
-module.exports = { getAuthJWT, verifyToken, getRSAKeypairs, updateJWKendpoint };
+module.exports = { getAuthJWT, verifyToken, getRSAKeypairs, updateJWKendpoint, userLogin };

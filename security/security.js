@@ -60,6 +60,7 @@ function getAuthJWT(email, key, kid) {
     })
 }
 
+// Update exposed JWKs.
 function updateJWKendpoint(jwk, jwkToUpdate) {
     const data = jwk;
     try {
@@ -72,6 +73,7 @@ function updateJWKendpoint(jwk, jwkToUpdate) {
     }
 }
 
+// Function to validate user details against database.
 async function userLogin(userId, password) {
     this.userId = userId;
     this.password = password;
@@ -86,11 +88,11 @@ async function userLogin(userId, password) {
     };
     return new Promise(function(resolve, reject) {
         if (invalidUser) {
-            reject("Invalid username or organisation");
+            reject("Invalid Username");
         } else if (!invalidUser && compResult) {
             resolve({login: true});
         } else if (!invalidUser && !compResult) {
-            reject("Invalid password");
+            reject("Invalid Password");
         }
     });
 }

@@ -27,7 +27,6 @@ const validateJWT = function(req, res, next) {
 }
 
 // TODO: Add fault codes for front end.
-// TODO: Currently next middleware router is disabled. Uncomment and remove response.
 // After validiation, issue new JWT. 
 const issueJWT = function(req, res, next) {
     const uid = res.locals.uid;

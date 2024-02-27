@@ -96,3 +96,15 @@ KeySet2 updated : Sun Mar 26 2023 18:50:00 GMT+1100 (Australian Eastern Daylight
 >>>>>>> 7c1ef1355a2a250ed6517dee013effa3cbe05661
 KeySet2 updated : Sat Nov 25 2023 21:36:28 GMT+1100 (Australian Eastern Daylight Time)
 KeySet1 updated : Sat Nov 25 2023 21:36:28 GMT+1100 (Australian Eastern Daylight Time)
+ReferenceError: fileLogging is not defined
+    at Object.updateJWKendpoint (c:\Projects\Node-Backend\security\security.js:70:9)
+    at c:\Projects\Node-Backend\app.js:52:18 : Tue Feb 27 2024 12:53:39 GMT+1100 (Australian Eastern Daylight Time)
+ReferenceError: fileLogging is not defined
+    at Object.updateJWKendpoint (c:\Projects\Node-Backend\security\security.js:70:9)
+    at c:\Projects\Node-Backend\app.js:40:18 : Tue Feb 27 2024 12:53:39 GMT+1100 (Australian Eastern Daylight Time)
+ReferenceError: fileLogging is not defined
+    at Object.updateJWKendpoint (c:\Projects\Node-Backend\security\security.js:70:9)
+    at c:\Projects\Node-Backend\app.js:52:18 : Tue Feb 27 2024 12:58:22 GMT+1100 (Australian Eastern Daylight Time)
+ReferenceError: fileLogging is not defined
+    at Object.updateJWKendpoint (c:\Projects\Node-Backend\security\security.js:70:9)
+    at c:\Projects\Node-Backend\app.js:40:18 : Tue Feb 27 2024 12:58:22 GMT+1100 (Australian Eastern Daylight Time)

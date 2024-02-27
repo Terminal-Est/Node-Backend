@@ -112,8 +112,7 @@ function setUserAthenticated(userId, auth) {
     });
 }
 
-module.exports = { queryUser, 
-    setUserState, 
+module.exports = { queryUser,
     setPassHash, 
     addUser, 
     setUserAthenticated }; 

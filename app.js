@@ -8,7 +8,6 @@ var cron = require('node-cron');
 var security = require('./security/security');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
-//var mqttapi = require('./dbapi/mqttapi')
 var indexRouter = require('./routes/index');
 var addUserRouter = require('./routes/addUser');
 var loginRouter = require('./routes/login');
@@ -28,8 +27,6 @@ app.use('/', loginRouter);
 app.use('/', jwksRouter);
 app.use('/', jwtHandler.validateJWT, jwtHandler.issueJWT, testRouter);
 app.set('switchRSA', true);
-
-//mqttapi.pub();
 
 // Init RSA keypairs.
 getKeyPair1();

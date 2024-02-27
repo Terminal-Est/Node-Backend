@@ -4,9 +4,8 @@ var router = express.Router();
 
 router.get('/login', function(req, res) {
     const uid = req.body.userId;
-    const org = req.body.org;
     const pass = req.body.password;
-    security.userLogin(uid, org, pass).then(handleFulfilled => {
+    security.userLogin(uid, pass).then(handleFulfilled => {
         if (handleFulfilled.login) {
             var jwk;
             var keySet;

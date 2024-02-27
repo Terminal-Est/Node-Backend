@@ -1,14 +1,13 @@
 var express = require('express');
-var dbapi = require('../dbapi/dbapi')
+var dbapi = require('../dbaccess/dbaccess')
 var router = express.Router();
 
 router.post('/addUser', function(req, res, next) {
     const uid = req.body.userId;
-    const org = req.body.org;
     const admin = req.body.admin;
     const auth = req.body.auth;
     const userName = req.body.username;
-    dbapi.addUser(uid, org, admin, auth, userName).then(handleFulfilled => {
+    dbapi.addUser(uid, admin, auth, userName).then(handleFulfilled => {
         res.locals.handleFulfilled = handleFulfilled;
         next();
     }, handleRejected => {
@@ -25,8 +24,7 @@ router.post('/addUser', function(req, res, next) {
 }, function (req, res) {
     const uid = req.body.userId;
     const password = req.body.password;
-    const org = req.body.org;
-    dbapi.setPassHash(uid, org, password).then(handleFulfilled => {
+    dbapi.setPassHash(uid, password).then(handleFulfilled => {
         res.status(200).json({
             "Message": "User Added Successfully.", 
             "User Database Updated": res.locals.handleFulfilled,

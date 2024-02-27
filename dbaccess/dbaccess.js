@@ -2,7 +2,7 @@ var mysql = require('mysql');
 var bcrypt = require('bcrypt');
 
 // TODO: Add exception handling to queries where the db engine might return an exception.
-
+// This is hard coded for now, change to system environment variable for security in production.
 const connection = () => {
     let con = mysql.createConnection({
         host: "localhost",
@@ -15,14 +15,13 @@ const connection = () => {
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-function queryUser(table, userId, org) {
+function queryUser(table, userId) {
     return new Promise(function(resolve, reject) {
         this.table = table;
         this.userId = userId; 
-        this.org = org; 
         const con = connection()
-        const sql = mysql.format('SELECT * FROM ?? WHERE user_id = ? AND organisation = ?', 
-        [this.table, this.userId, this.org]);
+        const sql = mysql.format('SELECT * FROM ?? WHERE user_id = ?', 
+        [this.table, this.userId]);
         con.query(
             sql, 
             function(error, result) {
@@ -34,27 +33,7 @@ function queryUser(table, userId, org) {
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-function setUserState(userId, org, loggedIn) {
-    return new Promise(function(resolve, reject) {
-        const con = connection();
-        this.userId = userId;
-        this.org = org;
-        this.loggedIn = loggedIn;
-        const sql = mysql.format('UPDATE user_state SET logged_in = ? WHERE user_id = ? AND organisation = ?', 
-        [this.loggedIn, this.userId, this.org]);
-        con.query(
-            sql,
-            function(error, result) {
-               return error ? reject(error) : resolve(result);
-            }
-        );
-        con.end();
-    });
-}
-
-// TODO: Design and carry out correct testing.
-// TODO: Comment.
-async function setPassHash(userId, org, hashPass) {
+async function setPassHash(userId, hashPass) {
     const con = connection();
     this.userId = userId;
     this.org = org;
@@ -67,8 +46,8 @@ async function setPassHash(userId, org, hashPass) {
         const saltRounds = 10;
         const writeDb = (pass) => {
             if (res[0] === null) {
-                const sql = mysql.format('INSERT INTO user_password SET user_id = ?, organisation = ?, pass_hash = ?', 
-                [outer.userId, outer.org, pass]);
+                const sql = mysql.format('INSERT INTO user_password SET user_id = ?, pass_hash = ?', 
+                [outer.userId, pass]);
                 con.query(
                     sql,
                     function(error, result) {
@@ -76,8 +55,8 @@ async function setPassHash(userId, org, hashPass) {
                     }
                 );
             } else {
-                const sql = mysql.format('UPDATE user_password SET pass_hash = ? WHERE user_id = ? AND organisation = ?', 
-                ['user_password', pass, outer.userId, outer.org]);
+                const sql = mysql.format('UPDATE user_password SET pass_hash = ? WHERE user_id = ?', 
+                ['user_password', pass, outer.userId]);
                 con.query(
                     sql,
                     function(error, result) {
@@ -97,16 +76,15 @@ async function setPassHash(userId, org, hashPass) {
     });
 }
 
-function addUser(userId, org, admin, auth, userName) {
+function addUser(userId, admin, auth, userName) {
     return new Promise(function(resolve, reject) {
         const con = connection();
         this.userId = userId;
-        this.org = org;
         this.admin = admin;
         this.auth = auth;
         this.userName = userName;
-        const sql = mysql.format('INSERT INTO user SET user_id = ?, organisation = ?, admin = ?, authenticated = ?, username = ?'
-                                , [this.userId, this.org, this.admin, this.auth, this.userName]);
+        const sql = mysql.format('INSERT INTO user SET user_id = ?, admin = ?, authenticated = ?, username = ?'
+                                , [this.userId, this.admin, this.auth, this.userName]);
         con.query(
             sql,
             function(error, result) {
@@ -117,14 +95,13 @@ function addUser(userId, org, admin, auth, userName) {
     });
 }
 
-function setUserAthenticated(userId, org, auth) {
+function setUserAthenticated(userId, auth) {
     return new Promise(function(resolve, reject) {
         const con = connection();
         this.userId = userId;
-        this.org = org;
         this.auth = auth;
-        const sql = mysql.format('UPDATE user SET authenticated = ? WHERE user_id = ? AND organisation = ?', 
-        [this.auth, this.userId, this.org]);
+        const sql = mysql.format('UPDATE user SET authenticated = ? WHERE user_id = ?', 
+        [this.auth, this.userId]);
         con.query(
             sql,
             function(error, result) {

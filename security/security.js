@@ -1,4 +1,4 @@
-var dbapi = require('../dbapi/dbapi');
+var dbapi = require('../dbaccess/dbaccess');
 var jose = require('jose');
 var fs = require('fs');
 var bcrypt = require('bcrypt');
@@ -71,12 +71,11 @@ function updateJWKendpoint(jwk, jwkToUpdate) {
     }
 }
 
-async function userLogin(userId, org, password) {
+async function userLogin(userId, password) {
     this.userId = userId;
-    this.org = org;
     this.password = password;
     var invalidUser = false;
-    const res = await dbapi.queryUser("user_password", this.userId, this.org).then(data => {
+    const res = await dbapi.queryUser("user_password", this.userId).then(data => {
         return data;
     });
     if (res[0] == null) {

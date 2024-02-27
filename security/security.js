@@ -66,7 +66,7 @@ function updateJWKendpoint(jwk, jwkToUpdate) {
         const fileContents = fs.readFileSync('./public/Keys.json', 'utf8');
         var fileJSON = JSON.parse(fileContents);
         fileJSON.keys[jwkToUpdate] = jwk;
-        fs.writeFileSync('./public/keys.json', JSON.stringify(fileJSON, null, '\t'));
+        fs.writeFileSync('./public/Keys.json', JSON.stringify(fileJSON, null, '\t'));
     } catch (e) {
         fileLogging.logToFile(e);
     }

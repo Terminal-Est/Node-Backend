@@ -1,4 +1,5 @@
 var dbapi = require('../dbaccess/dbaccess');
+var fileLogging = require('../utils/logging');
 var jose = require('jose');
 var fs = require('fs');
 var bcrypt = require('bcrypt');

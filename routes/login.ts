@@ -1,11 +1,13 @@
 var express = require('express');
+import { NextFunction, Request, Response } from "express";
+var logFile = require("../utils/logging")
 var security = require('../security/security');
 var router = express.Router();
 
-router.get('/login', function(req, res) {
+router.get('/login', function(req : Request, res : Response) {
     const uid = req.body.userId;
     const pass = req.body.password;
-    security.userLogin(uid, pass).then(handleFulfilled => {
+    security.userLogin(uid, pass).then((handleFulfilled : any)=> {
         if (handleFulfilled.login) {
             var jwk;
             var keySet;
@@ -19,18 +21,18 @@ router.get('/login', function(req, res) {
                 jwk = req.app.get('jwk1');
                 kid = jwk.kid;
             }
-            security.getAuthJWT(uid, keySet.private, kid).then(handleFulfilled => {
+            security.getAuthJWT(uid, keySet.private, kid).then((handleFulfilled : any ) => {
                 res.locals.jwt = handleFulfilled;
                 res.status(200).json({
                     "Message": "Login Successful",
                     "token": handleFulfilled
                 });  
-            }, handleRejected => {
+            }, (handleRejected : any) => {
                 res.status(400).json({
                     "Message": "Token Generation Error",
                     "Payload": handleRejected
                 })
-            }).catch(error => {
+            }).catch((error: {message : any}) => {
                 res.status(500).json({
                     "Message": "Exception whilst generating token.",
                     "Exception": error
@@ -42,11 +44,11 @@ router.get('/login', function(req, res) {
                 "Message": "Login Failed"
             });
         }
-    }, handleRejeted => {
+    }, (handleRejected : any) => {
         res.status(400).json({
-            "Message": handleRejeted
+            "Message": handleRejected
         });
-    }).catch(error => {
+    }).catch((error: {message : any}) => {
         res.status(500).json({
             "Message": "Login exception",
             "Exception": error

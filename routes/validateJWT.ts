@@ -18,7 +18,7 @@ const validateJWT = function(req : Request, res : Response, next : NextFunction)
             "Message": "Jwt failed to validate",
             "Payload": handleRejected
         });
-    }).catch((error : {message : any}) => {
+    }).catch((error: any) => {
         res.status(500).json({
             "Message": "Exception whilst processing jwt.",
             "Exception": error
@@ -29,7 +29,7 @@ const validateJWT = function(req : Request, res : Response, next : NextFunction)
 
 // TODO: Add fault codes for front end.
 // After validiation, issue new JWT. 
-const issueJWT = function(req : Request, res : Response, next : NextFunction) {
+const issueJWT = function(req: Request, res: Response, next: NextFunction) {
     const uid = res.locals.uid;
     var jwk;
     var keySet;
@@ -51,7 +51,7 @@ const issueJWT = function(req : Request, res : Response, next : NextFunction) {
             "Message": "Token Generation Error",
             "Payload": handleRejected
         })
-    }).catch((error : {message : any}) => {
+    }).catch((error: any) => {
         res.status(500).json({
             "Message": "Exception whilst generating token.",
             "Exception": error

@@ -15,7 +15,7 @@ const connection = () => {
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-function queryUser(table: string, userId: any) {
+function getUser(table: string, userId: any) {
     return new Promise((resolve, reject) => {
         table = table;
         userId = userId; 
@@ -37,7 +37,7 @@ async function setPassHash(userId: any, hashPass: any) {
     const con = connection();
     userId = userId;
     hashPass = hashPass;
-    const res : any = await queryUser("user_password", userId).then(data => {
+    const res : any = await getUser("user_password", userId).then(data => {
         return data;
     });
     return new Promise(function(resolve, reject) { 
@@ -74,7 +74,7 @@ async function setPassHash(userId: any, hashPass: any) {
     });
 }
 
-function addUser(userId: any, admin: any, auth: any, userName: any) {
+function createUser(userId: any, admin: any, auth: any, userName: any) {
     return new Promise(function(resolve, reject) {
         const con = connection();
         userId = userId;
@@ -110,7 +110,7 @@ function setUserAthenticated(userId: any, auth: any) {
     });
 }
 
-module.exports = { queryUser,
+module.exports = { getUser,
     setPassHash, 
-    addUser, 
+    createUser, 
     setUserAthenticated }; 

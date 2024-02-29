@@ -4,10 +4,10 @@ var logFile = require("../utils/logging")
 var security = require('../security/security');
 var router = express.Router();
 
-router.get('/login', function(req : Request, res : Response) {
+router.get('/login', function(req: Request, res: Response) {
     const uid = req.body.userId;
     const pass = req.body.password;
-    security.userLogin(uid, pass).then((handleFulfilled : any)=> {
+    security.userLogin(uid, pass).then((handleFulfilled: any)=> {
         if (handleFulfilled.login) {
             var jwk;
             var keySet;
@@ -21,18 +21,18 @@ router.get('/login', function(req : Request, res : Response) {
                 jwk = req.app.get('jwk1');
                 kid = jwk.kid;
             }
-            security.getAuthJWT(uid, keySet.private, kid).then((handleFulfilled : any ) => {
+            security.getAuthJWT(uid, keySet.private, kid).then((handleFulfilled: any ) => {
                 res.locals.jwt = handleFulfilled;
                 res.status(200).json({
                     "Message": "Login Successful",
                     "token": handleFulfilled
                 });  
-            }, (handleRejected : any) => {
+            }, (handleRejected: any) => {
                 res.status(400).json({
                     "Message": "Token Generation Error",
                     "Payload": handleRejected
                 })
-            }).catch((error: {message : any}) => {
+            }).catch((error: any) => {
                 res.status(500).json({
                     "Message": "Exception whilst generating token.",
                     "Exception": error
@@ -44,11 +44,11 @@ router.get('/login', function(req : Request, res : Response) {
                 "Message": "Login Failed"
             });
         }
-    }, (handleRejected : any) => {
+    }, (handleRejected: any) => {
         res.status(400).json({
             "Message": handleRejected
         });
-    }).catch((error: {message : any}) => {
+    }).catch((error: any) => {
         res.status(500).json({
             "Message": "Login exception",
             "Exception": error

@@ -1,4 +1,4 @@
-var dbapi = require('../dbaccess/dbaccess');
+var user = require('../controllers/userController');
 var fileLogging = require('../utils/logging');
 var jose = require('jose');
 var fs = require('fs');
@@ -78,7 +78,7 @@ async function userLogin(userId : string, password : string) {
     userId = userId;
     password = password;
     var invalidUser = false;
-    const res = await dbapi.queryUser("user_password", userId).then((data : any) => {
+    const res = await user.getUser("user_password", userId).then((data : any) => {
         return data;
     });
     if (res[0] == null) {
@@ -88,11 +88,11 @@ async function userLogin(userId : string, password : string) {
     };
     return new Promise(function(resolve, reject) {
         if (invalidUser) {
-            reject("Invalid Username");
+            reject({message: "Invalid user."});
         } else if (!invalidUser && compResult) {
             resolve({login: true});
         } else if (!invalidUser && !compResult) {
-            reject("Invalid Password");
+            reject({message: "Invalid password."});
         }
     });
 }

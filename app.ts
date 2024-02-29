@@ -25,7 +25,7 @@ app.use('/', indexRouter);
 app.use('/', addUserRouter);
 app.use('/', loginRouter);
 app.use('/', jwksRouter);
-app.use('/', jwtHandler.validateJWT, jwtHandler.issueJWT, testRouter);
+app.use('/', /*jwtHandler.validateJWT, jwtHandler.issueJWT,*/ testRouter);
 app.set('switchRSA', true);
 
 // Init RSA keypairs.

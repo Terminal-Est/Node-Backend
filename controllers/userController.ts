@@ -1,33 +1,16 @@
-var mysql = require('mysql');
-var bcrypt = require('bcrypt');
-
-// TODO: Add exception handling to queries where the db engine might return an exception.
-// This is hard coded for now, change to system environment variable for security in production.
-const connection = () => {
-    let con = mysql.createConnection({
-        host: "localhost",
-        user: "admin",
-        password: "Bfg5000-1",
-        database: "user_information"
-    });
-    return con;
-}
+import { AppDataSource } from "../data/data-source";
+import { User } from "../data/entity/user";
 
 // TODO: Design and carry out correct testing.
 // TODO: Comment.
-function getUser(table: string, userId: any) {
-    return new Promise((resolve, reject) => {
-        table = table;
-        userId = userId; 
-        const con = connection()
-        const sql = mysql.format('SELECT * FROM ?? WHERE user_id = ?', 
-        [table, userId]);
-        con.query(
-            sql, 
-            function(error: any, result: unknown) {
-                return error ? reject(error) : resolve(result);     
-        });
-        con.end();
+async function getUser(userId: string) {
+    const user = await AppDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .where("user.userId = :id", {id: userId})
+        .getOne();
+
+    return new Promise(function(resolve, reject) {
+        return user ? reject("User not found.") : resolve(user);
     });
 }
 

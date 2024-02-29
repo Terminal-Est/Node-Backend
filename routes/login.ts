@@ -1,7 +1,7 @@
-var express = require('express');
 import { NextFunction, Request, Response } from "express";
+var express = require('express');
 var logFile = require("../utils/logging")
-var security = require('../security/security');
+var security = require('../controllers/security');
 var router = express.Router();
 
 router.get('/login', function(req: Request, res: Response) {

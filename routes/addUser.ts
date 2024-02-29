@@ -1,9 +1,9 @@
-var express = require('express');
 import { NextFunction, Request, Response } from "express";
+var express = require('express');
 var user = require('../controllers/userController')
 var router = express.Router();
 
-router.post('/addUser', function(req : Request, res : Response, next : NextFunction) {
+router.post('/addUser', function(req: Request, res: Response, next: NextFunction) {
     const uid = req.body.userId;
     const admin = req.body.admin;
     const auth = req.body.auth;
@@ -22,7 +22,7 @@ router.post('/addUser', function(req : Request, res : Response, next : NextFunct
             "Stack Trace": error.message
         });
     });
-}, function (req : Request, res : Response) {
+}, function (req: Request, res: Response) {
     const uid = req.body.userId;
     const password = req.body.password;
     user.setPassHash(uid, password).then((handleFulfilled : any) => {
@@ -31,7 +31,7 @@ router.post('/addUser', function(req : Request, res : Response, next : NextFunct
             "User Database Updated": res.locals.handleFulfilled,
             "Hashed Pass Success": handleFulfilled
         });
-    }, (handleRejected : any) => {
+    }, (handleRejected: any) => {
         res.status(400).json({
             "Message": "Hashing Promise Rejected", 
             "data": handleRejected

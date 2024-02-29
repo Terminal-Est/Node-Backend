@@ -1,11 +1,11 @@
 //TODO: Add CORS, react server origin.
-
+var cors = require('cors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cron = require('node-cron');
-var security = require('./security/security');
+var security = require('./controllers/security');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 var indexRouter = require('./routes/index');
@@ -18,6 +18,8 @@ var app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
+// cors enabled for all routes for now.
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

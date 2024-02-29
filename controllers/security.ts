@@ -78,7 +78,7 @@ async function userLogin(userId : string, password : string) {
     userId = userId;
     password = password;
     var invalidUser = false;
-    const res = await user.getUser("user_password", userId).then((data : any) => {
+    const res = await user.getUser(userId).then((data : any) => {
         return data;
     });
     if (res[0] == null) {

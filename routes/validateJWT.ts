@@ -1,5 +1,5 @@
-var security = require('../security/security')
 import { NextFunction, Request, Response } from "express";
+var security = require('../controllers/security')
 var logFile = require('../utils/logging')
 
 // TODO: Thorough unit testing to validate proper rotation mechanisms.

@@ -1,6 +1,6 @@
 import { AppDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
-import { Password } from "../data/entity/Password";
+import { Password } from "../data/entity/password";
 
 // Get user info from user table.
 // TODO: Testing.

@@ -9,7 +9,7 @@ export const AppDataSource = new DataSource({
     password: "Arrow_Couch_72@",
     database: "ProgProjDB",
     logging: ["error"],
-    migrations: ["/migrations/*{.ts,.js}"]
+    migrations: [__dirname + '/migrations/*.js']
 });
 
 AppDataSource.initialize()

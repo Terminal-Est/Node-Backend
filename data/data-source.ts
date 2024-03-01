@@ -2,12 +2,14 @@ import { DataSource } from "typeorm";
 var logging = require('../utils/logging');
 
 export const AppDataSource = new DataSource({
-    type: "mysql",
-    host: "localhost",
-    port: 3306,
-    username: "test",
-    password: "test",
-    database: "test"
+    type: "mssql",
+    host: "progprojdb.database.windows.net",
+    port: 1433,
+    username: "progprojadmin",
+    password: "Arrow_Couch_72@",
+    database: "ProgProjDB",
+    logging: ["error"],
+    migrations: ["/migrations/*{.ts,.js}"]
 });
 
 AppDataSource.initialize()

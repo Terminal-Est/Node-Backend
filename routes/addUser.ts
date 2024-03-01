@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { InsertResult } from "typeorm";
 var express = require('express');
 var user = require('../controllers/userController')
 var router = express.Router();
@@ -8,13 +9,12 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
     const admin = req.body.admin;
     const auth = req.body.auth;
     const userName = req.body.username;
-    user.createUser(uid, admin, auth, userName).then((handleFulfilled: any) => {
-        res.locals.handleFulfilled = handleFulfilled;
+    user.createUser(uid, admin, auth, userName).then((handleFulfilled: InsertResult) => {
+        res.locals.handleFulfilled = handleFulfilled.identifiers[0].userId;
         next();
-    }, (handleRejected: any) => {
+    }, () => {
         res.status(400).json({
             "Message": "User Add Promise Rejected.", 
-            "data": handleRejected
         });
     }).catch((error: any) => { 
         res.status(400).json({

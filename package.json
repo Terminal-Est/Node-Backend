@@ -6,7 +6,8 @@
     "build": "npx tsc",
     "nodemon": "npx nodemon ./bin/www.ts",
     "start": "node ./bin/www.ts",
-    "test": "jest"
+    "test": "jest",
+    "migrate": "typeorm migration:run -d ./dist/data/data-source.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

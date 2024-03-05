@@ -10,36 +10,35 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
     const auth = req.body.auth;
     const userName = req.body.username;
     user.createUser(uid, admin, auth, userName).then((handleFulfilled: InsertResult) => {
-        res.locals.handleFulfilled = handleFulfilled.identifiers[0].userId;
+        res.locals.userId = handleFulfilled.identifiers[0].userId;
         next();
-    }, () => {
-        res.status(400).json({
-            "Message": "User Add Promise Rejected.", 
-        });
     }).catch((error: any) => { 
         res.status(400).json({
-            "Message": "Add User Error", 
-            "Stack Trace": error.message
+            Message: "Add User Error", 
+            Stack: error.message
         });
     });
-}, function (req: Request, res: Response) {
-    const uid = req.body.userId;
-    const password = req.body.password;
-    user.setPassHash(uid, password).then((handleFulfilled : any) => {
-        res.status(200).json({
-            "Message": "User Added Successfully.", 
-            "User Database Updated": res.locals.handleFulfilled,
-            "Hashed Pass Success": handleFulfilled
-        });
-    }, (handleRejected: any) => {
+}, function (req: Request, res: Response, next: NextFunction) {
+    user.getHash(req.body.password).then((handleBad: string) => {
         res.status(400).json({
-            "Message": "Hashing Promise Rejected", 
-            "data": handleRejected
+            Message: "Hashing Error",
+            Stack: handleBad})
+    }, (handleOk: string) => {
+        res.locals.hashPass = handleOk;
+        next()
+    });
+}, function (req: Request, res: Response) {
+    const uid = res.locals.userId;
+    const password = res.locals.hashPass;
+    user.insertPasswordHash(uid, password).then((handleFulfilled : any) => {
+        res.status(200).json({
+            Message: "User Added Successfully.",
+            detail: handleFulfilled
         });
     }).catch((error: any) => {
         res.status(400).json({
-            "Message": "Hashing Password Error", 
-            "Stack Trace": error
+            Message: "Hashing Password Error", 
+            Stack: error
         });
     });
 });

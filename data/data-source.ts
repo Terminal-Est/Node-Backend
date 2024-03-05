@@ -1,4 +1,6 @@
 import { DataSource } from "typeorm";
+import { User } from './entity/user';
+import { Password } from './entity/password';
 var logging = require('../utils/logging');
 
 export const AppDataSource = new DataSource({
@@ -8,7 +10,8 @@ export const AppDataSource = new DataSource({
     username: "progprojadmin",
     password: "Arrow_Couch_72@",
     database: "ProgProjDB",
-    logging: ["error"],
+    entities: [User, Password],
+    logging: ["error", "query", "schema"],
     migrations: ['dist/migrations/*.js']
 });
 

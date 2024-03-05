@@ -47,9 +47,9 @@ async function getHash(pass: string) {
     return new Promise (function(reject, resolve) {
         const saltRounds = 10;
         bcrypt.genSalt(saltRounds, function(error: any, salt: any) {
-            if (error) return reject("Help")
+            if (error) return reject(error)
             bcrypt.hash(pass, salt, function(error: any, hash: any) {
-                if (error) return reject ("Me")
+                if (error) return reject (error)
                 return resolve(hash);
             })
         })

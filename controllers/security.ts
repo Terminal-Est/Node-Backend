@@ -1,4 +1,4 @@
-var dbapi = require('../dbaccess/dbaccess');
+var user = require('../controllers/userController');
 var fileLogging = require('../utils/logging');
 var jose = require('jose');
 var fs = require('fs');
@@ -26,7 +26,7 @@ function getRSAKeypairs() {
 }
 
 // Process JWT signature.
-async function verifyToken(jwt, jwk1, jwk2) {
+async function verifyToken(jwt : any, jwk1 : any, jwk2 : any) {
     var jwk;
     const alg = 'RS256';
     const decodedJwt = jose.decodeJwt(jwt);
@@ -42,7 +42,7 @@ async function verifyToken(jwt, jwk1, jwk2) {
 }
 
 // Issue new JWT.
-function getAuthJWT(email, key, kid) {
+function getAuthJWT(email : string, key : any, kid : any) {
     const alg = 'RS256';
     return new Promise(async function(resolve, reject) {
         const privateKey = await jose.importPKCS8(key, alg);
@@ -52,16 +52,16 @@ function getAuthJWT(email, key, kid) {
         .setSubject(email)
         .setExpirationTime('30m')
         .sign(privateKey)
-        .then(handleFulfilled => { 
+        .then((handleFulfilled : any) => { 
             resolve(handleFulfilled); 
-        }, handleRejected => {
+        }, (handleRejected : any) => {
             reject(handleRejected);
         })
     })
 }
 
 // Update exposed JWKs.
-function updateJWKendpoint(jwk, jwkToUpdate) {
+function updateJWKendpoint(jwk : any, jwkToUpdate : any) {
     const data = jwk;
     try {
         const fileContents = fs.readFileSync('./public/Keys.json', 'utf8');
@@ -74,11 +74,11 @@ function updateJWKendpoint(jwk, jwkToUpdate) {
 }
 
 // Function to validate user details against database.
-async function userLogin(userId, password) {
-    this.userId = userId;
-    this.password = password;
+async function userLogin(userId : string, password : string) {
+    userId = userId;
+    password = password;
     var invalidUser = false;
-    const res = await dbapi.queryUser("user_password", this.userId).then(data => {
+    const res = await user.getUser(userId).then((data : any) => {
         return data;
     });
     if (res[0] == null) {
@@ -88,11 +88,11 @@ async function userLogin(userId, password) {
     };
     return new Promise(function(resolve, reject) {
         if (invalidUser) {
-            reject("Invalid Username");
+            reject({message: "Invalid user."});
         } else if (!invalidUser && compResult) {
             resolve({login: true});
         } else if (!invalidUser && !compResult) {
-            reject("Invalid Password");
+            reject({message: "Invalid password."});
         }
     });
 }

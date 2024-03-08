@@ -1,7 +1,7 @@
 var fs = require('fs');
 var util = require('util');
 
-function logToFile(message) {
+function logToFile(message : string) {
     var logFile = './utils/debug.log';
     var date = new Date();
     var stream = fs.createWriteStream(logFile, {flags : 'a'});

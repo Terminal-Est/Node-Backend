@@ -3,6 +3,7 @@ import { User } from './entity/user';
 import { Password } from './entity/password';
 var logging = require('../utils/logging');
 
+// Sensitive data to be moved to environment variable.
 export const AppDataSource = new DataSource({
     type: "mssql",
     host: "progprojdb.database.windows.net",

@@ -5,6 +5,7 @@ var logFile = require('../utils/logging')
 // TODO: Thorough unit testing to validate proper rotation mechanisms.
 // TODO: Add fault codes for front end.
 // First validate user JWT, if any error occours, send appropriate repsonse.
+// These may be split off into independent routes later if independent JWT validation is required.
 const validateJWT = function(req : Request, res : Response, next : NextFunction) {
     const jwt = req.headers.authorization;
     const jwk1 = req.app.get('jwk1');
@@ -15,12 +16,12 @@ const validateJWT = function(req : Request, res : Response, next : NextFunction)
         next();
     }, (handleRejected : any) => {
         res.status(400).json({
-            "Message": "Jwt failed to validate",
+            "Message": "Jwt Failed To Validate",
             "Payload": handleRejected
         });
     }).catch((error: any) => {
         res.status(500).json({
-            "Message": "Exception whilst processing jwt.",
+            "Message": "Exception Whilst Processing JWT",
             "Exception": error
         });
         logFile.logToFile(error);
@@ -53,7 +54,7 @@ const issueJWT = function(req: Request, res: Response, next: NextFunction) {
         })
     }).catch((error: any) => {
         res.status(500).json({
-            "Message": "Exception whilst generating token.",
+            "Message": "Exception Whilst Generating Token",
             "Exception": error
         });
         logFile.logToFile(error);

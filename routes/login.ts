@@ -34,7 +34,7 @@ router.get('/login', function(req: Request, res: Response) {
                 })
             }).catch((error: any) => {
                 res.status(500).json({
-                    "Message": "Exception whilst generating token.",
+                    "Message": "Exception Whilst Generating Token",
                     "Exception": error
                 });
                 logFile.logToFile(error);
@@ -50,7 +50,7 @@ router.get('/login', function(req: Request, res: Response) {
         });
     }).catch((error: any) => {
         res.status(500).json({
-            "Message": "Login exception",
+            "Message": "Login Exception",
             "Exception": error
         });
     });

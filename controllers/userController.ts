@@ -63,12 +63,30 @@ async function getHash(pass: string) {
 }
 
 // TODO Testing and comments.
-async function createUser(userId: string, admin: boolean, auth: boolean, userName: string) {
+async function createUser(
+    userId: string, 
+    admin: boolean, 
+    auth: boolean, 
+    username: string,
+    address: string,
+    city: string,
+    state: string,
+    postcode: string
+    ) {
     return await UserDataSource.createQueryBuilder()
         .insert()
         .into(User)
         .values([
-            { userId: userId, admin: admin, auth: auth, username: userName }
+            { 
+                userId: userId, 
+                admin: admin, 
+                auth: auth, 
+                username: username,
+                address: address,
+                city: city,
+                state: state,
+                postcode: postcode
+            }
         ])
         .printSql()
         .execute();

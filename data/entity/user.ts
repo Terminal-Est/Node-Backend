@@ -13,4 +13,16 @@ export class User {
 
     @Column()
     username: string;
+
+    @Column()
+    address: string;
+
+    @Column()
+    city: string;
+
+    @Column()
+    state: string;
+
+    @Column()
+    postcode: string;
 }

@@ -11,13 +11,8 @@ export async function createContainer(containerName: string) {
     const containerClient = blobServiceClient.getContainerClient(container);
     const getContainerResponse = await containerClient.create();
 
-    return new Promise(function(resolve, reject) {
-        if (getContainerResponse.errorCode) {
-            return reject(getContainerResponse.errorCode);
-        } 
-        else {
-            return resolve(getContainerResponse.requestId);
-        }
+    return new Promise(function(resolve) {
+        return resolve(getContainerResponse);
     });
 }
 
@@ -27,13 +22,8 @@ export async function deleteContainer(containerName: string) {
     const containerClient = blobServiceClient.getContainerClient(container);
     const getContainerResponse = await containerClient.delete();
 
-    return new Promise(function(resolve, reject) {
-        if (getContainerResponse.errorCode) {
-            return reject(getContainerResponse.errorCode);
-        } 
-        else {
-            return resolve(getContainerResponse.requestId);
-        }
+    return new Promise(function(resolve) {
+        return resolve(getContainerResponse.requestId);
     });
 }
 

@@ -1,4 +1,4 @@
-import { AppDataSource } from "../data/data-source";
+import { UserDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
 var bcrypt = require('bcrypt');
@@ -6,7 +6,7 @@ var bcrypt = require('bcrypt');
 // Get user info from user table.
 // TODO: Testing.
 async function getUser(userId: string) {
-    return await AppDataSource.getRepository(User)
+    return await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
         .where("user.userId = :id", {id: userId})
         .getOne();
@@ -15,7 +15,7 @@ async function getUser(userId: string) {
 // Get user info from password table.
 // TODO: Testing.
 async function getUserPassword(userId: string) {
-    return await AppDataSource.getRepository(Password)
+    return await UserDataSource.getRepository(Password)
         .createQueryBuilder("password")
         .where("password.userId = :id", {id: userId})
         .getOne();
@@ -23,7 +23,7 @@ async function getUserPassword(userId: string) {
 
 // TODO: Testing and comments.
 async function insertPasswordHash(userId: string, hashPass: string) {
-    return await AppDataSource.createQueryBuilder()
+    return await UserDataSource.createQueryBuilder()
         .insert()
         .into(Password)
         .values([
@@ -34,7 +34,7 @@ async function insertPasswordHash(userId: string, hashPass: string) {
 
 // TODO: Testing and comments.
 async function updatePasswordHash(userId: string, hashPass: string) {
-    return await AppDataSource.createQueryBuilder()
+    return await UserDataSource.createQueryBuilder()
         .update(Password)
         .set({ passHash: hashPass })
         .where("userId = :id", {id: userId})
@@ -64,7 +64,7 @@ async function getHash(pass: string) {
 
 // TODO Testing and comments.
 async function createUser(userId: string, admin: boolean, auth: boolean, userName: string) {
-    return await AppDataSource.createQueryBuilder()
+    return await UserDataSource.createQueryBuilder()
         .insert()
         .into(User)
         .values([
@@ -76,7 +76,7 @@ async function createUser(userId: string, admin: boolean, auth: boolean, userNam
 
 // TODO Testing and comments.
 async function setUserAthenticated(userId: string, auth: boolean) {
-    return await AppDataSource.createQueryBuilder()
+    return await UserDataSource.createQueryBuilder()
         .update(User)
         .set({ auth: auth })
         .where("userId = :id", {id: userId})

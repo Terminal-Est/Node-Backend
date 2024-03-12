@@ -14,8 +14,7 @@ export const UserDataSource = new DataSource({
     password: "Modern_Skates_054",
     database: "ProgProjDB",
     entities: [User, Password],
-    logging: ["error", "query", "schema"],
-    migrations: ['dist/migrations/*.js'],
+    logging: ["error", "query", "schema"]
 })
 
 export const AppDataSource = new DataSource({
@@ -25,8 +24,7 @@ export const AppDataSource = new DataSource({
     username: "app_data_login",
     password: "Distinct_Iguana_670",
     database: "ProgProjAppDb",
-    logging: ["error", "query", "schema"],
-    migrations: ['dist/migrations/*.js']
+    logging: ["error", "query", "schema"]
 });
 
 AppDataSource.initialize()

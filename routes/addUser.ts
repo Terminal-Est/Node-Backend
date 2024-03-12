@@ -68,10 +68,9 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
         res.locals.userId = handleFulfilled.identifiers[0].userId;
         next();
     }).catch((error: any) => { 
-        res.status(400).json({
-            Message: "Add User Error", 
-            Stack: error.message
-        });
+        res.status(400).json(
+            error.message
+        );
     });
 
 }, function (req: Request, res: Response, next: NextFunction) {

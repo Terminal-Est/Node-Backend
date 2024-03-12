@@ -1,6 +1,7 @@
 import { UserDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
+import { validate } from "class-validator";
 var bcrypt = require('bcrypt');
 
 // Get user info from user table.
@@ -62,7 +63,8 @@ async function getHash(pass: string) {
     });
 }
 
-// TODO Testing and comments.
+// Added data validation for creating users returns 400 and an error
+// for the front end.
 async function createUser(
     userId: string, 
     admin: boolean, 
@@ -73,23 +75,41 @@ async function createUser(
     state: string,
     postcode: string
     ) {
-    return await UserDataSource.createQueryBuilder()
-        .insert()
-        .into(User)
-        .values([
-            { 
-                userId: userId, 
-                admin: admin, 
-                auth: auth, 
-                username: username,
-                address: address,
-                city: city,
-                state: state,
-                postcode: postcode
-            }
-        ])
-        .printSql()
-        .execute();
+
+    var user = new User();
+    user.userId = userId;
+    user.admin = admin;
+    user.auth = auth;
+    user.username = username;
+    user.address = address;
+    user.city = city;
+    user.state = state;
+    user.postcode = postcode;
+
+    const errors = await validate(user);
+
+    if (errors.length > 0)
+    {
+        throw new Error(errors.toString());
+    } else {
+        return await UserDataSource.createQueryBuilder()
+            .insert()
+            .into(User)
+            .values([
+                { 
+                    userId: userId, 
+                    admin: admin, 
+                    auth: auth, 
+                    username: username,
+                    address: address,
+                    city: city,
+                    state: state,
+                    postcode: postcode
+                }
+            ])
+            .printSql()
+            .execute();
+    }
 }
 
 // TODO Testing and comments.

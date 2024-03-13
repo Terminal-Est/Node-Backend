@@ -1,6 +1,7 @@
 import { Entity, PrimaryColumn, Column } from "typeorm";
+import { Length } from "class-validator";
 
-@Entity()
+@Entity({schema: "progprojdb"})
 export class User {
     @PrimaryColumn()
     userId: string;
@@ -18,6 +19,7 @@ export class User {
     address: string;
 
     @Column()
+    @Length(3, 3)
     city: string;
 
     @Column()

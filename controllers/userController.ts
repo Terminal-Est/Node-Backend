@@ -2,6 +2,7 @@ import { UserDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
 import { validate } from "class-validator";
+import { PasswordValid } from "../data/entity/passwordValid";
 var bcrypt = require('bcrypt');
 
 // Get user info from user table.
@@ -11,6 +12,19 @@ async function getUser(userId: string) {
         .createQueryBuilder("user")
         .where("user.userId = :id", {id: userId})
         .getOne();
+}
+
+async function validatePassword(password: string) {
+    var passwordValid = new PasswordValid();
+    passwordValid.password = password;
+    var errors = await validate(passwordValid);
+    return new Promise(function(resolve, reject) {
+        if (errors.length > 0) {
+            return reject(errors);
+        } else {
+            return resolve(true)
+        }
+    });
 }
 
 // Get user info from password table.
@@ -53,7 +67,7 @@ async function getHash(pass: string) {
             }
             bcrypt.hash(pass, salt, function(error: any, hash: any) {
                 if (error) {
-                    return reject (error);
+                    return reject(error);
                 }
                 else {
                     return resolve(hash);
@@ -63,53 +77,37 @@ async function getHash(pass: string) {
     });
 }
 
+async function validateUser(user: User) {
+    const errors = await validate(user)
+    return new Promise(function(resolve, reject) {
+        if (errors.length > 0) {
+            return reject(errors);
+        } else {
+            return resolve(true)
+        }
+    });
+}
+
 // Added data validation for creating users returns 400 and an error
 // for the front end.
-async function createUser(
-    userId: string, 
-    admin: boolean, 
-    auth: boolean, 
-    username: string,
-    address: string,
-    city: string,
-    state: string,
-    postcode: string
-    ) {
-
-    var user = new User();
-    user.userId = userId;
-    user.admin = admin;
-    user.auth = auth;
-    user.username = username;
-    user.address = address;
-    user.city = city;
-    user.state = state;
-    user.postcode = postcode;
-
-    const errors = await validate(user);
-
-    if (errors.length > 0)
-    {
-        throw new Error(errors.toString());
-    } else {
-        return await UserDataSource.createQueryBuilder()
-            .insert()
-            .into(User)
-            .values([
-                { 
-                    userId: userId, 
-                    admin: admin, 
-                    auth: auth, 
-                    username: username,
-                    address: address,
-                    city: city,
-                    state: state,
-                    postcode: postcode
-                }
-            ])
-            .printSql()
-            .execute();
-    }
+async function createUser(user: User) {
+    return await UserDataSource.createQueryBuilder()
+        .insert()
+        .into(User)
+        .values([
+            { 
+                userId: user.userId, 
+                admin: user.admin, 
+                auth: user.auth, 
+                username: user.username,
+                address: user.address,
+                city: user.city,
+                state: user.state,
+                postcode: user.postcode
+            }
+        ])
+        .printSql()
+        .execute();
 }
 
 // TODO Testing and comments.
@@ -121,9 +119,11 @@ async function setUserAthenticated(userId: string, auth: boolean) {
         .execute();
 }
 
-module.exports = { getUser,
+export { getUser,
     insertPasswordHash,
     updatePasswordHash,
     getHash, 
     createUser, 
-    setUserAthenticated }; 
+    setUserAthenticated,
+    validateUser,
+    validatePassword }; 

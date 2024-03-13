@@ -16,13 +16,13 @@ const validateJWT = function(req : Request, res : Response, next : NextFunction)
         next();
     }, (handleRejected : any) => {
         res.status(400).json({
-            "Message": "Jwt Failed To Validate",
-            "Payload": handleRejected
+            Message: "Jwt Failed To Validate",
+            Payload: handleRejected
         });
     }).catch((error: any) => {
         res.status(500).json({
-            "Message": "Exception Whilst Processing JWT",
-            "Exception": error
+            Message: "Exception Whilst Processing JWT",
+            Exception: error
         });
         logFile.logToFile(error);
     });
@@ -49,13 +49,13 @@ const issueJWT = function(req: Request, res: Response, next: NextFunction) {
         next();  
     }, (handleRejected : any) => {
         res.status(400).json({
-            "Message": "Token Generation Error",
-            "Payload": handleRejected
+            Message: "Token Generation Error",
+            Payload: handleRejected
         })
     }).catch((error: any) => {
         res.status(500).json({
-            "Message": "Exception Whilst Generating Token",
-            "Exception": error
+            Message: "Exception Whilst Generating Token",
+            Exception: error
         });
         logFile.logToFile(error);
     });

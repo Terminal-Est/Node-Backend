@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
+import { User } from "../data/entity/user";
+import { createUser, validatePassword, validateUser, insertPasswordHash, getHash } from "../controllers/userController";
 var express = require('express');
-var user = require('../controllers/userController')
 var router = express.Router();
 
 /**
@@ -48,23 +49,43 @@ var router = express.Router();
 
 router.post('/addUser', function(req: Request, res: Response, next: NextFunction) {
 
-    const uid = req.body.userId;
-    const admin = req.body.admin;
-    const auth = req.body.auth;
-    const userName = req.body.username;
-    const address = req.body.address;
-    const city = req.body.city;
-    const state = req.body.state;
-    const postcode = req.body.postcode;
+    var user = new User();
+    user.userId = req.body.userId;
+    user.admin = req.body.admin;
+    user.auth = req.body.auth;
+    user.username = req.body.username;
+    user.address = req.body.address;
+    user.city = req.body.city;
+    user.state = req.body.state;
+    user.postcode = req.body.postcode;
 
-    user.createUser(uid, 
-        admin, 
-        auth, 
-        userName, 
-        address, 
-        city, 
-        state, 
-        postcode).then((handleFulfilled: InsertResult) => {
+    res.locals.user = user;
+
+    validateUser(user).then((handleFullfilled: any) => {
+        next();
+    }, (handleRejected: any) => {
+        res.status(400).json({
+            Message: "Invalid User Details",
+            Detail: handleRejected
+        })
+    })
+}, function (req: Request, res: Response, next: NextFunction) {
+
+    validatePassword(req.body.password).then((handleFullfilled: any) => {
+        next();
+    }, (handleRejected: any) => {
+        res.status(400).json({
+            Message: "Invalid User Details",
+            Detail: handleRejected
+        })
+    })
+
+}, function (req: Request, res: Response, next: NextFunction) {
+
+    const user: User = res.locals.user;
+
+    createUser(user)
+        .then((handleFulfilled: InsertResult) => {
         res.locals.userId = handleFulfilled.identifiers[0].userId;
         next();
     }).catch((error: any) => { 
@@ -72,9 +93,9 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
             error.message
         );
     });
-
 }, function (req: Request, res: Response, next: NextFunction) {
-    user.getHash(req.body.password).then((handleRejected: string) => {
+
+    getHash(req.body.password).then((handleRejected: any) => {
         res.status(400).json({
             Message: "Hashing Error",
             Stack: handleRejected})
@@ -82,14 +103,14 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
         res.locals.hashPass = handleFulfilled;
         next()
     });
-
 }, function (res: Response) {
+
     const uid = res.locals.userId;
     const password = res.locals.hashPass;
-    user.insertPasswordHash(uid, password).then((handleFulfilled : any) => {
+    insertPasswordHash(uid, password).then((handleFulfilled : any) => {
         res.status(200).json({
             Message: "User Added Successfully.",
-            detail: handleFulfilled
+            Detail: handleFulfilled
         });
     }).catch((error: any) => {
         res.status(400).json({

@@ -115,7 +115,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Insert jashed password into database.
-router.use((res: Response, next: NextFunction) => {
+router.use((req: Request, res: Response, next: NextFunction) => {
     const uid = res.locals.userId;
     const password = res.locals.hashPass;
     insertPasswordHash(uid, password).then((handleFulfilled : any) => {
@@ -129,7 +129,7 @@ router.use((res: Response, next: NextFunction) => {
 });
 
 // Respond 200 on successfull user creation.
-router.post('/', (res: Response) => {
+router.post('/', (req: Request, res: Response) => {
     res.status(200).json({
         Message: "User Added Successfully.",
         Detail: res.locals.user.userId

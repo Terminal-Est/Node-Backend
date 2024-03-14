@@ -1,7 +1,7 @@
-var user = require('../controllers/userController');
-var fileLogging = require('../utils/logging');
+import { getUser } from "../controllers/userController";
+import { logToFile } from "../utils/logging";
+import { writeFileSync, readFileSync } from "fs";
 var jose = require('jose');
-var fs = require('fs');
 var bcrypt = require('bcrypt');
 
 // Return RSA Keypair.
@@ -62,14 +62,13 @@ function getAuthJWT(email : string, key : any, kid : any) {
 
 // Update exposed JWKs.
 function updateJWKendpoint(jwk : any, jwkToUpdate : any) {
-    const data = jwk;
     try {
-        const fileContents = fs.readFileSync('./public/Keys.json', 'utf8');
+        const fileContents = readFileSync('./public/Keys.json', 'utf8');
         var fileJSON = JSON.parse(fileContents);
         fileJSON.keys[jwkToUpdate] = jwk;
-        fs.writeFileSync('./public/Keys.json', JSON.stringify(fileJSON, null, '\t'));
-    } catch (e) {
-        fileLogging.logToFile(e);
+        writeFileSync('./public/Keys.json', JSON.stringify(fileJSON, null, '\t'));
+    } catch {
+        logToFile("Failed to write key to endpoint : " + Date.now.toString());
     }
 }
 
@@ -78,7 +77,7 @@ async function userLogin(userId : string, password : string) {
     userId = userId;
     password = password;
     var invalidUser = false;
-    const res = await user.getUser(userId).then((data : any) => {
+    const res = await getUser(userId).then((data : any) => {
         return data;
     });
     if (res[0] == null) {

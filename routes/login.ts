@@ -42,7 +42,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Next generate JWT.
-router.use((res: Response, next: NextFunction) => {
+router.use((req: Request, res: Response, next: NextFunction) => {
     
     const uid = res.locals.uid;
     const keySet = res.locals.keysSet;
@@ -70,7 +70,7 @@ router.use((res: Response, next: NextFunction) => {
  * 
  * First validates user against database, if user is valid, respond with JWT.
  */
-router.get('/', (res: Response) => {
+router.get('/', (req: Request, res: Response) => {
 
     const jwt = res.locals.jwt;
 

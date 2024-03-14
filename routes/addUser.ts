@@ -47,7 +47,8 @@ var router = express.Router();
  * login to get a valid JWT.
  */
 
-router.post('/addUser', function(req: Request, res: Response, next: NextFunction) {
+// Validate user first.
+router.use((req: Request, res: Response, next: NextFunction) => {
 
     var user = new User();
     user.userId = req.body.userId;
@@ -62,14 +63,17 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
     res.locals.user = user;
 
     validateUser(user).then((handleFullfilled: any) => {
-        next();
+            next();
     }, (handleRejected: any) => {
         res.status(400).json({
             Message: "Invalid User Details",
             Detail: handleRejected
         })
-    })
-}, function (req: Request, res: Response, next: NextFunction) {
+    });
+});
+
+// Validate password.
+router.use((req: Request, res: Response, next: NextFunction) => {
 
     validatePassword(req.body.password).then((handleFullfilled: any) => {
         next();
@@ -79,8 +83,23 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
             Detail: handleRejected
         })
     })
+});
 
-}, function (req: Request, res: Response, next: NextFunction) {
+// If password is valid, create password hash.
+router.use((req: Request, res: Response, next: NextFunction) => {
+
+    getHash(req.body.password).then((handleRejected: any) => {
+        res.status(400).json({
+            Message: "Hashing Error",
+            Stack: handleRejected})
+    }, (handleFulfilled: string) => {
+        res.locals.hashPass = handleFulfilled;
+        next()
+    });
+})
+
+// Insert user into database.
+router.use((req: Request, res: Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
@@ -93,30 +112,27 @@ router.post('/addUser', function(req: Request, res: Response, next: NextFunction
             error.message
         );
     });
-}, function (req: Request, res: Response, next: NextFunction) {
+});
 
-    getHash(req.body.password).then((handleRejected: any) => {
-        res.status(400).json({
-            Message: "Hashing Error",
-            Stack: handleRejected})
-    }, (handleFulfilled: string) => {
-        res.locals.hashPass = handleFulfilled;
-        next()
-    });
-}, function (res: Response) {
-
+// Insert jashed password into database.
+router.use((res: Response, next: NextFunction) => {
     const uid = res.locals.userId;
     const password = res.locals.hashPass;
     insertPasswordHash(uid, password).then((handleFulfilled : any) => {
-        res.status(200).json({
-            Message: "User Added Successfully.",
-            Detail: handleFulfilled
-        });
+        next();
     }).catch((error: any) => {
         res.status(400).json({
             Message: "Hashing Password Error", 
             Stack: error
         });
+    });
+});
+
+// Respond 200 on successfull user creation.
+router.post('/', (res: Response) => {
+    res.status(200).json({
+        Message: "User Added Successfully.",
+        Detail: res.locals.user.userId
     });
 });
 

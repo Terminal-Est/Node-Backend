@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column } from "typeorm";
 
-@Entity({schema: "progprojdb"})
+@Entity()
 export class Password {
     @PrimaryColumn()
     userId: string;

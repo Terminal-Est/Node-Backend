@@ -97,4 +97,8 @@ async function userLogin(userId : string, password : string) {
     });
 }
 
-module.exports = { getAuthJWT, verifyToken, getRSAKeypairs, updateJWKendpoint, userLogin };
+export { getAuthJWT, 
+    verifyToken, 
+    getRSAKeypairs, 
+    updateJWKendpoint, 
+    userLogin };

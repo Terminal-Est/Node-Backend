@@ -1,16 +1,17 @@
+// Middleware routes for validating JWTS.
 import { NextFunction, Request, Response } from "express";
-var security = require('../controllers/security')
-var logFile = require('../utils/logging')
+import { verifyToken, getAuthJWT } from "../controllers/security";
+var logFile = require('../utils/logging');
 
 // TODO: Thorough unit testing to validate proper rotation mechanisms.
 // TODO: Add fault codes for front end.
 // First validate user JWT, if any error occours, send appropriate repsonse.
 // These may be split off into independent routes later if independent JWT validation is required.
-const validateJWT = function(req : Request, res : Response, next : NextFunction) {
+const validateJWT = (req : Request, res : Response, next : NextFunction) => {
     const jwt = req.headers.authorization;
     const jwk1 = req.app.get('jwk1');
     const jwk2 = req.app.get('jwk2');
-    security.verifyToken(jwt, jwk1, jwk2).then((handleFulfilled : any) => {
+    verifyToken(jwt, jwk1, jwk2).then((handleFulfilled : any) => {
         const payload = handleFulfilled.payload;
         res.locals.uid = payload.sub;
         next();
@@ -30,7 +31,7 @@ const validateJWT = function(req : Request, res : Response, next : NextFunction)
 
 // TODO: Add fault codes for front end.
 // After validiation, issue new JWT. 
-const issueJWT = function(req: Request, res: Response, next: NextFunction) {
+const issueJWT = (req: Request, res: Response, next: NextFunction) => {
     const uid = res.locals.uid;
     var jwk;
     var keySet;
@@ -44,7 +45,7 @@ const issueJWT = function(req: Request, res: Response, next: NextFunction) {
         jwk = req.app.get('jwk1');
         kid = jwk.kid;
     }
-    security.getAuthJWT(uid, keySet.private, kid).then((handleFulfilled : any) => {
+    getAuthJWT(uid, keySet.private, kid).then((handleFulfilled : any) => {
         res.locals.jwt = handleFulfilled;
         next();  
     }, (handleRejected : any) => {

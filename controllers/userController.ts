@@ -1,21 +1,36 @@
-import { AppDataSource } from "../data/data-source";
+import { UserDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
+import { validate } from "class-validator";
+import { PasswordValid } from "../data/entity/passwordValid";
 var bcrypt = require('bcrypt');
 
 // Get user info from user table.
 // TODO: Testing.
 async function getUser(userId: string) {
-    return await AppDataSource.getRepository(User)
+    return await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
         .where("user.userId = :id", {id: userId})
         .getOne();
 }
 
+async function validatePassword(password: string) {
+    var passwordValid = new PasswordValid();
+    passwordValid.password = password;
+    var errors = await validate(passwordValid);
+    return new Promise(function(resolve, reject) {
+        if (errors.length > 0) {
+            return reject(errors);
+        } else {
+            return resolve(true)
+        }
+    });
+}
+
 // Get user info from password table.
 // TODO: Testing.
 async function getUserPassword(userId: string) {
-    return await AppDataSource.getRepository(Password)
+    return await UserDataSource.getRepository(Password)
         .createQueryBuilder("password")
         .where("password.userId = :id", {id: userId})
         .getOne();
@@ -23,7 +38,7 @@ async function getUserPassword(userId: string) {
 
 // TODO: Testing and comments.
 async function insertPasswordHash(userId: string, hashPass: string) {
-    return await AppDataSource.createQueryBuilder()
+    return await UserDataSource.createQueryBuilder()
         .insert()
         .into(Password)
         .values([
@@ -34,7 +49,7 @@ async function insertPasswordHash(userId: string, hashPass: string) {
 
 // TODO: Testing and comments.
 async function updatePasswordHash(userId: string, hashPass: string) {
-    return await AppDataSource.createQueryBuilder()
+    return await UserDataSource.createQueryBuilder()
         .update(Password)
         .set({ passHash: hashPass })
         .where("userId = :id", {id: userId})
@@ -47,22 +62,49 @@ async function getHash(pass: string) {
     return new Promise (function(reject, resolve) {
         const saltRounds = 10;
         bcrypt.genSalt(saltRounds, function(error: any, salt: any) {
-            if (error) return reject(error)
+            if (error) {
+                return reject(error);
+            }
             bcrypt.hash(pass, salt, function(error: any, hash: any) {
-                if (error) return reject (error)
-                return resolve(hash);
+                if (error) {
+                    return reject(error);
+                }
+                else {
+                    return resolve(hash);
+                }
             })
         })
     });
 }
 
-// TODO Testing and comments.
-async function createUser(userId: string, admin: boolean, auth: boolean, userName: string) {
-    return await AppDataSource.createQueryBuilder()
+async function validateUser(user: User) {
+    const errors = await validate(user)
+    return new Promise(function(resolve, reject) {
+        if (errors.length > 0) {
+            return reject(errors);
+        } else {
+            return resolve(true)
+        }
+    });
+}
+
+// Added data validation for creating users returns 400 and an error
+// for the front end.
+async function createUser(user: User) {
+    return await UserDataSource.createQueryBuilder()
         .insert()
         .into(User)
         .values([
-            { userId: userId, admin: admin, auth: auth, username: userName }
+            { 
+                userId: user.userId, 
+                admin: user.admin, 
+                auth: user.auth, 
+                username: user.username,
+                address: user.address,
+                city: user.city,
+                state: user.state,
+                postcode: user.postcode
+            }
         ])
         .printSql()
         .execute();
@@ -70,16 +112,18 @@ async function createUser(userId: string, admin: boolean, auth: boolean, userNam
 
 // TODO Testing and comments.
 async function setUserAthenticated(userId: string, auth: boolean) {
-    return await AppDataSource.createQueryBuilder()
+    return await UserDataSource.createQueryBuilder()
         .update(User)
         .set({ auth: auth })
         .where("userId = :id", {id: userId})
         .execute();
 }
 
-module.exports = { getUser,
+export { getUser,
     insertPasswordHash,
     updatePasswordHash,
     getHash, 
     createUser, 
-    setUserAthenticated }; 
+    setUserAthenticated,
+    validateUser,
+    validatePassword }; 

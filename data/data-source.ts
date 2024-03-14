@@ -8,22 +8,22 @@ var logging = require('../utils/logging');
 // at production deployment.
 export const UserDataSource = new DataSource({
     type: "mssql",
-    host: "progprojdb.database.windows.net",
+    host: "programproj.database.windows.net",
     port: 1433,
     username: "app_user_login",
     password: "Modern_Skates_054",
-    database: "ProgProjDB",
+    database: "grenntickpii",
     entities: [User, Password],
     logging: ["error", "query", "schema"]
 })
 
 export const AppDataSource = new DataSource({
     type: "mssql",
-    host: "progprojdb.database.windows.net",
+    host: "programproj.database.windows.net",
     port: 1433,
     username: "app_data_login",
     password: "Distinct_Iguana_670",
-    database: "ProgProjAppDb",
+    database: "greentikdata",
     logging: ["error", "query", "schema"]
 });
 

@@ -27,6 +27,7 @@ app.use('/addUser', addUserRouter);
 app.use('/login', loginRouter);
 app.use('/.well-known', jwksRouter);
 app.use('/test', testRouter);
+app.set('view engine', 'jade');
 app.set('switchRSA', true);
 
 // Init RSA keypairs.

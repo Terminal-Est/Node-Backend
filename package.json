@@ -6,8 +6,7 @@
     "build": "npx tsc",
     "nodemon": "npx nodemon ./bin/www.ts",
     "start": "node ./bin/www.ts",
-    "test": "jest",
-    "migrate": "typeorm migration:run -d ./dist/data/data-source.js"
+    "test": "jest"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
@@ -15,6 +14,7 @@
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
+    "dotenv": "^16.4.5",
     "express": "~4.16.1",
     "jose": "^4.12.0",
     "jsonwebtoken": "^9.0.0",

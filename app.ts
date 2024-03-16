@@ -21,13 +21,11 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/addUser', addUserRouter);
 app.use('/login', loginRouter);
 app.use('/.well-known', jwksRouter);
 app.use('/test', testRouter);
-app.set('view engine', 'jade');
 app.set('switchRSA', true);
 
 // Init RSA keypairs.

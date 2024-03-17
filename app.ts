@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use('/', indexRouter);
-app.use('/addUser', addUserRouter);
+app.post('/user', addUserRouter);
 app.use('/login', loginRouter);
 app.use('/.well-known', jwksRouter);
 app.use('/test', testRouter);

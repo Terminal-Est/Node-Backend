@@ -4,7 +4,7 @@ var router = express.Router();
 var fs = require('fs');
 
 router.get('/jwks', (req: Request, res: Response, next: NextFunction) => {
-    const keys = fs.readFileSync('./public/keys.json');
+    const keys = fs.readFileSync('./public/Keys.json');
     const keyString = keys.toString();
     const keysJson = JSON.parse(keyString);
     res.send(keysJson);

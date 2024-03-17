@@ -7,11 +7,6 @@ var cron = require('node-cron');
 var security = require('./controllers/security');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
-var indexRouter = require('./routes/index');
-var addUserRouter = require('./routes/addUser');
-var loginRouter = require('./routes/login');
-var jwksRouter = require('./routes/jwks');
-var testRouter = require('./routes/debug');
 
 var app = express();
 
@@ -21,11 +16,40 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use('/', indexRouter);
+
+// Get index router.
+var indexRouter = require('./routes/index');
+app.get('/', indexRouter);
+
+// Post route for adding User.
+var addUserRouter = require('./routes/addUser');
 app.post('/user', addUserRouter);
-app.use('/login', loginRouter);
-app.use('/.well-known', jwksRouter);
-app.use('/test', testRouter);
+
+// Put route for updating User.
+var updateUserRouter = require('./routes/updateUser');
+app.put('/user', updateUserRouter);
+
+// Get route for getting a User.
+var getUserRouter = require('./routes/getUser');
+app.get('/user', getUserRouter);
+
+// Delete route for deleting a User.
+var deleteUserRouter = require('./routes/deleteUser');
+app.delete('/user', deleteUserRouter);
+
+// Get login route. Returns a JWT.
+var loginRouter = require('./routes/login');
+app.get('/login', loginRouter);
+
+// Get router for JWKS.
+var jwksRouter = require('./routes/jwks');
+app.get('/.well-known/jwks', jwksRouter);
+
+// Test route for dev.
+var testRouter = require('./routes/debug');
+app.get('/test', testRouter);
+
+// Set app key switchRSA to true.
 app.set('switchRSA', true);
 
 // Init RSA keypairs.

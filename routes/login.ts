@@ -70,7 +70,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
  * 
  * First validates user against database, if user is valid, respond with JWT.
  */
-router.get('/', (req: Request, res: Response) => {
+router.use((req: Request, res: Response) => {
 
     const jwt = res.locals.jwt;
 

@@ -120,6 +120,7 @@ async function setUserAthenticated(userId: string, auth: boolean) {
 }
 
 export { getUser,
+    getUserPassword,
     insertPasswordHash,
     updatePasswordHash,
     getHash, 

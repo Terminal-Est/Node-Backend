@@ -1,4 +1,5 @@
-import { getUser } from "../controllers/userController";
+import { getUserPassword } from "../controllers/userController";
+import { Password } from "../data/entity/password";
 import { logToFile } from "../utils/logging";
 import { writeFileSync, readFileSync } from "fs";
 var jose = require('jose');
@@ -77,13 +78,13 @@ async function userLogin(userId : string, password : string) {
     userId = userId;
     password = password;
     var invalidUser = false;
-    const res = await getUser(userId).then((data : any) => {
+    const res = await getUserPassword(userId).then((data : Password | null) => {
         return data;
     });
-    if (res[0] == null) {
+    if (res == null) {
         invalidUser = true;
     } else {
-        var compResult = await bcrypt.compare(password, res[0].pass_hash);
+        var compResult = await bcrypt.compare(password, res.passHash);
     };
     return new Promise(function(resolve, reject) {
         if (invalidUser) {

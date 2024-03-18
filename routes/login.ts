@@ -45,7 +45,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 router.use((req: Request, res: Response, next: NextFunction) => {
     
     const uid = res.locals.uid;
-    const keySet = res.locals.keysSet;
+    const keySet = res.locals.keySet;
     const kid = res.locals.kid;
 
     getAuthJWT(uid, keySet.private, kid).then((handleFulfilled: any ) => {

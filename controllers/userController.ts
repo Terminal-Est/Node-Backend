@@ -5,12 +5,19 @@ import { validate } from "class-validator";
 import { PasswordValid } from "../data/entity/passwordValid";
 var bcrypt = require('bcrypt');
 
-// Get user info from user table.
+// Get user info from user table from email address.
 // TODO: Testing.
-async function getUser(userId: string) {
+async function getUserEmail(email: string) {
     return await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
-        .where("user.userId = :id", {id: userId})
+        .where("user.email = :id", {id: email})
+        .getOne();
+}
+
+async function getUserUUID(uuid: string) {
+    return await UserDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .where("user.uuid = :id", {id: uuid})
         .getOne();
 }
 
@@ -18,7 +25,7 @@ async function validatePassword(password: string) {
     var passwordValid = new PasswordValid();
     passwordValid.password = password;
     var errors = await validate(passwordValid);
-    return new Promise(function(resolve, reject) {
+    return new Promise<boolean>(function(resolve, reject) {
         if (errors.length > 0) {
             return reject(errors);
         } else {
@@ -29,37 +36,37 @@ async function validatePassword(password: string) {
 
 // Get user info from password table.
 // TODO: Testing.
-async function getUserPassword(userId: string) {
+async function getUserPassword(uuid: string) {
     return await UserDataSource.getRepository(Password)
         .createQueryBuilder("password")
-        .where("password.userId = :id", {id: userId})
+        .where("password.uuid = :id", {id: uuid})
         .getOne();
 }
 
 // TODO: Testing and comments.
-async function insertPasswordHash(userId: string, hashPass: string) {
+async function insertPasswordHash(uuid: string, hashPass: string) {
     return await UserDataSource.createQueryBuilder()
         .insert()
         .into(Password)
         .values([
-            { userId: userId, passHash: hashPass }
+            { uuid: uuid, passHash: hashPass }
         ])
         .execute();
 }
 
 // TODO: Testing and comments.
-async function updatePasswordHash(userId: string, hashPass: string) {
+async function updatePasswordHash(uuid: string, hashPass: string) {
     return await UserDataSource.createQueryBuilder()
         .update(Password)
         .set({ passHash: hashPass })
-        .where("userId = :id", {id: userId})
+        .where("uuid = :id", {id: uuid})
         .execute();
 }
 
 // 
 // TODO: Design and carry out correct testing.
 async function getHash(pass: string) {
-    return new Promise (function(reject, resolve) {
+    return new Promise(function(reject, resolve) {
         const saltRounds = 10;
         bcrypt.genSalt(saltRounds, function(error: any, salt: any) {
             if (error) {
@@ -79,7 +86,7 @@ async function getHash(pass: string) {
 
 async function validateUser(user: User) {
     const errors = await validate(user)
-    return new Promise(function(resolve, reject) {
+    return new Promise<boolean>(function(resolve, reject) {
         if (errors.length > 0) {
             return reject(errors);
         } else {
@@ -96,7 +103,6 @@ async function createUser(user: User) {
         .into(User)
         .values([
             { 
-                userId: user.userId, 
                 admin: user.admin, 
                 auth: user.auth, 
                 username: user.username,
@@ -119,7 +125,8 @@ async function setUserAthenticated(userId: string, auth: boolean) {
         .execute();
 }
 
-export { getUser,
+export { getUserEmail,
+    getUserUUID,
     getUserPassword,
     insertPasswordHash,
     updatePasswordHash,

@@ -1,12 +1,14 @@
-import { Entity, PrimaryColumn, Column } from "typeorm";
-import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString } from "class-validator";
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDate } from "class-validator";
 
 /**
  * User entity class. TypeORM class with validation decorators.
  */
 @Entity()
 export class User {
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn()
+    uuid: string;
+
     @IsEmail({ 
     }, {
         message: "Invalid E-Mail address."
@@ -17,7 +19,7 @@ export class User {
     @Length(0, 250, {
         message: "E-mail address cannot exceed 250 characters."
     })
-    userId: string;
+    email: string;
 
     @Column()
     @IsBooleanString({
@@ -42,6 +44,15 @@ export class User {
 
     @Column()
     @IsNotEmpty({
+        message: "DOB field cannot be empty."
+    })
+    @IsDate({
+        message: "DOB is not a valid date."
+    })
+    dob: string;
+
+    @Column()
+    @IsNotEmpty({
         message: "Address field cannot be empty."
     })
     address: string;
@@ -50,8 +61,8 @@ export class User {
     @IsNotEmpty({
         message: "City field cannot be empty."
     })
-    @Length(3, 3, {
-        message: "City must be 3 characters."
+    @Length(3, 50, {
+        message: "City must be between 3 and 50 characters."
     })
     city: string;
 

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
 import { createUser, validatePassword, validateUser, insertPasswordHash, getHash } from "../controllers/userController";
+import { ValidationError } from "class-validator";
 var express = require('express');
 var router = express.Router();
 
@@ -51,20 +52,20 @@ var router = express.Router();
 router.use((req: Request, res: Response, next: NextFunction) => {
 
     var user = new User();
-    user.userId = req.body.userId;
+    user.email = req.body.email;
     user.admin = req.body.admin;
     user.auth = req.body.auth;
     user.username = req.body.username;
+    user.dob = req.body.dob;
     user.address = req.body.address;
     user.city = req.body.city;
     user.state = req.body.state;
     user.postcode = req.body.postcode;
 
-    res.locals.user = user;
-
-    validateUser(user).then((handleFullfilled: any) => {
+    validateUser(user).then((handleFullfilled: boolean) => {
+            res.locals.user = user;
             next();
-    }, (handleRejected: any) => {
+    }, (handleRejected: ValidationError) => {
         res.status(400).json({
             Message: "Invalid User Details",
             Detail: handleRejected
@@ -75,9 +76,9 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 // Validate password.
 router.use((req: Request, res: Response, next: NextFunction) => {
 
-    validatePassword(req.body.password).then((handleFullfilled: any) => {
+    validatePassword(req.body.password).then((handleFullfilled: boolean) => {
         next();
-    }, (handleRejected: any) => {
+    }, (handleRejected: ValidationError) => {
         res.status(400).json({
             Message: "Invalid User Details",
             Detail: handleRejected
@@ -105,7 +106,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
     createUser(user)
         .then((handleFulfilled: InsertResult) => {
-        res.locals.userId = handleFulfilled.identifiers[0].userId;
+        res.locals.uuid = handleFulfilled.identifiers[0].uuid;
         next();
     }).catch((error: any) => { 
         res.status(400).json(
@@ -117,9 +118,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 // Insert jashed password into database. If successful respond 200 
 // with the user ID.
 router.use((req: Request, res: Response, next: NextFunction) => {
-    const uid = res.locals.userId;
+
+    const uuid = res.locals.uuid;
     const password = res.locals.hashPass;
-    insertPasswordHash(uid, password).then((handleFulfilled : any) => {
+
+    insertPasswordHash(uuid, password).then((handleFulfilled : any) => {
         next();
     }).catch((error: any) => {
         res.status(400).json({

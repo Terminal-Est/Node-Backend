@@ -21,6 +21,8 @@ app.use(cookieParser());
 var indexRouter = require('./routes/index');
 app.get('/', indexRouter);
 
+// USER routes. Actions on TypeORM user entity.
+// -------------------------------------------- 
 // Post route for adding User.
 var addUserRouter = require('./routes/addUser');
 app.post('/user', addUserRouter);

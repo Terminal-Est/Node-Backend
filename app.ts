@@ -4,7 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cron = require('node-cron');
-var security = require('./controllers/security');
+var security = require('./controllers/securityController');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 
@@ -64,7 +64,6 @@ function getKeyPair1() {
         app.set('jwk1', handleFulfilled.jwk);
         app.set('onKey2', false);
         security.updateJWKendpoint(handleFulfilled.jwk, 0);
-        fileLogging.logToFile('KeySet1 updated');
     }).catch((error: any) => {
         fileLogging.logToFile(error);
     });
@@ -76,7 +75,6 @@ function getKeyPair2() {
         app.set('jwk2', handleFulfilled.jwk);
         app.set('onKey2', true);
         security.updateJWKendpoint(handleFulfilled.jwk, 1);
-        fileLogging.logToFile('KeySet2 updated');
     }).catch((error: any) => {
         fileLogging.logToFile(error);
     });

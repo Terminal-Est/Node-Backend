@@ -6,6 +6,8 @@ import { ValidationError } from "class-validator";
 var express = require('express');
 var router = express.Router();
 
+//TODO: Clean up documentation.
+
 /**
  * Request parameters to supplied in BODY.
  * 
@@ -104,6 +106,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
+    console.log(user.dob);
+
     createUser(user)
         .then((handleFulfilled: InsertResult) => {
         res.locals.uuid = handleFulfilled.identifiers[0].uuid;
@@ -132,7 +136,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     });
     res.status(200).json({
         Message: "User Added Successfully.",
-        Detail: res.locals.user.userId
+        Detail: res.locals.user.email
     });
 });
 

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDate } from "class-validator";
+import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDateString } from "class-validator";
 
 /**
  * User entity class. TypeORM class with validation decorators.
@@ -7,8 +7,9 @@ import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDate } fr
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
-    uuid: string;
+    uuid: number;
 
+    @Column()
     @IsEmail({ 
     }, {
         message: "Invalid E-Mail address."
@@ -46,7 +47,10 @@ export class User {
     @IsNotEmpty({
         message: "DOB field cannot be empty."
     })
-    @IsDate({
+    @IsDateString({
+        strict: false,
+        strictSeparator: false
+    },{
         message: "DOB is not a valid date."
     })
     dob: string;

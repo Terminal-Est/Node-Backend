@@ -36,7 +36,7 @@ async function validatePassword(password: string) {
 
 // Get user info from password table.
 // TODO: Testing.
-async function getUserPassword(uuid: string) {
+async function getUserPassword(uuid: number) {
     return await UserDataSource.getRepository(Password)
         .createQueryBuilder("password")
         .where("password.uuid = :id", {id: uuid})
@@ -44,7 +44,7 @@ async function getUserPassword(uuid: string) {
 }
 
 // TODO: Testing and comments.
-async function insertPasswordHash(uuid: string, hashPass: string) {
+async function insertPasswordHash(uuid: number, hashPass: string) {
     return await UserDataSource.createQueryBuilder()
         .insert()
         .into(Password)
@@ -55,7 +55,7 @@ async function insertPasswordHash(uuid: string, hashPass: string) {
 }
 
 // TODO: Testing and comments.
-async function updatePasswordHash(uuid: string, hashPass: string) {
+async function updatePasswordHash(uuid: number, hashPass: string) {
     return await UserDataSource.createQueryBuilder()
         .update(Password)
         .set({ passHash: hashPass })
@@ -103,9 +103,11 @@ async function createUser(user: User) {
         .into(User)
         .values([
             { 
+                email: user.email,
                 admin: user.admin, 
                 auth: user.auth, 
                 username: user.username,
+                dob: user.dob,
                 address: user.address,
                 city: user.city,
                 state: user.state,
@@ -117,11 +119,11 @@ async function createUser(user: User) {
 }
 
 // TODO Testing and comments.
-async function setUserAthenticated(userId: string, auth: boolean) {
+async function setUserAthenticated(email: string, auth: boolean) {
     return await UserDataSource.createQueryBuilder()
         .update(User)
         .set({ auth: auth })
-        .where("userId = :id", {id: userId})
+        .where("email = :id", {id: email})
         .execute();
 }
 

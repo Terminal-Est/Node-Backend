@@ -74,7 +74,7 @@ export class User {
     @IsNotEmpty({
         message: "State field cannot be empty."
     })
-    @Length(3, 3, {
+    @Length(2, 3, {
         message: "State must be 3 characters."
     })
     state: string;

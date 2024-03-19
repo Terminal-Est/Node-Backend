@@ -79,6 +79,7 @@ async function userLogin(email: string, password : string) {
     var userPwd: Password | null;
     var userExists: boolean = false;
     var passwordValid: boolean = false;
+    var uuid: string;
 
     const user: User | null = await getUserEmail(email).then((data : User | null) => {
         return data;
@@ -91,6 +92,7 @@ async function userLogin(email: string, password : string) {
 
         if (userPwd != null) {  
             userExists = true;
+            uuid = userPwd.uuid.toString();
             passwordValid = await compare(password, userPwd.passHash);
         }
     }
@@ -103,7 +105,7 @@ async function userLogin(email: string, password : string) {
             return reject("Invalid Password");
 
         } else {
-            return resolve("Login Success!")
+            return resolve(uuid);
         }
     });
 }

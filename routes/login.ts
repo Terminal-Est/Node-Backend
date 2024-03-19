@@ -26,7 +26,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         res.locals.jwk = jwk;
         res.locals.keySet = keySet;
         res.locals.kid = kid;
-        
+        res.locals.uuid = handleFulfilled;
+
         next();
        
     }, (handleRejected: string) => {
@@ -77,6 +78,7 @@ router.use((req: Request, res: Response) => {
 
     res.status(200).json({
         Message: "Login Successful",
+        uuid: res.locals.uuid,
         Token: jwt
     }); 
 });

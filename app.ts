@@ -33,11 +33,11 @@ app.get('/', indexRouter);
 // -------------------------------------------- 
 // Post route for adding User.
 var addUserRouter = require('./routes/addUser');
-app.post('/user', addUserRouter);
+app.post('/user', fieldsOnly, addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', updateUserRouter);
+app.put('/user', fieldsOnly, updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');
@@ -45,7 +45,7 @@ app.get('/user', getUserRouter);
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/deleteUser');
-app.delete('/user', deleteUserRouter);
+app.delete('/user', fieldsOnly, deleteUserRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

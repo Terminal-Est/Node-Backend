@@ -1,8 +1,10 @@
-import { getUser } from "../controllers/userController";
+import { getUserEmail, getUserPassword } from "./userController";
+import { Password } from "../data/entity/password";
+import { User } from "../data/entity/user";
 import { logToFile } from "../utils/logging";
 import { writeFileSync, readFileSync } from "fs";
 var jose = require('jose');
-var bcrypt = require('bcrypt');
+import { compare } from 'bcrypt';
 
 // Return RSA Keypair.
 function getRSAKeypairs() { 
@@ -53,9 +55,9 @@ function getAuthJWT(email : string, key : any, kid : any) {
         .setExpirationTime('30m')
         .sign(privateKey)
         .then((handleFulfilled : any) => { 
-            resolve(handleFulfilled); 
+            return resolve(handleFulfilled); 
         }, (handleRejected : any) => {
-            reject(handleRejected);
+            return reject(handleRejected);
         })
     })
 }
@@ -73,28 +75,41 @@ function updateJWKendpoint(jwk : any, jwkToUpdate : any) {
 }
 
 // Function to validate user details against database.
-async function userLogin(userId : string, password : string) {
-    userId = userId;
-    password = password;
-    var invalidUser = false;
-    const res = await getUser(userId).then((data : any) => {
+async function userLogin(email: string, password : string) {
+    var userPwd: Password | null;
+    var userExists: boolean = false;
+    var passwordValid: boolean = false;
+    var uuid: string;
+
+    const user: User | null = await getUserEmail(email).then((data : User | null) => {
         return data;
     });
-    if (res[0] == null) {
-        invalidUser = true;
-    } else {
-        var compResult = await bcrypt.compare(password, res[0].pass_hash);
-    };
-    return new Promise(function(resolve, reject) {
-        if (invalidUser) {
-            reject({message: "Invalid user."});
-        } else if (!invalidUser && compResult) {
-            resolve({login: true});
-        } else if (!invalidUser && !compResult) {
-            reject({message: "Invalid password."});
+    
+    if (user != null) {
+        var userPwd: Password | null = await getUserPassword(user.uuid).then((data: Password | null) =>{
+            return data;
+        });
+
+        if (userPwd != null) {  
+            userExists = true;
+            uuid = userPwd.uuid.toString();
+            passwordValid = await compare(password, userPwd.passHash);
+        }
+    }
+
+    return new Promise<string>(function(resolve, reject) {
+        if (!userExists){
+            return reject("Invalid User.");
+
+        } else if (userExists && !passwordValid) {
+            return reject("Invalid Password");
+
+        } else {
+            return resolve(uuid);
         }
     });
 }
+
 
 export { getAuthJWT, 
     verifyToken, 

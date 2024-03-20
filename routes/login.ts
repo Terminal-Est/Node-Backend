@@ -1,14 +1,16 @@
 import { NextFunction, Request, Response } from "express";
-import { userLogin, getAuthJWT } from "../controllers/security";
+import { userLogin, getAuthJWT } from "../controllers/securityController";
 import { logToFile } from "../utils/logging";
 var express = require('express');
 var router = express.Router();
 
 // First validate user against database.
 router.use((req: Request, res: Response, next: NextFunction) => {
-    const uid = req.body.userId;
+
+    const email = req.body.email;
     const pass = req.body.password;
-    userLogin(uid, pass).then((handleFulfilled: any) => {
+
+    userLogin(email, pass).then((handleFulfilled: any) => {
        
         var jwk;
         var keySet;
@@ -22,13 +24,15 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             jwk = req.app.get('jwk1');
             kid = jwk.kid;
         }
-        res.locals.uid = uid;
+        res.locals.email = email;
         res.locals.jwk = jwk;
         res.locals.keySet = keySet;
         res.locals.kid = kid;
+        res.locals.uuid = handleFulfilled;
+
         next();
        
-    }, (handleRejected: any) => {
+    }, (handleRejected: string) => {
         res.status(400).json({
             Message: "Login Failed",
             Detail: handleRejected
@@ -44,11 +48,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 // Next generate JWT.
 router.use((req: Request, res: Response, next: NextFunction) => {
     
-    const uid = res.locals.uid;
-    const keySet = res.locals.keysSet;
+    const email = res.locals.email;
+    const keySet = res.locals.keySet;
     const kid = res.locals.kid;
 
-    getAuthJWT(uid, keySet.private, kid).then((handleFulfilled: any ) => {
+    getAuthJWT(email, keySet.private, kid).then((handleFulfilled: any ) => {
         res.locals.jwt = handleFulfilled;
         next(); 
     }, (handleRejected: any) => {
@@ -70,12 +74,13 @@ router.use((req: Request, res: Response, next: NextFunction) => {
  * 
  * First validates user against database, if user is valid, respond with JWT.
  */
-router.get('/', (req: Request, res: Response) => {
+router.use((req: Request, res: Response) => {
 
     const jwt = res.locals.jwt;
 
     res.status(200).json({
         Message: "Login Successful",
+        uuid: res.locals.uuid,
         Token: jwt
     }); 
 });

@@ -3,7 +3,7 @@ var express = require('express');
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
+router.use((req: Request, res: Response, next: NextFunction) => {
     res.sendFile('index.html', {
         root: './public'
     });

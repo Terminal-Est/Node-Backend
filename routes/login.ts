@@ -6,8 +6,10 @@ var router = express.Router();
 
 // First validate user against database.
 router.use((req: Request, res: Response, next: NextFunction) => {
+
     const email = req.body.email;
     const pass = req.body.password;
+
     userLogin(email, pass).then((handleFulfilled: any) => {
        
         var jwk;

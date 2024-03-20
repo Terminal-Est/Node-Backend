@@ -52,7 +52,7 @@ var router = express.Router();
 
 // Validate user first.
 router.use((req: Request, res: Response, next: NextFunction) => {
-
+    
     var user = new User();
     user.email = req.body.email;
     user.admin = req.body.admin;

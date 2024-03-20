@@ -14,7 +14,7 @@ export const UserDataSource = new DataSource({
     password: "Modern_Skates_054",
     database: "grenntickpii",
     entities: [User, Password],
-    logging: ["error", "query", "schema"]
+    logging: ["error", "schema"]
 })
 
 export const AppDataSource = new DataSource({
@@ -24,7 +24,7 @@ export const AppDataSource = new DataSource({
     username: "app_data_login",
     password: "Distinct_Iguana_670",
     database: "greentikdata",
-    logging: ["error", "query", "schema"]
+    logging: ["error", "schema"]
 });
 
 AppDataSource.initialize()

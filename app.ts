@@ -3,13 +3,21 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var multer = require('multer');
 var cron = require('node-cron');
+var bodyParser = require('body-parser');
 var security = require('./controllers/securityController');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 
+// Multer for pulling form data from multipart/form-data
+const fieldsOnly = multer().none();
 var app = express();
-
+// for parsing application/json
+app.use(bodyParser.json()); 
+// for parsing application/xwww-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true })); 
+// app logger
 app.use(logger('dev'));
 app.use(express.json());
 // cors enabled for all routes for now.
@@ -41,7 +49,7 @@ app.delete('/user', deleteUserRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');
-app.get('/login', loginRouter);
+app.post('/login', fieldsOnly, loginRouter);
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');

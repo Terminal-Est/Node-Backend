@@ -1,6 +1,6 @@
 // Middleware routes for validating JWTS.
 import { NextFunction, Request, Response } from "express";
-import { verifyToken, getAuthJWT } from "../controllers/security";
+import { verifyToken, getAuthJWT } from "../controllers/securityController";
 var logFile = require('../utils/logging');
 
 // TODO: Thorough unit testing to validate proper rotation mechanisms.

@@ -3,3 +3,4 @@ node_modules/
 /utils/debug.log
 dist/
 .env
+uploads/

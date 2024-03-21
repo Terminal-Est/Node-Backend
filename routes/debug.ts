@@ -3,7 +3,7 @@ var express = require('express');
 var router = express.Router();
 
 router.use((req: Request, res : Response, next: NextFunction) => { 
-    res.send("Hello, World");
+    res.send(req.file?.filename);
 });
 
 module.exports = router;

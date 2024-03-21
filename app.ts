@@ -10,8 +10,21 @@ var security = require('./controllers/securityController');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 
+// Multer disk storage.
+const storage = multer.diskStorage({
+    destination: function(req: any, file: any, cb: any) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req: any, file: any, cb: any) {
+        cb(null, file.originalname);
+    }
+});
+
 // Multer for pulling form data from multipart/form-data
 const fieldsOnly = multer().none();
+// Multer for temp storage of video uploads.
+const uploads = multer({ storage: storage });
+
 var app = express();
 // for parsing application/json
 app.use(bodyParser.json()); 
@@ -57,7 +70,7 @@ app.get('/.well-known/jwks', jwksRouter);
 
 // Test route for dev.
 var testRouter = require('./routes/debug');
-app.get('/test', testRouter);
+app.post('/test', uploads.single('test'), testRouter);
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);

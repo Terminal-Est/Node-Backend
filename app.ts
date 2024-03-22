@@ -13,10 +13,11 @@ var jwtHandler = require('./routes/validateJWT');
 // Multer disk storage.
 const storage = multer.diskStorage({
     destination: function(req: any, file: any, cb: any) {
-        cb(null, 'uploads/');
+        cb(null, './videos');
     },
     filename: function (req: any, file: any, cb: any) {
-        cb(null, file.originalname);
+        const tstamp: string = Date.now().toString();
+        cb(null, file.fieldname + "_" + tstamp + path.extname(file.originalname));
     }
 });
 

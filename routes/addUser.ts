@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
 import { createUser, validatePassword, validateUser, insertPasswordHash, getHash } from "../controllers/userController";
+import { createBlobStorageContainer } from "../controllers/fileController";
+import { logToFile } from "../utils/logging";
 import { ValidationError } from "class-validator";
 var express = require('express');
 var router = express.Router();
@@ -137,6 +139,21 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     res.status(200).json({
         Message: "User Added Successfully.",
         Detail: res.locals.user.email
+    });
+});
+
+// Add a user container for video storage.
+router.use((req: Request, res: Response, next: NextFunction) => {
+
+    const uuid: string = res.locals.uuid;
+
+    createBlobStorageContainer(uuid).then((responseId) => {
+        logToFile("User: " + uuid + " - " + "Container resid: " + responseId);
+    }).catch((err) => {
+        res.status(400).json({
+            Message: "Error Adding Container.",
+            detail: err
+        })
     });
 });
 

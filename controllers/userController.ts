@@ -3,10 +3,10 @@ import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
 import { validate } from "class-validator";
 import { PasswordValid } from "../data/entity/passwordValid";
+import { Uuid } from "../data/entity/uuid";
 var bcrypt = require('bcrypt');
 
-// Get user info from user table from email address.
-// TODO: Testing.
+// Get user object from email address.
 async function getUserEmail(email: string) {
     return await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
@@ -14,6 +14,7 @@ async function getUserEmail(email: string) {
         .getOne();
 }
 
+// Get a user object based on UUID.
 async function getUserUUID(uuid: string) {
     return await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
@@ -21,6 +22,7 @@ async function getUserUUID(uuid: string) {
         .getOne();
 }
 
+// Validate user supplied password against class validator parameters.
 async function validatePassword(password: string) {
     var passwordValid = new PasswordValid();
     passwordValid.password = password;
@@ -34,8 +36,7 @@ async function validatePassword(password: string) {
     });
 }
 
-// Get user info from password table.
-// TODO: Testing.
+// Get user password hash based on UUID.
 async function getUserPassword(uuid: number) {
     return await UserDataSource.getRepository(Password)
         .createQueryBuilder("password")
@@ -54,7 +55,7 @@ async function insertPasswordHash(uuid: number, hashPass: string) {
         .execute();
 }
 
-// TODO: Testing and comments.
+// Update user password hash based in supplied UUID.
 async function updatePasswordHash(uuid: number, hashPass: string) {
     return await UserDataSource.createQueryBuilder()
         .update(Password)
@@ -64,7 +65,7 @@ async function updatePasswordHash(uuid: number, hashPass: string) {
 }
 
 // 
-// TODO: Design and carry out correct testing.
+// Get a password hash using bcrypt.
 async function getHash(pass: string) {
     return new Promise(function(reject, resolve) {
         const saltRounds = 10;
@@ -84,6 +85,7 @@ async function getHash(pass: string) {
     });
 }
 
+// Validate user details against class validator.
 async function validateUser(user: User) {
     const errors = await validate(user)
     return new Promise<boolean>(function(resolve, reject) {
@@ -95,8 +97,7 @@ async function validateUser(user: User) {
     });
 }
 
-// Added data validation for creating users returns 400 and an error
-// for the front end.
+// Create a user in PII database.
 async function createUser(user: User) {
     return await UserDataSource.createQueryBuilder()
         .insert()
@@ -114,11 +115,23 @@ async function createUser(user: User) {
                 postcode: user.postcode
             }
         ])
-        .printSql()
         .execute();
 }
 
-// TODO Testing and comments.
+// Insert Uuid into user data database.
+async function createDataUser(userId: Uuid) {
+    return await UserDataSource.createQueryBuilder()
+        .insert()
+        .into(Uuid)
+        .values([
+            { 
+                uuid: userId.uuid
+            }
+        ])
+        .execute();
+}
+
+// Set user authenticated based on supplied email.
 async function setUserAthenticated(email: string, auth: boolean) {
     return await UserDataSource.createQueryBuilder()
         .update(User)
@@ -133,7 +146,8 @@ export { getUserEmail,
     insertPasswordHash,
     updatePasswordHash,
     getHash, 
-    createUser, 
+    createUser,
+    createDataUser, 
     setUserAthenticated,
     validateUser,
     validatePassword }; 

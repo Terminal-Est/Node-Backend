@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDateString } from "class-validator";
+import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDateString, IsOptional } from "class-validator";
 
 /**
  * User entity class. TypeORM class with validation decorators.
@@ -23,15 +23,13 @@ export class User {
     email: string;
 
     @Column()
-    @IsBooleanString({
-        message: "Admin field must be a boolean value."
-    })
+    @IsOptional()
+    @IsBooleanString()
     admin: boolean;
    
     @Column()
-    @IsBooleanString({
-        message: "Auth field must be a boolean value."
-    })
+    @IsOptional()
+    @IsBooleanString()
     auth: boolean;
 
     @Column()

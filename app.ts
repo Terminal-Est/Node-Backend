@@ -81,8 +81,8 @@ var loginRouter = require('./routes/login');
 app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
-var testRouter = require('./routes/addVideo');
-app.post('/test', uploads.single('video'), testRouter);
+var addVideoRouter = require('./routes/addVideo');
+app.post('/video', uploads.single('video'), addVideoRouter);
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');

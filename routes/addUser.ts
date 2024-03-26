@@ -108,7 +108,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     const uuid: string = res.locals.uuid;
 
     try {
-        createBlobStorageContainer(uuid).then((responseId) => {
+        createBlobStorageContainer("u-" + uuid).then((responseId) => {
             logToFile("User: " + uuid + " - " + "Container resid: " + responseId);
             res.status(200).json({
                 Message: "User Added Successfully.",

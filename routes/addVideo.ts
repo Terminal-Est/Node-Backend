@@ -10,7 +10,7 @@ var router = express.Router();
 // Validate video data, if video data is ok, got to next function.
 router.use((req: Request, res : Response, next: NextFunction) => {
 
-    const timestamp = Date.now();
+    const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);
     var video = new Video()
     video.videoId = fileName;
@@ -37,7 +37,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     const fileName: string = String(req.file?.filename);
 
     try {
-        createBlobOnContainer(req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
+        createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
             unlink(file, (err) => {
                 if (err) {
                     res.status(400).json({

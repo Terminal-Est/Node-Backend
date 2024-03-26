@@ -28,6 +28,8 @@ async function createBlobStorageContainer(containerName: string) {
     }
 }
 
+
+
 // Delete a blob storage container.
 async function deleteBlobStorageContainer(containerName: string) {
     try {
@@ -78,6 +80,15 @@ async function createVideo(video: Video) {
             }
         ])
         .execute();
+}
+
+// Get an array of videos by user ID.
+async function getVideos(uuid: string) {
+        const videos = await AppDataSource.getRepository(Video)
+        .createQueryBuilder("video")
+        .where("video.uuid = :id", { id: uuid })
+        .getMany();
+        return videos;
 }
 
 export {

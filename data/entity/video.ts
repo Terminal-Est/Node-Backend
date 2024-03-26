@@ -35,5 +35,5 @@ export class Video {
 
     @Column()
     @IsNotEmpty()
-    timestamp: number;
+    timestamp: string;
 }

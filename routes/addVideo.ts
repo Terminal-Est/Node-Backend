@@ -10,6 +10,8 @@ var router = express.Router();
 // Validate video data, if video data is ok, got to next function.
 router.use((req: Request, res : Response, next: NextFunction) => {
 
+    console.log(req.body);
+
     const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);
     var video = new Video()

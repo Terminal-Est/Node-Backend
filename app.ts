@@ -13,7 +13,7 @@ var jwtHandler = require('./routes/validateJWT');
 // Multer disk storage.
 const storage = multer.diskStorage({
     fileFilter: function(req: any, file: any, cb: any) {
-        mimeTypeCheck(file, cb);
+        mimeTypeCheck(req, file, cb);
     },
     destination: function(req: any, file: any, cb: any) {
         cb(null, './videos');
@@ -25,9 +25,9 @@ const storage = multer.diskStorage({
 });
 
 // Check video mime types. Must be .mov or .mp4.
-function mimeTypeCheck(file: any, cb: any) {
+function mimeTypeCheck(req: any, file: any, cb: any) {
 
-    const mimetype: string = file.mimetype;
+    const mimetype: string = file.mimetype; 
 
     if (mimetype.toLowerCase() == "video/mp4" || mimetype.toLowerCase() == "video/quicktime") {
         cb(null, true);
@@ -84,13 +84,17 @@ app.post('/login', fieldsOnly, loginRouter);
 var addVideoRouter = require('./routes/addVideo');
 app.post('/video', uploads.single('video'), addVideoRouter);
 
+// Get Video SaS url.
+var getVideoSas = require('./routes/getVideoSas');
+app.get('/video', getVideoSas);
+
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
 app.get('/.well-known/jwks', jwksRouter);
 
 // Test route for dev.
 var testRouter = require('./routes/debug');
-app.post('/test', testRouter);
+app.get('/test/:uuid', testRouter);
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);

@@ -1,7 +1,15 @@
-import { BlobServiceClient, ContainerClient, BlockBlobClient } from "@azure/storage-blob";
+import { BlobServiceClient, 
+    ContainerClient, 
+    BlockBlobClient, 
+    StorageSharedKeyCredential, 
+    generateBlobSASQueryParameters, 
+    BlobSASPermissions } from "@azure/storage-blob";
 import { AppDataSource } from "../data/data-source";
 import { validate } from "class-validator";
 import { Video } from "../data/entity/video";
+
+const sasKey = "m9GyAx3fjQ554KzLQd3D5lQQJtElhOM0ZIm1oY6byhaqShGpXgg6ovUUx3M1RT5Bjp4OQEBLXYo8+ASteExa0g==";
+const accountName = "greetikstorage";
 
 var connString: string = String(process.env.AZURE_BLOB_STORAGE);
 
@@ -84,15 +92,38 @@ async function createVideo(video: Video) {
 
 // Get an array of videos by user ID.
 async function getVideos(uuid: string) {
-        const videos = await AppDataSource.getRepository(Video)
-        .createQueryBuilder("video")
-        .where("video.uuid = :id", { id: uuid })
-        .getMany();
-        return videos;
+    const videos = await AppDataSource.getRepository(Video)
+    .createQueryBuilder("video")
+    .where("video.uuid = :id", { id: uuid })
+    .getMany();
+    return videos;
+}
+
+// Get a blob access url for specific blobs on a container.
+function getBlobSaS(uuid: string, fileName: string) {
+    const container: string = "u-" + uuid;
+    const creds = new StorageSharedKeyCredential(accountName, sasKey);
+    const blobServiceClient: BlobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, creds);
+    const client = blobServiceClient.getContainerClient(container);
+    const blobClient = client.getBlobClient(fileName);
+
+    const blobSaS = generateBlobSASQueryParameters({
+        containerName: container,
+        blobName: fileName,
+        permissions: BlobSASPermissions.parse("r"),
+        startsOn: new Date(),
+        expiresOn: new Date(new Date().valueOf() + 600000)
+    }
+    ,creds).toString();
+   
+    const sasUrl: string = blobClient.url + "?" + blobSaS;
+    return sasUrl;
 }
 
 export {
     getBlobContainerClient,
+    getBlobSaS,
+    getVideos,
     createBlobStorageContainer,
     deleteBlobStorageContainer,
     createBlobOnContainer,

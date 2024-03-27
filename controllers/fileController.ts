@@ -101,23 +101,27 @@ async function getVideos(uuid: string) {
 
 // Get a blob access url for specific blobs on a container.
 function getBlobSaS(uuid: string, fileName: string) {
-    const container: string = "u-" + uuid;
-    const creds = new StorageSharedKeyCredential(accountName, sasKey);
-    const blobServiceClient: BlobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, creds);
-    const client = blobServiceClient.getContainerClient(container);
-    const blobClient = client.getBlobClient(fileName);
-
-    const blobSaS = generateBlobSASQueryParameters({
-        containerName: container,
-        blobName: fileName,
-        permissions: BlobSASPermissions.parse("r"),
-        startsOn: new Date(),
-        expiresOn: new Date(new Date().valueOf() + 600000)
+    try {
+        const container: string = "u-" + uuid;
+        const creds = new StorageSharedKeyCredential(accountName, sasKey);
+        const blobServiceClient: BlobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, creds);
+        const client = blobServiceClient.getContainerClient(container);
+        const blobClient = client.getBlobClient(fileName);
+    
+        const blobSaS = generateBlobSASQueryParameters({
+            containerName: container,
+            blobName: fileName,
+            permissions: BlobSASPermissions.parse("r"),
+            startsOn: new Date(),
+            expiresOn: new Date(new Date().valueOf() + 600000)
+        }
+        ,creds).toString();
+       
+        const sasUrl: string = blobClient.url + "?" + blobSaS;
+        return sasUrl;
+    } catch (e) {
+        throw e;
     }
-    ,creds).toString();
-   
-    const sasUrl: string = blobClient.url + "?" + blobSaS;
-    return sasUrl;
 }
 
 export {

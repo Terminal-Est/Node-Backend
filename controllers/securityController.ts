@@ -3,8 +3,8 @@ import { Password } from "../data/entity/password";
 import { User } from "../data/entity/user";
 import { logToFile } from "../utils/logging";
 import { writeFileSync, readFileSync } from "fs";
-var jose = require('jose');
 import { compare } from 'bcrypt';
+var jose = require('jose');
 
 // Return RSA Keypair.
 function getRSAKeypairs() { 

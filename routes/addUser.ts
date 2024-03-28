@@ -1,62 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
-import { createUser, validatePassword, validateUser, insertPasswordHash, getHash } from "../controllers/userController";
+import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser } from "../controllers/userController";
+import { createBlobStorageContainer } from "../controllers/fileController";
+import { logToFile } from "../utils/logging";
 import { ValidationError } from "class-validator";
+import { Uuid } from "../data/entity/uuid";
 var express = require('express');
 var router = express.Router();
 
-//TODO: Clean up documentation.
-
-/**
- * Request parameters to supplied in BODY.
- * 
- * uid - STRING - format: e-mail, description: unique userid this will be
- * an e-mail address and formatted as such. Cannot be null.
- * 
- * admin - BOOL - format: tinyint (can be 0 or 1, true or false), description:
- * specifies whether the account has admin priviledges. default 0.
- * 
- * auth - BOOL - format: tinyint (can be 0 or 1, true or false), description:
- * specifies whether the account is authenticated. default 0.
- * 
- * username - STRING - format: TBA, description: user screen name. Cannot be null.
- * 
- * address - STRING - format: TBA, description: user address. Cannot be null.
- * 
- * city - STRING - format: TBA, description: user city. Cannot be null.
- * 
- * state - STRING - format: TBA, description: user state. Cannot be null.
- * 
- * postcode - STRING - format: TBA, description: user postcode. Cannot be null.
- * 
- * password - STRING - format: TBA, description: user password. Cannot be null.
- * 
- * Sequenceing
- *
- * 1) Calls createUser function from user controller which attempts
- * to add user to the databse, will respond 400 with JSON formatted
- * with an error message and exception stack details.
- * 
- * 2) If user is created successfully, the next function is called
- * which hashes the supplied password for storage. If there is an 
- * exception thrown during this process it is sent as a response. Next 
- * function is called with the hashed password stored in the response locals.
- * 
- * 3) Hashed password is retreived from repsonse locals and the insertPasswordHash
- * function is called from userController. Upon successful insertion of the hashed password
- * a 200 response is sent with the details of the transaction. This can be used to
- * redirect to the login page at the front end. No JWT is sent on success, the user must
- * login to get a valid JWT.
- */
+//TODO: Documentation needs to be updated for new route checks.
 
 // Validate user first.
 router.use((req: Request, res: Response, next: NextFunction) => {
     
     var user = new User();
     user.email = req.body.email;
-    user.admin = req.body.admin;
-    user.auth = req.body.auth;
     user.username = req.body.username;
     user.dob = req.body.dob;
     user.address = req.body.address;
@@ -101,26 +60,33 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     });
 })
 
-// Insert user into database.
+// Insert user into PII database.
 router.use((req: Request, res: Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
     console.log(user.dob);
 
-    createUser(user)
-        .then((handleFulfilled: InsertResult) => {
-        res.locals.uuid = handleFulfilled.identifiers[0].uuid;
-        next();
-    }).catch((error: any) => { 
-        res.status(400).json(
-            error.message
-        );
-    });
+    try {
+        createUser(user).then((handleFulfilled: InsertResult) => {
+            var userId: Uuid = new Uuid();
+            userId.uuid = handleFulfilled.identifiers[0].uuid;
+            res.locals.uuid = handleFulfilled.identifiers[0].uuid;
+
+            createDataUser(userId).then((handleFulfilled: InsertResult) => {
+                next();
+            })
+
+        });
+    } catch(error) { 
+        res.status(400).json({
+            Message: "Database Update Error.",
+            Detail: error
+        });
+    }
 });
 
-// Insert jashed password into database. If successful respond 200 
-// with the user ID.
+// Insert hashed password into database. 
 router.use((req: Request, res: Response, next: NextFunction) => {
 
     const uuid = res.locals.uuid;
@@ -134,10 +100,28 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             Stack: error
         });
     });
-    res.status(200).json({
-        Message: "User Added Successfully.",
-        Detail: res.locals.user.email
-    });
+});
+
+// Add a user container for video storage.
+router.use((req: Request, res: Response, next: NextFunction) => {
+
+    const uuid: string = res.locals.uuid;
+
+    try {
+        createBlobStorageContainer("u-" + uuid).then((responseId) => {
+            logToFile("User: " + uuid + " - " + "Container resid: " + responseId);
+            res.status(200).json({
+                Message: "User Added Successfully.",
+                Detail: res.locals.user.email,
+                RequestId: responseId
+            });
+        });
+    } catch (e) {
+        res.status(400).json({
+            Message: "Error Adding Container.",
+            detail: e
+        })
+    }
 });
 
 module.exports = router;

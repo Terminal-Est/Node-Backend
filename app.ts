@@ -10,8 +10,37 @@ var security = require('./controllers/securityController');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 
+// Multer disk storage.
+const storage = multer.diskStorage({
+    fileFilter: function(req: any, file: any, cb: any) {
+        mimeTypeCheck(req, file, cb);
+    },
+    destination: function(req: any, file: any, cb: any) {
+        cb(null, './videos');
+    },
+    filename: function (req: any, file: any, cb: any) {
+        const tstamp: string = Date.now().toString();
+        cb(null, file.fieldname + "_" + tstamp + path.extname(file.originalname));
+    }
+});
+
+// Check video mime types. Must be .mov or .mp4.
+function mimeTypeCheck(req: any, file: any, cb: any) {
+
+    const mimetype: string = file.mimetype; 
+
+    if (mimetype.toLowerCase() == "video/mp4" || mimetype.toLowerCase() == "video/quicktime") {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+}
+
 // Multer for pulling form data from multipart/form-data
 const fieldsOnly = multer().none();
+// Multer for temp storage of video uploads.
+const uploads = multer({ storage: storage });
+
 var app = express();
 // for parsing application/json
 app.use(bodyParser.json()); 
@@ -51,13 +80,21 @@ app.delete('/user', fieldsOnly, deleteUserRouter);
 var loginRouter = require('./routes/login');
 app.post('/login', fieldsOnly, loginRouter);
 
+// Post route for video upload
+var addVideoRouter = require('./routes/addVideo');
+app.post('/video', uploads.single('video'), addVideoRouter);
+
+// Get Video SaS url.
+var getVideoSas = require('./routes/getVideoSas');
+app.get('/video', getVideoSas);
+
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
 app.get('/.well-known/jwks', jwksRouter);
 
 // Test route for dev.
 var testRouter = require('./routes/debug');
-app.get('/test', testRouter);
+app.get('/test/:uuid', testRouter);
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);

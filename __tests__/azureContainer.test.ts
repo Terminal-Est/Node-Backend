@@ -1,13 +1,8 @@
-import { createContainer, deleteContainer } from '../data/azure-blob';
+import { createBlobStorageContainer } from '../controllers/fileController';
 
 test('Create azure file storage container', () => {
-    createContainer('test').then((fulfilled: any) => {
+    createBlobStorageContainer('test').then((fulfilled: any) => {
         console.log(fulfilled);
+        expect(typeof fulfilled).toBe('string');
     })
 });
-
-test('delete azure file storage container', () => {
-    deleteContainer('test').then((fulfilled: any) => {
-       console.log(fulfilled);
-    })
-})

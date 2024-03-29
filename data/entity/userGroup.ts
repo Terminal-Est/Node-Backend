@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
-import { Entity, PrimaryColumn } from "typeorm";
+import { Entity, PrimaryColumn, OneToOne, JoinColumn } from "typeorm";
+import { Group } from "./group";
 
 @Entity()
 export class UserGroup {
@@ -8,4 +9,8 @@ export class UserGroup {
 
     @PrimaryColumn()
     groupid: number;
+
+    @OneToOne(() => Group)
+    @JoinColumn()
+    group: Group
 }

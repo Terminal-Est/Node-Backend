@@ -8,7 +8,7 @@ async function getGroups() {
     .getMany();
 }
 
-async function joinGroup() {uuid: number, groupid: number) {
+async function joinGroup(uuid: number, groupid: number) {
     return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Group)

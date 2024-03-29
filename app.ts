@@ -76,8 +76,8 @@ app.get('/user', getUserRouter);
 var deleteUserRouter = require('./routes/deleteUser');
 app.delete('/user', fieldsOnly, deleteUserRouter);
 
-var getGroupRouter = require('./routes/getGroups');
-app.get('/groups', getGroupsRouter);
+var getGroupsRouter = require('./routes/getGroups');
+app.get('/groups', fieldsOnly, getGroupsRouter);
 
 var joinGroupRouter = require('.routes/joinGroup');
 app.post('/joingroup', fieldsOnly, joinGroupRouter);

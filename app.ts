@@ -76,11 +76,17 @@ app.get('/user', getUserRouter);
 var deleteUserRouter = require('./routes/deleteUser');
 app.delete('/user', fieldsOnly, deleteUserRouter);
 
+// Get route to get all groups.
 var getGroupsRouter = require('./routes/getGroups');
 app.get('/groups', fieldsOnly, getGroupsRouter);
 
-var joinGroupRouter = require('.routes/joinGroup');
+// Post route for users to join a group.
+var joinGroupRouter = require('./routes/joinGroup');
 app.post('/joingroup', fieldsOnly, joinGroupRouter);
+
+// Post route to create a group.
+var addGroupRouter = require('./routes/addGroup');
+app.post('/addgroup', fieldsOnly, addGroupRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

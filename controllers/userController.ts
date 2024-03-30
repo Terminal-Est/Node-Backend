@@ -1,4 +1,4 @@
-import { UserDataSource } from "../data/data-source";
+import { AppDataSource, UserDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
 import { validate } from "class-validator";
@@ -120,7 +120,7 @@ async function createUser(user: User) {
 
 // Insert Uuid into user data database.
 async function createDataUser(userId: Uuid) {
-    return await UserDataSource.createQueryBuilder()
+    return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Uuid)
         .values([

@@ -15,6 +15,9 @@ const storage = multer.diskStorage({
     fileFilter: function(req: any, file: any, cb: any) {
         mimeTypeCheck(req, file, cb);
     },
+    limits: {
+        fileSize: 100000000
+    },
     destination: function(req: any, file: any, cb: any) {
         cb(null, './videos');
     },
@@ -24,12 +27,45 @@ const storage = multer.diskStorage({
     }
 });
 
+const imageStorage = multer.diskStorage({
+    fileFilter: function(req: any, file: any, cb: any) {
+        imageMimeTypeCheck(req, file, cb);
+    },
+    limits: {
+        // Limit file size to 5 meg.
+        fileSize: 5000000
+    },
+    destination: function(req: any, file: any, cb: any) {
+        cb(null, './images');
+    },
+    filename: function (req: any, file: any, cb: any) {
+        // what you want to name your files.
+        // See above video multer for reference.
+        cb(null, /**your filename plus ext, see video file*/);
+    }
+})
+
+// check image mime types
+function imageMimeTypeCheck(req: any, file: any, cb: any) {
+
+    const mimetype: string = file.mimetype;
+
+    if (file.mimetype.toLowerCase() == "image/png" || 
+        file.mimetype.toLowerCase() == "image/jpg" || 
+        file.mimetype.toLowerCase == "image/jpeg") {
+            cb(null, true);
+        } else {
+            cb(null, false);
+        }
+}
+
 // Check video mime types. Must be .mov or .mp4.
 function mimeTypeCheck(req: any, file: any, cb: any) {
 
     const mimetype: string = file.mimetype; 
 
-    if (mimetype.toLowerCase() == "video/mp4" || mimetype.toLowerCase() == "video/quicktime") {
+    if (mimetype.toLowerCase() == "video/mp4" || 
+        mimetype.toLowerCase() == "video/quicktime") {
         cb(null, true);
     } else {
         cb(null, false);
@@ -40,6 +76,8 @@ function mimeTypeCheck(req: any, file: any, cb: any) {
 const fieldsOnly = multer().none();
 // Multer for temp storage of video uploads.
 const uploads = multer({ storage: storage });
+// Middleware for adding array of images to request of a size of 2.
+const imageUploads = multer({ storage: imageStorage });
 
 var app = express();
 // for parsing application/json
@@ -84,9 +122,9 @@ app.get('/groups', fieldsOnly, getGroupsRouter);
 var joinGroupRouter = require('./routes/joinGroup');
 app.post('/joingroup', fieldsOnly, joinGroupRouter);
 
-// Post route to create a group.
+// Post route to create a group. Allows an upload of 2 images at 5 meg each. See imageUploads multer function.
 var addGroupRouter = require('./routes/addGroup');
-app.post('/addgroup', fieldsOnly, addGroupRouter);
+app.post('/addgroup', imageUploads.array('imageArray', 2), addGroupRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

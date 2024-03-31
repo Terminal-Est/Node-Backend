@@ -9,7 +9,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 
     joinGroup(uuid, groupid);
 
-    res.send(200);
+    res.sendStatus(200);
 });
 
 module.exports = router;

@@ -5,10 +5,9 @@ var express = require('express');
 var router = express.Router();
 
 router.use((req: Request, res : Response, next: NextFunction) => { 
-    const Groups = new Promise((resolve, reject) => {
-        getGroups();
-    })
-    res.status(200).json({Groups});
+    getGroups().then((value) => {
+        res.json(value);
+    });
 });
 
 module.exports = router;

@@ -26,25 +26,21 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     })
 });
 
-router.use((req: Request, res : Response, next: NextFunction) => {
+router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     var userFollows: UserFollows[] = res.locals.userFollows;
-    var users: User[] = []; 
-    
-    for (var i = 0; i < userFollows.length; i++) {
+    var users: User[] = [];
 
-        getUserUUID(String(userFollows[i].uuidFollowing)).then((handleFulfilled) => {
-            if (handleFulfilled != null) {
-                users.push(handleFulfilled);
-            }
-        })
+    for (var i = 0; i < userFollows.length; i++) {
+        var user: User = await getUserUUID(String(userFollows[i].uuidFollowing));
+        users.push(user);
     }
 
     res.locals.userFollows = users;
     next();
 });
 
-router.use((req: Request, res : Response, next: NextFunction) => {
+router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     var key = "userVideos";
     var object: any = {};
@@ -54,7 +50,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 
     for (var i = 0; i < users.length; i++) {
         
-        getUserVideos(String(users[i].uuid)).then((handleFulfilled) => {
+        await getUserVideos(String(users[i].uuid)).then((handleFulfilled) => {
             
             var videos: Video[] = handleFulfilled;
 
@@ -71,11 +67,15 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 
                 object[key].push(data);
             }
-        })
+        }).catch((err) => {
+            console.log(err);
+        });
     }
 
     res.status(200).json({
         message: "Feed Data Returned",
-        content: object
+        object
     })
 });
+
+module.exports = router;

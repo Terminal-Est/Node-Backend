@@ -25,6 +25,8 @@ async function getUserVideos(uuid: string) {
         .where("userVideos.uuid = :id", { id: uuid })
         .getMany();
     
+    console.log(uuid);
+
     return new Promise<Video[]>((resolve , reject) => {
         if (userVideos.length == 0) {
             return reject(false);

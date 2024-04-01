@@ -87,6 +87,14 @@ app.post('/video', uploads.single('video'), addVideoRouter);
 var getVideoSas = require('./routes/getVideoSas');
 app.get('/video', getVideoSas);
 
+// Get user feed JSON.
+var getUserFeed = require('./routes/getFeed');
+app.get('/feed', getUserFeed);
+
+// Add a user follow.
+var addUserFollow = require('./routes/addFollow');
+app.post('/follow', fieldsOnly, addUserFollow);
+
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
 app.get('/.well-known/jwks', jwksRouter);

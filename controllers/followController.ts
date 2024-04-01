@@ -34,3 +34,9 @@ async function deleteUserFollowing(uuid: string, uuidFollowing: string) {
         .andWhere("unfollow.uuidfollowing = :id", { id: uuidFollowing })
         .execute();
 }
+
+export {
+    validateUserFollows,
+    creatUserFollow,
+    deleteUserFollowing
+}

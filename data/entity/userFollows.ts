@@ -1,7 +1,7 @@
 import { Entity, PrimaryColumn } from "typeorm";
 import { IsNotEmpty } from "class-validator";
 
-@Entity()
+@Entity({ name: "UserFollows "})
 export class UserFollows {
     @PrimaryColumn()
     @IsNotEmpty({

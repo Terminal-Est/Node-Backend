@@ -4,6 +4,9 @@ import { Password } from './entity/password';
 import { Video } from './entity/video';
 import { Uuid } from './entity/uuid';
 import { UserFollows } from './entity/userFollows';
+import { Group } from './entity/group';
+import { UserGroup } from './entity/userGroup'
+import { Categories } from './entity/category'
 var logging = require('../utils/logging');
 
 var sqlPort: number = Number(process.env.SQL_SERVER_PORT);
@@ -32,6 +35,8 @@ export const AppDataSource = new DataSource({
     database: process.env.SQL_SERVER_DATA_DB,
     entities: [Uuid, Video, UserFollows],
     logging: ["error", "schema"],
+    entities: [Uuid, Video, Group, UserGroup, Categories],
+    logging: ["error", "schema", "query"],
     connectionTimeout: 60000
 });
 

@@ -4,3 +4,5 @@ INSERT INTO [Group] (Name, Description, System) VALUES ('Moving with Electricity
 INSERT INTO [Group] (Name, Description, System) VALUES ('Energised by the Sun', 'Group dedicated to solar power.', 1)
 INSERT INTO [Group] (Name, Description, System) VALUES ('Growing Green Spaces Together', 'Group dedicated to community gardens.', 1)
 INSERT INTO [Group] (Name, Description, System) VALUES ('Sustainability on a Budget', 'Group dedicatged to being environmentally friendly on a budget.', 1)
+
+INSERT INTO [Categories] (Name) VALUES ('Default');

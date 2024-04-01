@@ -88,6 +88,10 @@ app.post('/joingroup', fieldsOnly, joinGroupRouter);
 var addGroupRouter = require('./routes/addGroup');
 app.post('/addgroup', fieldsOnly, addGroupRouter);
 
+// Get route for getting all categories
+var getCategoriesRouter = require('./routes/getCategories')
+app.get('/categories', fieldsOnly, getCategoriesRouter);
+
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');
 app.post('/login', fieldsOnly, loginRouter);

@@ -1,11 +1,11 @@
 import { Entity, PrimaryColumn, OneToOne, JoinColumn } from "typeorm";
 import { Group } from "./group";
 
-@Entity()
+@Entity({name: "UserGroup"})
 export class UserGroup {
-    @PrimaryColumn()
-    uuid: number;
+    @PrimaryColumn("int")
+    userid: number;
 
-    @PrimaryColumn()
+    @PrimaryColumn("int")
     groupid: number;
 }

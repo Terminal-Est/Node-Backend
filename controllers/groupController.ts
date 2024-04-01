@@ -7,12 +7,12 @@ async function getGroups() {
     return groups;
 }
 
-async function joinGroup(uuid: number, groupid: number) {
+async function joinGroup(userid: number, groupid: number) {
     return await AppDataSource.createQueryBuilder()
         .insert()
         .into(UserGroup)
         .values([
-            { uuid: uuid, groupid: groupid }
+            { userid: userid, groupid: groupid }
         ])
         .execute();
 }

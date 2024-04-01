@@ -3,5 +3,9 @@ CREATE TABLE [dbo].[Group] (
     [Name]        VARCHAR (100) NOT NULL,
     [Description] VARCHAR (100) NULL,
     [System]      INT           NULL,
-    CONSTRAINT [PK_Group] PRIMARY KEY CLUSTERED ([ID] ASC)
+    [CategoryID]  INT           CONSTRAINT [DEFAULT_Group_CategoryID] DEFAULT 1 NOT NULL,
+    [Location]    VARCHAR (100) NULL,
+    CONSTRAINT [PK_Group] PRIMARY KEY CLUSTERED ([ID] ASC),
+    CONSTRAINT [FK_Group_Categories] FOREIGN KEY ([CategoryID]) REFERENCES [dbo].[Categories] ([ID])
 );
+

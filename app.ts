@@ -80,16 +80,15 @@ const uploads = multer({ storage: storage });
 const imageUploads = multer({ storage: imageStorage });
 
 var app = express();
+
+app.use(cors());
+
 // for parsing application/json
 app.use(bodyParser.json()); 
 // for parsing application/xwww-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true })); 
 // app logger
 app.use(logger('dev'));
-app.use(express.json());
-// cors enabled for all routes for now.
-app.use(cors());
-app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Get index router.
@@ -141,6 +140,14 @@ app.post('/video', uploads.single('video'), addVideoRouter);
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
 app.get('/video', getVideoSas);
+
+// Get user feed JSON.
+var getUserFeed = require('./routes/getFeed');
+app.get('/feed', getUserFeed);
+
+// Add a user follow.
+var addUserFollow = require('./routes/addFollow');
+app.post('/follow', fieldsOnly, addUserFollow);
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');

@@ -1,25 +1,42 @@
-import { UserDataSource } from "../data/data-source";
+import { AppDataSource, UserDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
 import { validate } from "class-validator";
 import { PasswordValid } from "../data/entity/passwordValid";
 import { Uuid } from "../data/entity/uuid";
+import { rejects } from "assert";
 var bcrypt = require('bcrypt');
 
 // Get user object from email address.
 async function getUserEmail(email: string) {
-    return await UserDataSource.getRepository(User)
+    var promise = await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
         .where("user.email = :id", {id: email})
         .getOne();
+    return new Promise<User>((resolve, reject) => {
+        if (promise != null) {
+            var user: User = promise;
+            return resolve(user);
+        } else {
+            return reject(false);
+        }
+    })
 }
 
 // Get a user object based on UUID.
 async function getUserUUID(uuid: string) {
-    return await UserDataSource.getRepository(User)
+    var promise = await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
         .where("user.uuid = :id", {id: uuid})
         .getOne();
+    return new Promise<User>((resolve, reject) => {
+        if (promise != null) {
+            var user: User = promise;
+            return resolve(user);
+        } else {
+            return reject(false);
+        }
+    })
 }
 
 // Validate user supplied password against class validator parameters.
@@ -120,7 +137,7 @@ async function createUser(user: User) {
 
 // Insert Uuid into user data database.
 async function createDataUser(userId: Uuid) {
-    return await UserDataSource.createQueryBuilder()
+    return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Uuid)
         .values([

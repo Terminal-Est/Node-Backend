@@ -130,6 +130,10 @@ app.post('/addgroup', imageUploads.array('imageArray', 2), addGroupRouter);
 var getCategoriesRouter = require('./routes/getCategories')
 app.get('/categories', fieldsOnly, getCategoriesRouter);
 
+// Validate IP to make sure it is in Australia on registration.
+var validateIPRouter = require('./routes/validateIP');
+app.get('/validateIP', validateIPRouter);
+
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');
 app.post('/login', fieldsOnly, loginRouter);

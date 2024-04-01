@@ -91,15 +91,6 @@ async function createVideo(video: Video) {
         .execute();
 }
 
-// Get an array of videos by user ID.
-async function getVideos(uuid: string) {
-    const videos = await AppDataSource.getRepository(Video)
-    .createQueryBuilder("video")
-    .where("video.uuid = :id", { id: uuid })
-    .getMany();
-    return videos;
-}
-
 // Get a blob access url for specific blobs on a container.
 function getBlobSaS(uuid: string, fileName: string) {
     try {
@@ -128,7 +119,6 @@ function getBlobSaS(uuid: string, fileName: string) {
 export {
     getBlobContainerClient,
     getBlobSaS,
-    getVideos,
     createBlobStorageContainer,
     deleteBlobStorageContainer,
     createBlobOnContainer,

@@ -13,3 +13,24 @@ async function validateUserFollows(userFollows: UserFollows) {
     });
 }
 
+async function creatUserFollow(uuid: string, uuidFollowing: string) {
+    return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(UserFollows)
+        .values([
+            { 
+                uuid: Number(uuid),
+                uuidFollowing: Number(uuidFollowing)
+            }
+        ])
+        .execute();
+}
+
+async function deleteUserFollowing(uuid: string, uuidFollowing: string) {
+    return await AppDataSource.getRepository(UserFollows)
+        .createQueryBuilder("unfollow")
+        .delete()
+        .where("unfollow.uuid = :id", { id: uuid })
+        .andWhere("unfollow.uuidfollowing = :id", { id: uuidFollowing })
+        .execute();
+}

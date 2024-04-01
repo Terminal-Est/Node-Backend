@@ -22,7 +22,7 @@ export const UserDataSource = new DataSource({
     password: process.env.SQL_SERVER_PII_PASSWORD,
     database: process.env.SQL_SERVER_PII_DB,
     entities: [User, Password],
-    logging: ["error", "schema"],
+    logging: ["error", "schema", "query"],
     connectionTimeout: 60000
 })
 
@@ -33,9 +33,7 @@ export const AppDataSource = new DataSource({
     username: process.env.SQL_SERVER_DATA_LOGIN,
     password: process.env.SQL_SERVER_DATA_PASSWORD,
     database: process.env.SQL_SERVER_DATA_DB,
-    entities: [Uuid, Video, UserFollows],
-    logging: ["error", "schema"],
-    entities: [Uuid, Video, Group, UserGroup, Categories],
+    entities: [Uuid, Video, Group, UserGroup, Categories, UserFollows],
     logging: ["error", "schema", "query"],
     connectionTimeout: 60000
 });

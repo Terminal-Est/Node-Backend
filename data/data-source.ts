@@ -34,8 +34,6 @@ export const AppDataSource = new DataSource({
     password: process.env.SQL_SERVER_DATA_PASSWORD,
     database: process.env.SQL_SERVER_DATA_DB,
     entities: [Uuid, Video, UserFollows],
-    logging: ["error", "schema"],
-    entities: [Uuid, Video, Group, UserGroup, Categories],
     logging: ["error", "schema", "query"],
     connectionTimeout: 60000
 });

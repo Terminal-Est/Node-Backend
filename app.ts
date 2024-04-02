@@ -139,7 +139,7 @@ app.post('/video', uploads.single('video'), addVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
-app.get('/video/:id', fieldsOnly, getVideoSas);
+app.use('/video/get', fieldsOnly, getVideoSas);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');

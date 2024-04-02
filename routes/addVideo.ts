@@ -60,7 +60,6 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     }
 });
 
-
 // If video upload is successful, update database with video details.
 router.use((req: Request, res : Response, next: NextFunction) => { 
 

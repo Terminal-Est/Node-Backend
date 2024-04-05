@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from "express";
+import { getCategories } from "../controllers/categoryController";
 var express = require('express');
 var router = express.Router();
 
 router.use((req: Request, res : Response, next: NextFunction) => { 
-    res.status(200).json({
-        Message: "Video Files",
-    })
+    getCategories().then((value) => {
+        res.json(value);
+    });
 });
 
 module.exports = router;

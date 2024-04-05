@@ -3,6 +3,10 @@ import { User } from './entity/user';
 import { Password } from './entity/password';
 import { Video } from './entity/video';
 import { Uuid } from './entity/uuid';
+import { UserFollows } from './entity/userFollows';
+import { Group } from './entity/group';
+import { UserGroup } from './entity/userGroup'
+import { Categories } from './entity/category'
 var logging = require('../utils/logging');
 
 var sqlPort: number = Number(process.env.SQL_SERVER_PORT);
@@ -18,7 +22,7 @@ export const UserDataSource = new DataSource({
     password: process.env.SQL_SERVER_PII_PASSWORD,
     database: process.env.SQL_SERVER_PII_DB,
     entities: [User, Password],
-    logging: ["error", "schema"],
+    logging: ["error", "schema", "query"],
     connectionTimeout: 60000
 })
 
@@ -29,8 +33,8 @@ export const AppDataSource = new DataSource({
     username: process.env.SQL_SERVER_DATA_LOGIN,
     password: process.env.SQL_SERVER_DATA_PASSWORD,
     database: process.env.SQL_SERVER_DATA_DB,
-    entities: [Uuid, Video],
-    logging: ["error", "schema"],
+    entities: [Uuid, Video, Group, UserGroup, Categories, UserFollows],
+    logging: ["error", "schema", "query"],
     connectionTimeout: 60000
 });
 

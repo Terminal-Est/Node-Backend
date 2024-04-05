@@ -135,7 +135,7 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.use('/video', uploads.single('video'), addVideoRouter);
+app.post('/video', uploads.single('video'), addVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');

@@ -8,7 +8,7 @@ var express = require('express');
 var router = express.Router();
 
 // Validate video data, if video data is ok, got to next function.
-router.post('/', (req: Request, res : Response, next: NextFunction) => {
+router.use((req: Request, res : Response, next: NextFunction) => {
 
     const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);

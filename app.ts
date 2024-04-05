@@ -135,11 +135,15 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.post('/video', uploads.single('video'), addVideoRouter);
+app.use('/video', uploads.single('video'), addVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
 app.use('/video/get', fieldsOnly, getVideoSas);
+
+// Delete video from storage.
+var deleteVideoRouter = require('./routes/deleteVideo');
+app.use('/video/delete', fieldsOnly, deleteVideoRouter);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');

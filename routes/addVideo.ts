@@ -8,9 +8,7 @@ var express = require('express');
 var router = express.Router();
 
 // Validate video data, if video data is ok, got to next function.
-router.use((req: Request, res : Response, next: NextFunction) => {
-
-    console.log(req.body);
+router.post('/', (req: Request, res : Response, next: NextFunction) => {
 
     const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);
@@ -63,7 +61,6 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 // If video upload is successful, update database with video details.
 router.use((req: Request, res : Response, next: NextFunction) => { 
 
-    const requestId = res.locals.requestId;
     const video: Video = res.locals.vid;
 
     createVideo(video).then((handleFullfilled: InsertResult) => {

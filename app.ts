@@ -8,7 +8,7 @@ var cron = require('node-cron');
 var bodyParser = require('body-parser');
 var security = require('./controllers/securityController');
 var fileLogging = require('./utils/logging');
-var jwtHandler = require('./routes/validateJWT');
+var jwtHandler = require('./routes/jwtRouterMid');
 
 // Multer disk storage.
 const storage = multer.diskStorage({

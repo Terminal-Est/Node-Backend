@@ -9,11 +9,13 @@ var logFile = require('../utils/logging');
 // These may be split off into independent routes later if independent JWT validation is required.
 const validateJWT = (req : Request, res : Response, next : NextFunction) => {
     const jwt = req.headers.authorization;
+    const uuid: string = String(req.query.uuid);
     const jwk1 = req.app.get('jwk1');
     const jwk2 = req.app.get('jwk2');
-    verifyToken(jwt, jwk1, jwk2).then((handleFulfilled : any) => {
+    
+    verifyToken(jwt, uuid, jwk1, jwk2).then((handleFulfilled : any) => {
         const payload = handleFulfilled.payload;
-        res.locals.uid = payload.sub;
+        res.locals.uuid = payload.sub;
         next();
     }, (handleRejected : any) => {
         res.status(400).json({
@@ -25,14 +27,13 @@ const validateJWT = (req : Request, res : Response, next : NextFunction) => {
             Message: "Exception Whilst Processing JWT",
             Exception: error
         });
-        logFile.logToFile(error);
     });
 }
 
 // TODO: Add fault codes for front end.
 // After validiation, issue new JWT. 
 const issueJWT = (req: Request, res: Response, next: NextFunction) => {
-    const uid = res.locals.uid;
+    const uid = res.locals.uuid;
     var jwk;
     var keySet;
     var kid;

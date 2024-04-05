@@ -48,11 +48,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 // Next generate JWT.
 router.use((req: Request, res: Response, next: NextFunction) => {
     
-    const email = res.locals.email;
+    const uuid = res.locals.uuid;
     const keySet = res.locals.keySet;
     const kid = res.locals.kid;
 
-    getAuthJWT(email, keySet.private, kid).then((handleFulfilled: any ) => {
+    getAuthJWT(uuid, keySet.private, kid).then((handleFulfilled: any ) => {
         res.locals.jwt = handleFulfilled;
         next(); 
     }, (handleRejected: any) => {

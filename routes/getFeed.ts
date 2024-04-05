@@ -6,10 +6,13 @@ import { getUserFollows, getUserVideos, getGroupFollows, getUsersByGroup } from 
 import { getUserUUID } from "../controllers/userController";
 import { getBlobSaS } from "../controllers/fileController";
 import { UserGroup } from "../data/entity/userGroup";
+var jwtHandler = require('./jwtRouterMid');
 var express = require('express');
 var router = express.Router();
 
-router.get('/:id', async (req: Request, res : Response, next: NextFunction) => { 
+router.get('/:id', jwtHandler.validateJWT, 
+    jwtHandler.issueJWT,
+    async (req: Request, res : Response, next: NextFunction) => { 
    
     const uuid = req.params.id;
     res.locals.id = uuid;
@@ -124,6 +127,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     res.status(200).json({
         message: "Feed Data Returned",
+        jwt: res.locals.jwt,
         object
     })
 });

@@ -1,4 +1,4 @@
-CREATE TABLE [dbo].[Group] (
+CREATE TABLE [dbo].[Groups] (
     [ID]          INT           IDENTITY (1, 1) NOT NULL,
     [Name]        VARCHAR (100) NOT NULL,
     [Description] VARCHAR (100) NULL,

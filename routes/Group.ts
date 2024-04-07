@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { getGroupByID, getGroups, addGroup, joinGroup, getGroupByCategoryID } from "../controllers/groupController";
-import { createBlobOnContainer } from "../controllers/fileController";
+import { createBlobOnContainer, getBlobSaS } from "../controllers/fileController";
 import { InsertResult } from "typeorm";
 import { Group } from "../data/entity/group";
 import { unlink } from 'fs';
@@ -74,7 +74,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     const fileName: string = String(req.file?.originalname);
 
     try {
-        createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
+        createBlobOnContainer("groups", file, fileName).then((requestId: string | undefined) => { 
             unlink(file, (err) => {
                 if (err) {
                     res.status(400).json({
@@ -95,7 +95,9 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     }
 });
 
-router.use((req: Request, res : Response, next: NextFunction) => { 
+
+// Did you mean to have this in here Mark?
+/**router.use((req: Request, res : Response, next: NextFunction) => { 
 
     const requestId = res.locals.requestId;
     const tempGroup: Group = res.locals.group
@@ -113,12 +115,25 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             Detail: handleRejected
         });
     });
-});
+});**/
 
 router.get('/:id', (req: Request, res : Response, next: NextFunction) => {
     const groupid = parseInt(req.params.id);
     getGroupByID(groupid).then((value) => {
-        res.json(value);
+
+        const imgUrl = getBlobSaS("groups", String(value?.Background_FileName));
+
+        res.status(200).json({
+            Message: "Group Returned Successfully.",
+            GroupDetails: {
+                id: value?.ID,
+                name: value?.Name,
+                description: value?.Description,
+                location: value?.Location,
+                categoryId: value?.CategoryID,
+                backgroundImg: imgUrl
+            }
+        });
     })
 });
 

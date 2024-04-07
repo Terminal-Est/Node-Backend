@@ -92,9 +92,8 @@ async function createVideo(video: Video) {
 }
 
 // Get a blob access url for specific blobs on a container.
-function getBlobSaS(uuid: string, fileName: string) {
+function getBlobSaS(container: string, fileName: string) {
     try {
-        const container: string = "u-" + uuid;
         const creds = new StorageSharedKeyCredential(accountName, sasKey);
         const blobServiceClient: BlobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, creds);
         const client = blobServiceClient.getContainerClient(container);

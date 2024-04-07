@@ -86,7 +86,9 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
             console.log(err);
         });
 
-        var vidUrl: string = getBlobSaS(String(res.locals.id), userVideos[i].videoId);
+        const id = String(res.locals.id);
+
+        var vidUrl: string = getBlobSaS("u-" + id, userVideos[i].videoId);
         var data = {
                 videoTitle: userVideos[i].title,
                 username: user.username,

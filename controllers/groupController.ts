@@ -7,6 +7,14 @@ async function getGroups() {
     return groups;
 }
 
+async function getGroupByID(groupid: number) {
+    return await AppDataSource.getRepository(Group).createQueryBuilder("group").where("group.ID = :groupid", {groupid: groupid}).getOne();
+}
+
+async function getGroupByCategoryID(categoryid: number) {
+    return await AppDataSource.getRepository(Group).createQueryBuilder("categories").where("categories.CategoryID = :categoryid", {categoryid: categoryid}).getMany();
+}
+
 async function joinGroup(userid: number, groupid: number) {
     return await AppDataSource.createQueryBuilder()
         .insert()
@@ -17,14 +25,14 @@ async function joinGroup(userid: number, groupid: number) {
         .execute();
 }
 
-async function addGroup(Name: string, Description: string, System: number) {
+async function addGroup(tempGroup: Group) {
     return await AppDataSource.createQueryBuilder()
     .insert()
     .into(Group)
     .values([
-        {Name: Name, Description: Description, System: System}
+        {Name: tempGroup.Name, Description: tempGroup.Description, System: tempGroup.System, Location: tempGroup.Location, Background_FileName: tempGroup.Background_FileName, Image_TimeStamp: tempGroup.Image_TimeStamp}
     ])
     .execute();
 }
 
-export { getGroups, joinGroup, addGroup };
+export { getGroups, joinGroup, addGroup, getGroupByID, getGroupByCategoryID };

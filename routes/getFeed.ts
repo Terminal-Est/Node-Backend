@@ -9,10 +9,9 @@ import { UserGroup } from "../data/entity/userGroup";
 var express = require('express');
 var router = express.Router();
 
-router.get('/:id', async (req: Request, res : Response, next: NextFunction) => { 
+router.use(async (req: Request, res : Response, next: NextFunction) => { 
    
-    const uuid = req.params.id;
-    res.locals.id = uuid;
+    const uuid = String(res.locals.uuid);
     var userGroup: UserGroup[] = [];
     var usersByGroup: User[] = [];
 
@@ -66,6 +65,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
 router.use(async (req: Request, res : Response, next: NextFunction) => {
 
+    const uuid = String(res.locals.uuid);
     var key = "userVideos";
     var object: any = {};
     var userVideos: Video[] = [];
@@ -73,7 +73,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     var usersByGroup: User[] = res.locals.usersByGroup;
 
-    await getUserVideos(String(res.locals.id)).then((handleFulfilled) => {
+    await getUserVideos(uuid).then((handleFulfilled) => {
         userVideos = handleFulfilled;
     }).catch((err) => {
         res.status(500).json({
@@ -86,7 +86,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
         var user = new User();
         
-        await getUserUUID(String(res.locals.id)).then((handleFulfilled) => {
+        await getUserUUID(uuid).then((handleFulfilled) => {
             user = handleFulfilled;
         }).catch((err) => {
             res.status(500).json({
@@ -95,9 +95,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
             })
         });
 
-        const id = String(res.locals.id);
-
-        var vidUrl: string = getBlobSaS("u-" + id, userVideos[i].videoId);
+        var vidUrl: string = getBlobSaS("u-" + uuid, userVideos[i].videoId);
         var data = {
                 videoTitle: userVideos[i].title,
                 username: user.username,

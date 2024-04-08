@@ -142,7 +142,10 @@ app.use('/video/get', fieldsOnly, getVideoSas);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
-app.use('/feed', getUserFeed);
+app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.id;
+    next();
+}, getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');

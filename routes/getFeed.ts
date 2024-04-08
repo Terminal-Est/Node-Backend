@@ -29,7 +29,10 @@ router.get('/:id', async (req: Request, res : Response, next: NextFunction) => {
 
         userGroup = handleFulfilled;
     }).catch((err) => {
-        console.log(err);
+        res.status(500).json({
+            Message: "Feed Retreival Error.",
+            Detail: err
+        })
     });
 
     for (var i = 0; i < userGroup.length; i++) {
@@ -73,7 +76,10 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
     await getUserVideos(String(res.locals.id)).then((handleFulfilled) => {
         userVideos = handleFulfilled;
     }).catch((err) => {
-        console.log(err);
+        res.status(500).json({
+            Message: "Feed Retreival Error.",
+            Detail: err
+        })
     });
 
     for (var i = 0; i < userVideos.length; i++) {
@@ -83,7 +89,10 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
         await getUserUUID(String(res.locals.id)).then((handleFulfilled) => {
             user = handleFulfilled;
         }).catch((err) => {
-            console.log(err);
+            res.status(500).json({
+                Message: "Feed Retreival Error.",
+                Detail: err
+            })
         });
 
         const id = String(res.locals.id);
@@ -120,7 +129,10 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
                 object[key].push(data);
             }
         }).catch((err) => {
-            console.log(err);
+            res.status(500).json({
+                Message: "Feed Retreival Error.",
+                Detail: err
+            })
         });
     }
 

@@ -123,7 +123,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     
     const user: User = res.locals.user;
 
-    if (user.avatar != null) {
+    if (user.avatar) {
         
         var file = './images/' + req.file?.filename;
         const fileName: string = String(req.file?.filename);
@@ -147,7 +147,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
                 });
             });
         } catch (e) {
-            res.status(400).json({
+            res.status(500).json({
                 Message: "Upload Failed.",
                 Detail: e
             });

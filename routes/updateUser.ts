@@ -15,14 +15,46 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     getUserUUID(String(req.body.uuid)).then((handleFulfilled) => {
 
         var user = new User;
-        user.uuid = handleFulfilled.uuid;
-        user.email = req.body.email;
-        user.address = req.body.address;
-        user.city = req.body.city;
-        user.state = req.body.state;
-        user.postcode = req.body.postcode;
-        user.avatar = fileName;
+        user.uuid = handleFulfilled.uuid,
+        user.username = handleFulfilled.username,
+        user.dob = handleFulfilled.dob;
 
+        if (req.body.email) {
+            user.email = req.body.email;
+        } else {
+            user.email = handleFulfilled.email;
+        }
+
+        if (req.body.address) {
+            user.address = req.body.address;
+        } else {
+            user.address = handleFulfilled.address;
+        }
+
+        if (req.body.city) {
+            user.city = req.body.city;
+        } else {
+            user.city = handleFulfilled.city;
+        }
+
+        if (req.body.state) {
+            user.state = req.body.state;
+        } else {
+            user.state = handleFulfilled.state;
+        }
+
+        if (req.body.postcode) {
+            user.postcode = req.body.postcode;
+        } else {
+            user.postcode = handleFulfilled.postcode;
+        }
+
+        if (req.file?.filename) {
+            user.avatar = req.file.filename;
+        } else {
+            user.avatar = handleFulfilled.avatar;
+        }
+        
         validateUser(user).then((handleFulfilled) => {
             res.locals.user = user;
             next();

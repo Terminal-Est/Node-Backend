@@ -2,10 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
 import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser } from "../controllers/userController";
-import { createBlobStorageContainer } from "../controllers/fileController";
+import { createBlobStorageContainer, createBlobOnContainer } from "../controllers/fileController";
 import { logToFile } from "../utils/logging";
 import { ValidationError } from "class-validator";
 import { Uuid } from "../data/entity/uuid";
+import { unlink } from "fs";
 var express = require('express');
 var router = express.Router();
 
@@ -65,8 +66,6 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
-    console.log(user.dob);
-
     try {
         createUser(user).then((handleFulfilled: InsertResult) => {
             var userId: Uuid = new Uuid();
@@ -109,18 +108,57 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
     try {
         createBlobStorageContainer("u-" + uuid).then((responseId) => {
-            logToFile("User: " + uuid + " - " + "Container resid: " + responseId);
-            res.status(200).json({
-                Message: "User Added Successfully.",
-                Detail: res.locals.user.email,
-                RequestId: responseId
-            });
+            res.locals.contaierCreateReq = responseId
+            next();
         });
     } catch (e) {
         res.status(400).json({
             Message: "Error Adding Container.",
             detail: e
         })
+    }
+});
+
+// Insert User Avatar into blob contaier if it exists. 
+router.use((req: Request, res: Response, next: NextFunction) => {
+    
+    const user: User = res.locals.user;
+
+    if (user.avatar != null) {
+        
+        var file = './images/' + req.file?.filename;
+        const fileName: string = String(req.file?.filename);
+
+        try {
+            createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
+                unlink(file, (err) => {
+                    if (err) {
+                        res.status(400).json({
+                            Message: "Image Upload Error.",
+                            Detail: err
+                        });
+                    } else {
+                        res.status(200).json({
+                            Message: "User Added Successfully.",
+                            Detail: res.locals.user.email,
+                            containerReq: res.locals.contaierCreateReq,
+                            imageReq: requestId
+                        });
+                    }
+                });
+            });
+        } catch (e) {
+            res.status(400).json({
+                Message: "Upload Failed.",
+                Detail: e
+            });
+        }
+    } else {
+        res.status(200).json({
+            Message: "User Added Successfully.",
+            Detail: res.locals.user.email,
+            containerReq: res.locals.contaierCreateReq,
+        });
     }
 });
 

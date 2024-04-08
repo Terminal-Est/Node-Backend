@@ -9,6 +9,23 @@ var multer = require('multer');
 var express = require('express');
 var router = express.Router();
 
+import { BlobServiceClient, 
+    ContainerClient, 
+    BlockBlobClient, 
+    StorageSharedKeyCredential, 
+    generateBlobSASQueryParameters, 
+    BlobSASPermissions } from "@azure/storage-blob";
+import { AppDataSource } from "../data/data-source";
+import { validate } from "class-validator";
+import { Video } from "../data/entity/video";
+
+const sasKey = "m9GyAx3fjQ554KzLQd3D5lQQJtElhOM0ZIm1oY6byhaqShGpXgg6ovUUx3M1RT5Bjp4OQEBLXYo8+ASteExa0g==";
+const accountName = "greetikstorage";
+
+var connString: string = String(process.env.AZURE_BLOB_STORAGE);
+
+const blobServiceClient = BlobServiceClient.fromConnectionString(connString);
+
 const imageStorage = multer.diskStorage({
     fileFilter: function(req: any, file: any, cb: any) {
         imageMimeTypeCheck(req, file, cb);
@@ -40,6 +57,8 @@ function imageMimeTypeCheck(req: any, file: any, cb: any) {
         }
 }
 
+const fieldsOnly = multer().none();
+
 // Middleware for adding array of images to request of a size of 2.
 const imageUploads = multer({ storage: imageStorage });
 
@@ -47,6 +66,43 @@ router.get('/', (req: Request, res : Response, next: NextFunction) => {
     getGroups().then((value) => {
         res.json(value);
     });
+});
+
+router.get('/:id', (req: Request, res : Response, next: NextFunction) => {
+    const groupid = parseInt(req.params.id);
+    getGroupByID(groupid).then((value) => {
+
+        const imgUrl = getBlobSaS("groups", String(value?.Background_FileName));
+
+        res.status(200).json({
+            Message: "Group Returned Successfully.",
+            GroupDetails: {
+                id: value?.ID,
+                name: value?.Name,
+                description: value?.Description,
+                location: value?.Location,
+                categoryId: value?.CategoryID,
+                backgroundImg: imgUrl
+            }
+        });
+    })
+});
+
+router.get('/categories/:categoryid', (req: Request, res : Response, next: NextFunction) => {
+    const categoryid: number = parseInt(req.params.categoryid);
+
+    getGroupByCategoryID(categoryid).then((values) => {
+        res.json(values)
+    })
+});
+
+router.post('/:id/join', fieldsOnly, (req: Request, res : Response, next: NextFunction) => {
+    const groupid: number = parseInt(req.params.id);
+    const userid: number = parseInt(req.body.uuid);
+
+    joinGroup(userid, groupid);
+
+    res.sendStatus(200);
 });
 
 router.post('/', imageUploads.single('background'), (req: Request, res : Response, next: NextFunction) => {
@@ -95,63 +151,27 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     }
 });
 
-
-// Did you mean to have this in here Mark?
-/**router.use((req: Request, res : Response, next: NextFunction) => { 
-
-    const requestId = res.locals.requestId;
-    const tempGroup: Group = res.locals.group
-
-    addGroup(tempGroup).then((handleFullfilled: InsertResult) => {
-        res.status(200).json({
-            Message: "Video Upload Successful.",
-            Detail: handleFullfilled,
-            blobReqId: res.locals.requestId,
-            filename: req.file?.filename
-        });
-    }, (handleRejected: any) => {
-        res.status(400).json({
-            Message: "Video Database Update Failed.",
-            Detail: handleRejected
-        });
-    });
-});**/
-
-router.get('/:id', (req: Request, res : Response, next: NextFunction) => {
-    const groupid = parseInt(req.params.id);
-    getGroupByID(groupid).then((value) => {
-
-        const imgUrl = getBlobSaS("groups", String(value?.Background_FileName));
-
-        res.status(200).json({
-            Message: "Group Returned Successfully.",
-            GroupDetails: {
-                id: value?.ID,
-                name: value?.Name,
-                description: value?.Description,
-                location: value?.Location,
-                categoryId: value?.CategoryID,
-                backgroundImg: imgUrl
-            }
-        });
-    })
-});
-
-router.get('/:categoryid', (req: Request, res : Response, next: NextFunction) => {
-    const categoryid: number = parseInt(req.params.categoryid);
-
-    getGroupByCategoryID(categoryid);
-
-    res.sendStatus(200);
-});
-
-router.post('/:id/join', (req: Request, res : Response, next: NextFunction) => {
-    const groupid: number = parseInt(req.params.id);
-    const userid: number = parseInt(req.body.uuid);
-
-    joinGroup(userid, groupid);
-
-    res.sendStatus(200);
-});
+function getBlobSaS(container: string, fileName: string) {
+    try {
+        const creds = new StorageSharedKeyCredential(accountName, sasKey);
+        const blobServiceClient: BlobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, creds);
+        const client = blobServiceClient.getContainerClient(container);
+        const blobClient = client.getBlobClient(fileName);
+   
+        const blobSaS = generateBlobSASQueryParameters({
+            containerName: container,
+            blobName: fileName,
+            permissions: BlobSASPermissions.parse("r"),
+            startsOn: new Date(),
+            expiresOn: new Date(new Date().valueOf() + 600000)
+        }
+        ,creds).toString();
+       
+        const sasUrl: string = blobClient.url + "?" + blobSaS;
+        return sasUrl;
+    } catch (e) {
+        throw e;
+    }
+}
 
 module.exports = router;

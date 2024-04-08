@@ -49,6 +49,13 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
     });
 });
 
+router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
+    const categoryid = parseInt(req.params.id)
+    getCategoryByID(categoryid).then((value) => {
+        res.json(value);
+    });
+});
+
 const catimages = imageUploads.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }])
 router.post('/', catimages, (req: Request, res: Response, next: NextFunction) => {
     const ts = String(Date.now());
@@ -117,13 +124,6 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             Message: "Video Database Update Failed.",
             Detail: handleRejected
         });
-    });
-});
-
-router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
-    const categoryid = parseInt(req.params.id)
-    getCategoryByID(categoryid).then((value) => {
-        res.json(value);
     });
 });
 

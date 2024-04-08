@@ -17,10 +17,7 @@ async function getGroupByID(groupid: number) {
 }
 
 async function getGroupByCategoryID(categoryid: number) {
-    return await AppDataSource.getRepository(Group)
-        .createQueryBuilder("categories")
-        .where("categories.CategoryID = :categoryid", {categoryid: categoryid})
-        .getMany();
+    return await AppDataSource.getRepository(Group).createQueryBuilder("group").where("group.CategoryID = :categoryid", {categoryid: categoryid}).getMany();
 }
 
 async function joinGroup(userid: number, groupid: number) {

@@ -99,7 +99,7 @@ app.get('/', indexRouter);
 // -------------------------------------------- 
 // Post route for adding User.
 var addUserRouter = require('./routes/addUser');
-app.post('/user', fieldsOnly, addUserRouter);
+app.post('/user', avatarUpload.single('avatar'), addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');

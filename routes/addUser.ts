@@ -3,7 +3,6 @@ import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
 import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser } from "../controllers/userController";
 import { createBlobStorageContainer, createBlobOnContainer } from "../controllers/fileController";
-import { logToFile } from "../utils/logging";
 import { ValidationError } from "class-validator";
 import { Uuid } from "../data/entity/uuid";
 import { unlink } from "fs";
@@ -15,6 +14,8 @@ var router = express.Router();
 // Validate user first.
 router.use((req: Request, res: Response, next: NextFunction) => {
     
+    const fileName: string = String(req.file?.filename);
+
     var user = new User();
     user.email = req.body.email;
     user.username = req.body.username;
@@ -23,6 +24,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     user.city = req.body.city;
     user.state = req.body.state;
     user.postcode = req.body.postcode;
+    user.avatar = fileName;
 
     validateUser(user).then((handleFullfilled: boolean) => {
             res.locals.user = user;
@@ -66,23 +68,20 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
-    try {
-        createUser(user).then((handleFulfilled: InsertResult) => {
-            var userId: Uuid = new Uuid();
-            userId.uuid = handleFulfilled.identifiers[0].uuid;
-            res.locals.uuid = handleFulfilled.identifiers[0].uuid;
+    createUser(user).then((handleFulfilled: InsertResult) => {
+        var userId: Uuid = new Uuid();
+        userId.uuid = handleFulfilled.identifiers[0].uuid;
+        res.locals.uuid = handleFulfilled.identifiers[0].uuid;
 
-            createDataUser(userId).then((handleFulfilled: InsertResult) => {
-                next();
-            })
-
-        });
-    } catch(error) { 
+        createDataUser(userId).then((handleFulfilled: InsertResult) => {
+            next();
+        })
+    }).catch((error) => {
         res.status(400).json({
             Message: "Database Update Error.",
             Detail: error
         });
-    }
+    });
 });
 
 // Insert hashed password into database. 
@@ -130,7 +129,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         const fileName: string = String(req.file?.filename);
 
         try {
-            createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
+            createBlobOnContainer("u-" + res.locals.uuid, file, fileName).then((requestId: string | undefined) => { 
                 unlink(file, (err) => {
                     if (err) {
                         res.status(400).json({

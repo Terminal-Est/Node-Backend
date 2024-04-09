@@ -145,7 +145,7 @@ var getUserFeed = require('./routes/getFeed');
 app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.id;
     next();
-}, getUserFeed);
+}, jwtHandler.validateJWT, jwtHandler.issueJWT, getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
@@ -184,14 +184,14 @@ function getKeyPair2() {
     });
 }
 
-var getRSA1 = cron.schedule('20 * * * *', () => {
+var getRSA1 = cron.schedule('* * * Jan,Mar,May,Jul,Sep,Nov Sun', () => {
     getKeyPair1();
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
 });            
 
-var getRSA2 = cron.schedule('50 * * * *', () => {
+var getRSA2 = cron.schedule('* * * Feb,Apr,Jun,Aug,Oct,Dec Sun', () => {
    getKeyPair2();
 }, {
     scheduled: true,

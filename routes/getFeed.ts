@@ -115,7 +115,9 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
             for (var j = 0; j < videos.length; j++) {
 
-                var vidUrl: string = getBlobSaS(String(usersByGroup[i].uuid), videos[j].videoId);
+                var userContainer = "u-" + String(usersByGroup[i].uuid);
+
+                var vidUrl: string = getBlobSaS(userContainer, videos[j].videoId);
                 var data = {
                     videoTitle: videos[j].title,
                     username: usersByGroup[i].username,
@@ -136,6 +138,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     res.status(200).json({
         message: "Feed Data Returned",
+        Token: res.locals.jwt,
         object
     })
 });

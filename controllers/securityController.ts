@@ -28,11 +28,14 @@ function getRSAKeypairs() {
 }
 
 // Process JWT signature.
-async function verifyToken(jwt : any, jwk1 : any, jwk2 : any) {
+async function verifyToken(jwt: any, jwk1: any, jwk2: any) {
     var jwk;
     const alg = 'RS256';
     const decodedJwt = jose.decodeJwt(jwt);
     const kid = decodedJwt.kid;
+
+    console.log(decodedJwt.exp);
+
     if (kid == jwk1.kid) {
         jwk = jwk1
     } else {
@@ -40,19 +43,19 @@ async function verifyToken(jwt : any, jwk1 : any, jwk2 : any) {
     }
     const publicKey = await jose.importJWK(jwk, alg);
     const { payload, protectedHeader } = await jose.jwtVerify(jwt, publicKey);
-    return { payload: payload, header: protectedHeader };
+    return { payload: payload, header: protectedHeader};
 }
 
 // Issue new JWT.
-function getAuthJWT(email : string, key : any, kid : any) {
+function getAuthJWT(uuid: string, key: any, kid: any, exp: any) {
     const alg = 'RS256';
     return new Promise(async function(resolve, reject) {
         const privateKey = await jose.importPKCS8(key, alg);
         await new jose.SignJWT({ 'iat': true, 'sub': true, 'exp': true, 'kid': kid })
         .setProtectedHeader({ alg })
         .setIssuedAt()
-        .setSubject(email)
-        .setExpirationTime('30m')
+        .setSubject(uuid)
+        .setExpirationTime(exp)
         .sign(privateKey)
         .then((handleFulfilled : any) => { 
             return resolve(handleFulfilled); 
@@ -63,7 +66,7 @@ function getAuthJWT(email : string, key : any, kid : any) {
 }
 
 // Update exposed JWKs.
-function updateJWKendpoint(jwk : any, jwkToUpdate : any) {
+function updateJWKendpoint(jwk: any, jwkToUpdate: any) {
     try {
         const fileContents = readFileSync('./public/Keys.json', 'utf8');
         var fileJSON = JSON.parse(fileContents);
@@ -109,7 +112,6 @@ async function userLogin(email: string, password : string) {
         }
     });
 }
-
 
 export { getAuthJWT, 
     verifyToken, 

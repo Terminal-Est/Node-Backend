@@ -9,10 +9,9 @@ import { UserGroup } from "../data/entity/userGroup";
 var express = require('express');
 var router = express.Router();
 
-router.get('/:id', async (req: Request, res : Response, next: NextFunction) => { 
+router.use(async (req: Request, res : Response, next: NextFunction) => { 
    
-    const uuid = req.params.id;
-    res.locals.id = uuid;
+    const uuid = String(res.locals.uuid);
     var userGroup: UserGroup[] = [];
     var usersByGroup: User[] = [];
 
@@ -29,7 +28,10 @@ router.get('/:id', async (req: Request, res : Response, next: NextFunction) => {
 
         userGroup = handleFulfilled;
     }).catch((err) => {
-        console.log(err);
+        res.status(500).json({
+            Message: "Feed Retreival Error.",
+            Detail: err
+        })
     });
 
     for (var i = 0; i < userGroup.length; i++) {
@@ -63,6 +65,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
 router.use(async (req: Request, res : Response, next: NextFunction) => {
 
+    const uuid = String(res.locals.uuid);
     var key = "userVideos";
     var object: any = {};
     var userVideos: Video[] = [];
@@ -70,25 +73,29 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     var usersByGroup: User[] = res.locals.usersByGroup;
 
-    await getUserVideos(String(res.locals.id)).then((handleFulfilled) => {
+    await getUserVideos(uuid).then((handleFulfilled) => {
         userVideos = handleFulfilled;
     }).catch((err) => {
-        console.log(err);
+        res.status(500).json({
+            Message: "Feed Retreival Error.",
+            Detail: err
+        })
     });
 
     for (var i = 0; i < userVideos.length; i++) {
 
         var user = new User();
         
-        await getUserUUID(String(res.locals.id)).then((handleFulfilled) => {
+        await getUserUUID(uuid).then((handleFulfilled) => {
             user = handleFulfilled;
         }).catch((err) => {
-            console.log(err);
+            res.status(500).json({
+                Message: "Feed Retreival Error.",
+                Detail: err
+            })
         });
 
-        const id = String(res.locals.id);
-
-        var vidUrl: string = getBlobSaS("u-" + id, userVideos[i].videoId);
+        var vidUrl: string = getBlobSaS("u-" + uuid, userVideos[i].videoId);
         var data = {
                 videoTitle: userVideos[i].title,
                 username: user.username,
@@ -108,7 +115,9 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
             for (var j = 0; j < videos.length; j++) {
 
-                var vidUrl: string = getBlobSaS(String(usersByGroup[i].uuid), videos[j].videoId);
+                var userContainer = "u-" + String(usersByGroup[i].uuid);
+
+                var vidUrl: string = getBlobSaS(userContainer, videos[j].videoId);
                 var data = {
                     videoTitle: videos[j].title,
                     username: usersByGroup[i].username,
@@ -120,12 +129,16 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
                 object[key].push(data);
             }
         }).catch((err) => {
-            console.log(err);
+            res.status(500).json({
+                Message: "Feed Retreival Error.",
+                Detail: err
+            })
         });
     }
 
     res.status(200).json({
         message: "Feed Data Returned",
+        Token: res.locals.jwt,
         object
     })
 });

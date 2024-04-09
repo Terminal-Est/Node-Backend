@@ -85,4 +85,11 @@ export class User {
         message: "Invalid Postcode."
     })
     postcode: string;
+
+    @Column()
+    @IsOptional()
+    @Length(0, 250, {
+        message: "Avatar Filename Length Error."
+    })
+    avatar: string;
 }

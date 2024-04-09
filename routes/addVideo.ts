@@ -42,7 +42,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
         createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
             unlink(file, (err) => {
                 if (err) {
-                    res.status(400).json({
+                    res.status(500).json({
                         Message: "File Upload Error.",
                         Detail: err
                     });
@@ -53,7 +53,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             });
         });
     } catch (e) {
-        res.status(400).json({
+        res.status(500).json({
             Message: "Upload Failed.",
             Detail: e
         });

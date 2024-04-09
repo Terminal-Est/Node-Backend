@@ -34,12 +34,12 @@ router.use((req: Request, res: Response, next: NextFunction) => {
        
     }, (handleRejected: string) => {
         res.status(400).json({
-            Message: "Login Failed",
+            Message: "Login Failed.",
             Detail: handleRejected
         });
     }).catch((error: any) => {
         res.status(500).json({
-            Message: "Login Exception",
+            Message: "Login Exception.",
             Exception: error
         });
     });
@@ -48,21 +48,31 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 // Next generate JWT.
 router.use((req: Request, res: Response, next: NextFunction) => {
     
-    const email = res.locals.email;
+    const email = res.locals.uuid;
     const keySet = res.locals.keySet;
     const kid = res.locals.kid;
+    var date = Date.now();
+    var exp;
+    const remember: boolean = Boolean(req.body.remember);
 
-    getAuthJWT(email, keySet.private, kid).then((handleFulfilled: any ) => {
+    if (remember) {
+        exp = date + (30 * 86400000);
+        console.log(exp);
+    } else {
+        exp = '30m';
+    }
+
+    getAuthJWT(email, keySet.private, kid, exp).then((handleFulfilled: any ) => {
         res.locals.jwt = handleFulfilled;
         next(); 
     }, (handleRejected: any) => {
         res.status(400).json({
-            Message: "Token Generation Error",
+            Message: "Token Generation Error.",
             Detail: handleRejected
         })
     }).catch((error: any) => {
         res.status(500).json({
-            Message: "Exception Whilst Generating Token",
+            Message: "Exception Whilst Generating Token.",
             Detail: error
         });
         logToFile(error);
@@ -79,7 +89,7 @@ router.use((req: Request, res: Response) => {
     const jwt = res.locals.jwt;
 
     res.status(200).json({
-        Message: "Login Successful",
+        Message: "Login Successful.",
         uuid: res.locals.uuid,
         Token: jwt
     }); 

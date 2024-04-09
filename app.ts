@@ -1,3 +1,4 @@
+import { NextFunction, Request, Response } from "express";
 var cors = require('cors');
 var express = require('express');
 var path = require('path');
@@ -27,7 +28,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const imageStorage = multer.diskStorage({
+const avatarImage = multer.diskStorage({
     fileFilter: function(req: any, file: any, cb: any) {
         imageMimeTypeCheck(req, file, cb);
     },
@@ -39,9 +40,8 @@ const imageStorage = multer.diskStorage({
         cb(null, './images');
     },
     filename: function (req: any, file: any, cb: any) {
-        // what you want to name your files.
-        // See above video multer for reference.
-        cb(null, /**your filename plus ext, see video file*/);
+        const tstamp: string = Date.now().toString();
+        cb(null, file.fieldname + "_" + tstamp + path.extname(file.originalname));
     }
 })
 
@@ -77,7 +77,7 @@ const fieldsOnly = multer().none();
 // Multer for temp storage of video uploads.
 const uploads = multer({ storage: storage });
 // Middleware for adding array of images to request of a size of 2.
-const imageUploads = multer({ storage: imageStorage });
+const avatarUpload = multer({ storage: avatarImage });
 
 var app = express();
 
@@ -99,15 +99,18 @@ app.get('/', indexRouter);
 // -------------------------------------------- 
 // Post route for adding User.
 var addUserRouter = require('./routes/addUser');
-app.post('/user', fieldsOnly, addUserRouter);
+app.post('/user', avatarUpload.single('avatar'), addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', fieldsOnly, updateUserRouter);
+app.put('/user', avatarUpload.single('avatar'), updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');
-app.get('/user', getUserRouter);
+app.get('/user/:id', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.id;
+    next();
+},  getUserRouter);
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/deleteUser');
@@ -120,10 +123,6 @@ app.get('/groups', fieldsOnly, getGroupsRouter);
 // Post route for users to join a group.
 var joinGroupRouter = require('./routes/joinGroup');
 app.post('/joingroup', fieldsOnly, joinGroupRouter);
-
-// Post route to create a group. Allows an upload of 2 images at 5 meg each. See imageUploads multer function.
-var addGroupRouter = require('./routes/addGroup');
-app.post('/addgroup', imageUploads.array('imageArray', 2), addGroupRouter);
 
 // Get route for getting all categories
 var getCategoriesRouter = require('./routes/getCategories')
@@ -143,7 +142,10 @@ app.use('/video/get', fieldsOnly, getVideoSas);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
-app.use('/feed', getUserFeed);
+app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.id;
+    next();
+}, jwtHandler.validateJWT, jwtHandler.issueJWT, getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
@@ -152,10 +154,6 @@ app.post('/follow', fieldsOnly, addUserFollow);
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
 app.get('/.well-known/jwks', jwksRouter);
-
-// Test route for dev.
-var testRouter = require('./routes/debug');
-app.get('/test/:uuid', testRouter);
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);
@@ -186,14 +184,14 @@ function getKeyPair2() {
     });
 }
 
-var getRSA1 = cron.schedule('20 * * * *', () => {
+var getRSA1 = cron.schedule('* * * Jan,Mar,May,Jul,Sep,Nov Sun', () => {
     getKeyPair1();
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
 });            
 
-var getRSA2 = cron.schedule('50 * * * *', () => {
+var getRSA2 = cron.schedule('* * * Feb,Apr,Jun,Aug,Oct,Dec Sun', () => {
    getKeyPair2();
 }, {
     scheduled: true,

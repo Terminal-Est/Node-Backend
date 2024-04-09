@@ -4,7 +4,6 @@ import { Password } from "../data/entity/password";
 import { validate } from "class-validator";
 import { PasswordValid } from "../data/entity/passwordValid";
 import { Uuid } from "../data/entity/uuid";
-import { rejects } from "assert";
 var bcrypt = require('bcrypt');
 
 // Get user object from email address.
@@ -129,7 +128,8 @@ async function createUser(user: User) {
                 address: user.address,
                 city: user.city,
                 state: user.state,
-                postcode: user.postcode
+                postcode: user.postcode,
+                avatar: user.avatar
             }
         ])
         .execute();
@@ -149,11 +149,26 @@ async function createDataUser(userId: Uuid) {
 }
 
 // Set user authenticated based on supplied email.
-async function setUserAthenticated(email: string, auth: boolean) {
+async function setUserAthenticated(uuid: string, auth: boolean) {
     return await UserDataSource.createQueryBuilder()
         .update(User)
         .set({ auth: auth })
-        .where("email = :id", {id: email})
+        .where("uuid = :id", {id: uuid})
+        .execute();
+}
+
+async function updateUser(user: User) {
+    return await UserDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+            email: user.email,
+            address: user.address,
+            city: user.city,
+            state: user.state,
+            postcode: user.postcode,
+            avatar: user.avatar
+        })
+        .where("uuid = :id", {id: user.uuid})
         .execute();
 }
 
@@ -167,4 +182,6 @@ export { getUserEmail,
     createDataUser, 
     setUserAthenticated,
     validateUser,
-    validatePassword }; 
+    validatePassword,
+    updateUser
+ }; 

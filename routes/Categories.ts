@@ -9,6 +9,25 @@ var multer = require('multer');
 var express = require('express');
 var router = express.Router();
 
+import {
+    BlobServiceClient,
+    ContainerClient,
+    BlockBlobClient,
+    StorageSharedKeyCredential,
+    generateBlobSASQueryParameters,
+    BlobSASPermissions
+} from "@azure/storage-blob";
+import { AppDataSource } from "../data/data-source";
+import { validate } from "class-validator";
+import { Video } from "../data/entity/video";
+
+const sasKey = "m9GyAx3fjQ554KzLQd3D5lQQJtElhOM0ZIm1oY6byhaqShGpXgg6ovUUx3M1RT5Bjp4OQEBLXYo8+ASteExa0g==";
+const accountName = "greetikstorage";
+
+var connString: string = String(process.env.AZURE_BLOB_STORAGE);
+
+const blobServiceClient = BlobServiceClient.fromConnectionString(connString);
+
 const imageStorage = multer.diskStorage({
     fileFilter: function (req: any, file: any, cb: any) {
         imageMimeTypeCheck(req, file, cb);
@@ -44,16 +63,46 @@ function imageMimeTypeCheck(req: any, file: any, cb: any) {
 const imageUploads = multer({ storage: imageStorage });
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
-    getCategories().then((value) => {
-        res.json(value);
+    let listofgroups: Array<any> = new Array<any>();
+    getCategories().then((values) => {
+        values.forEach(function (value) {
+
+            const iconUrl = getBlobSaS("groups", String(value?.Icon_FileName));
+            let bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
+
+            let x = {
+                ID: value.ID,
+                Name: value.Name,
+                iconImg: iconUrl,
+                bgImg: bgImgUrl
+            }
+
+            listofgroups.push(x)
+        })
+        res.status(200).json({
+            Message: "Groups Returned Successfully.",
+            listofgroups
+        })
     });
 });
 
 router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
     const categoryid = parseInt(req.params.id)
     getCategoryByID(categoryid).then((value) => {
-        res.json(value);
-    });
+
+        const iconUrl = getBlobSaS("groups", String(value?.Icon_FileName));
+        const imgUrl = getBlobSaS("groups", String(value?.Background_FileName));
+
+        res.status(200).json({
+            Message: "Category Returned Successfully.",
+            CategoryDetails: {
+                id: value?.ID,
+                name: value?.Name,
+                iconImg: iconUrl,
+                backgroundImg: imgUrl
+            }
+        });
+    })
 });
 
 const catimages = imageUploads.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }])
@@ -85,7 +134,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         const fileName: string = String(imagefile.originalname);
 
         try {
-            createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => {
+            createBlobOnContainer("categories", file, fileName).then((requestId: string | undefined) => {
                 unlink(file, (err) => {
                     if (err) {
                         res.status(400).json({
@@ -113,18 +162,41 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     const tempCategory: Categories = res.locals.group
 
     addCategory(tempCategory).then((handleFullfilled: InsertResult) => {
-        res.status(200).json({
-            Message: "Video Upload Successful.",
+        res.json({
+            Message: "Category Upload Successful.",
             Detail: handleFullfilled,
             blobReqId: res.locals.requestId,
             filename: req.file?.filename
         });
     }, (handleRejected: any) => {
         res.status(400).json({
-            Message: "Video Database Update Failed.",
+            Message: "Categories Database Update Failed.",
             Detail: handleRejected
         });
     });
 });
+
+function getBlobSaS(container: string, fileName: string) {
+    try {
+        const creds = new StorageSharedKeyCredential(accountName, sasKey);
+        const blobServiceClient: BlobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, creds);
+        const client = blobServiceClient.getContainerClient(container);
+        const blobClient = client.getBlobClient(fileName);
+
+        const blobSaS = generateBlobSASQueryParameters({
+            containerName: container,
+            blobName: fileName,
+            permissions: BlobSASPermissions.parse("r"),
+            startsOn: new Date(),
+            expiresOn: new Date(new Date().valueOf() + 600000)
+        }
+            , creds).toString();
+
+        const sasUrl: string = blobClient.url + "?" + blobSaS;
+        return sasUrl;
+    } catch (e) {
+        throw e;
+    }
+}
 
 module.exports = router;

@@ -56,7 +56,6 @@ async function deleteBlobFromContainer(containerName: string, blobName: string) 
         const containerClient: ContainerClient = getBlobContainerClient(containerName);
         const blobBlockClient: BlockBlobClient = containerClient.getBlockBlobClient(blobName);
         const blobDeleteOptions: BlobDeleteOptions = {
-            deleteSnapshots: "include"
         }
         const response = await blobBlockClient.delete(blobDeleteOptions);
         return response.requestId;

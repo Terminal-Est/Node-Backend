@@ -1,5 +1,5 @@
-import { UUID } from "crypto";
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { GroupComment } from "./groupComment";
 
 @Entity()
 export class Group {
@@ -20,4 +20,7 @@ export class Group {
 
     @Column()
     System: number;
+
+    @OneToMany(() => GroupComment, (comment) => comment.groupId)
+    comment: Comment[];
 }

@@ -4,11 +4,11 @@ import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
-router.get('/:id/:fileName', (req: Request, res : Response, next: NextFunction) => { 
+router.get((req: Request, res : Response, next: NextFunction) => { 
+    const container: string = String(res.locals.uuid);
+    const filename: string = String(res.locals.filename);
 
-    console.log(req.params);
-
-    const url: string = getBlobSaS(req.params.id, req.params.fileName);
+    const url: string = getBlobSaS("u-" + container, filename);
     res.status(200).json({
         Message: "File SaS Url Received",
         Url: url

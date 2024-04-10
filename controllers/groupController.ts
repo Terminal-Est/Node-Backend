@@ -1,3 +1,4 @@
+import { InsertResult } from "typeorm";
 import { AppDataSource, UserDataSource } from "../data/data-source";
 import { Group } from "../data/entity/group";
 import { UserGroup } from "../data/entity/userGroup";
@@ -33,7 +34,7 @@ async function joinGroup(userid: number, groupid: number) {
 }
 
 async function addGroup(tempGroup: Group) {
-    return await AppDataSource.createQueryBuilder()
+    const result: InsertResult = await AppDataSource.createQueryBuilder()
         .insert()
         .into(Group)
         .values([
@@ -46,6 +47,7 @@ async function addGroup(tempGroup: Group) {
                 Image_TimeStamp: tempGroup.Image_TimeStamp}
         ])
         .execute();
+        return result;
 }
 
 export { getGroups, 

@@ -1,3 +1,4 @@
+import { InsertResult } from "typeorm";
 import { AppDataSource, UserDataSource } from "../data/data-source";
 import { Categories } from "../data/entity/category";
 import { UserGroup } from "../data/entity/userGroup";
@@ -11,13 +12,14 @@ async function getCategoryByID(categoryid: number) {
 }
 
 async function addCategory(tempCategory: Categories) {
-     return await AppDataSource.createQueryBuilder()
+     const result: InsertResult = await AppDataSource.createQueryBuilder()
      .insert()
      .into(Categories)
      .values([
          {Name: tempCategory.Name, Icon_FileName: tempCategory.Icon_FileName, Background_FileName: tempCategory.Background_FileName, Image_TimeStamp: tempCategory.Image_TimeStamp}
      ])
      .execute();
+     return result;
  }
 
 export { getCategories, getCategoryByID, addCategory };

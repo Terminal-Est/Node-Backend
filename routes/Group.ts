@@ -144,10 +144,32 @@ router.post('/', imageUploads.single('background'), (req: Request, res: Response
     next();
 });
 
+// Insert the database record first to get the GroupID to name the image.
+router.use((req: Request, res: Response, next: NextFunction) => {
+
+    const group: Group = res.locals.group;
+
+    addGroup(group).then((handleFullfilled: InsertResult) => {
+        res.locals.groupid = handleFullfilled.identifiers[0].ID;
+        next();
+    }, (handleRejected: any) => {
+        res.status(400).json({
+            Message: "Group Database Update Failed.",
+            Detail: handleRejected
+        });
+    });
+});
+
+// Insert the images into the group blob on Azure.
 router.use((req: Request, res: Response, next: NextFunction) => {
 
     var file = './images/' + req.file?.filename;
-    const fileName: string = String(req.file?.originalname);
+    const fileextension = req.file?.originalname.toString().split(".")[1];
+    const fileName: string = 'group_' + res.locals.groupid + "_" + res.locals.group.Image_TimeStamp + "." + fileextension;
+
+    let x: Group = res.locals.group;
+    x.Background_FileName = fileName
+    res.locals.group = x;
 
     try {
         createBlobOnContainer("groups", file, fileName).then((requestId: string | undefined) => {
@@ -159,10 +181,10 @@ router.use((req: Request, res: Response, next: NextFunction) => {
                     });
                 } else {
                     res.locals.requestId = requestId;
-                    next();
                 }
             });
         });
+        next();
     } catch (e) {
         res.status(400).json({
             Message: "Upload Failed.",
@@ -171,25 +193,9 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     }
 });
 
-router.use((req: Request, res: Response, next: NextFunction) => {
+// Update the database with the new name for the group background image.
 
-    const requestId = res.locals.requestId;
-    const group: Group = res.locals.group;
 
-    addGroup(group).then((handleFullfilled: InsertResult) => {
-        res.status(200).json({
-            Message: "Group Created Successful.",
-            Detail: handleFullfilled,
-            blobReqId: res.locals.requestId,
-            filename: req.file?.filename
-        });
-    }, (handleRejected: any) => {
-        res.status(400).json({
-            Message: "Group Database Update Failed.",
-            Detail: handleRejected
-        });
-    });
-});
 
 function getBlobSaS(container: string, fileName: string) {
     try {

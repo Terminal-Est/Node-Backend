@@ -8,6 +8,7 @@ var path = require('path');
 var multer = require('multer');
 var express = require('express');
 var router = express.Router();
+const sharp = require('sharp');
 
 import {
     BlobServiceClient,
@@ -158,6 +159,18 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             Detail: handleRejected
         });
     });
+});
+
+router.use((req: Request, res: Response, next: NextFunction) => {
+    
+    var file = './images/' + req.file?.filename;
+    const fileextension = req.file?.originalname.toString().split(".")[1];
+    const fileName: string = 'group_' + res.locals.groupid + "_thumbnail_" + res.locals.group.Image_TimeStamp + "." + fileextension;
+
+
+    sharp(file).resize({width: 100, height: 100, fit: 'fill'}).toFile('./images/' + fileName).then()
+
+    next();
 });
 
 // Insert the images into the group blob on Azure.

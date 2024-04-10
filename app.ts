@@ -136,6 +136,10 @@ app.post('/login', fieldsOnly, loginRouter);
 var addVideoRouter = require('./routes/addVideo');
 app.post('/video', uploads.single('video'), addVideoRouter);
 
+// Delete video from storage.
+var deleteVideoRouter = require('./routes/deleteVideo');
+app.use('/video/delete', fieldsOnly, deleteVideoRouter);
+
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
 app.use('/video/get', fieldsOnly, getVideoSas);

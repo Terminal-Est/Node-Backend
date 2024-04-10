@@ -3,7 +3,8 @@ import { BlobServiceClient,
     BlockBlobClient, 
     StorageSharedKeyCredential, 
     generateBlobSASQueryParameters, 
-    BlobSASPermissions } from "@azure/storage-blob";
+    BlobSASPermissions,
+    BlobDeleteOptions } from "@azure/storage-blob";
 import { AppDataSource } from "../data/data-source";
 import { validate } from "class-validator";
 import { Video } from "../data/entity/video";
@@ -44,6 +45,20 @@ async function deleteBlobStorageContainer(containerName: string) {
     try {
         const containerClient: ContainerClient = getBlobContainerClient(containerName);
         const response = await containerClient.delete();
+        return response.requestId;
+    } catch (e) {
+        throw e;
+    }
+}
+
+async function deleteBlobFromContainer(containerName: string, blobName: string) {
+    try {
+        const containerClient: ContainerClient = getBlobContainerClient(containerName);
+        const blobBlockClient: BlockBlobClient = containerClient.getBlockBlobClient(blobName);
+        const blobDeleteOptions: BlobDeleteOptions = {
+            deleteSnapshots: "include"
+        }
+        const response = await blobBlockClient.delete(blobDeleteOptions);
         return response.requestId;
     } catch (e) {
         throw e;
@@ -91,6 +106,15 @@ async function createVideo(video: Video) {
         .execute();
 }
 
+async function deleteVideo(video: string, uuid: string) {
+    return await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(Video)
+        .where("videoid = :video", { video: video })
+        .andWhere("uuid = :uuid", { uuid: Number(uuid) })
+        .execute();
+}
+
 // Get a blob access url for specific blobs on a container.
 function getBlobSaS(container: string, fileName: string) {
     try {
@@ -123,4 +147,6 @@ export {
     createBlobOnContainer,
     validateVideo,
     createVideo,
+    deleteVideo,
+    deleteBlobFromContainer
 }

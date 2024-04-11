@@ -34,13 +34,12 @@ async function verifyToken(jwt: any, jwk1: any, jwk2: any) {
     const decodedJwt = jose.decodeJwt(jwt);
     const kid = decodedJwt.kid;
 
-    console.log(decodedJwt.exp);
-
     if (kid == jwk1.kid) {
         jwk = jwk1
     } else {
         jwk = jwk2
     }
+    
     const publicKey = await jose.importJWK(jwk, alg);
     const { payload, protectedHeader } = await jose.jwtVerify(jwt, publicKey);
     return { payload: payload, header: protectedHeader};

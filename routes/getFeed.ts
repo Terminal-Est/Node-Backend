@@ -40,8 +40,12 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
         
         for (var j = 0; j < ug.length; j++) {
             
-            var user: User = await getUserUUID(String(ug[j].userid));    
-            usersByGroup.push(user);  
+            if (String(ug[j].userid) == uuid) {
+                continue;
+            } else {
+                var user: User = await getUserUUID(String(ug[j].userid));    
+                usersByGroup.push(user);  
+            }
         }
     }
 
@@ -107,8 +111,6 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     for (var i = 0; i < usersByGroup.length; i++) {
         
-        console.log("User by Group = " + usersByGroup[i].uuid)
-
         await getUserVideos(String(usersByGroup[i].uuid)).then((handleFulfilled) => {
             
             var videos: Video[] = handleFulfilled;
@@ -138,7 +140,6 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     res.status(200).json({
         message: "Feed Data Returned",
-        Token: res.locals.jwt,
         object
     })
 });

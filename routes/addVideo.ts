@@ -51,6 +51,11 @@ router.use((req: Request, res : Response, next: NextFunction) => {
                     next();
                 }
             });
+        }).catch((err) => {
+            res.status(500).json({
+                Message: "Blob Creation Failure.",
+                Detail: err
+            });
         });
     } catch (e) {
         res.status(500).json({

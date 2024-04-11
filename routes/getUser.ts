@@ -23,13 +23,18 @@ router.use((req: Request, res : Response, next: NextFunction) => {
                 postcode: handleFulfilled.postcode,
                 avatar: avatarUrl
             }
-        })
+        });
     }, (handleRejected) => {
         res.status(400).json({
             Message: "User Not Found.",
             Detail: handleRejected
-        })
-    })
+        });
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "User Retrieval Error.",
+            Detail: err
+        });
+    });
 });
 
 module.exports = router;

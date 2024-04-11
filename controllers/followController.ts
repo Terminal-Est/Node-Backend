@@ -3,7 +3,7 @@ import { UserFollows } from "../data/entity/userFollows";
 import { validate } from "class-validator";
 
 async function validateUserFollows(userFollows: UserFollows) {
-    const errors = await validate(UserFollows)
+    const errors = await validate(userFollows)
     return new Promise<boolean>(function(resolve, reject) {
         if (errors.length > 0) {
             return reject(errors);

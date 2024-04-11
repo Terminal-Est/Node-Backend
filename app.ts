@@ -95,8 +95,6 @@ app.use(cookieParser());
 var indexRouter = require('./routes/index');
 app.get('/', indexRouter);
 
-// USER routes. Actions on TypeORM user entity.
-// -------------------------------------------- 
 // Post route for adding User.
 var addUserRouter = require('./routes/addUser');
 app.post('/user', avatarUpload.single('avatar'), addUserRouter);
@@ -149,7 +147,11 @@ app.use('/video/delete', fieldsOnly, deleteVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
-app.use('/video/get', fieldsOnly, getVideoSas);
+app.get('/video/:id/:fileName', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.id;
+    res.locals.filename = req.params.fileName;
+    next();
+}, getVideoSas);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');

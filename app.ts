@@ -120,6 +120,13 @@ app.delete('/user', fieldsOnly, deleteUserRouter);
 var getGroupsRouter = require('./routes/getGroups');
 app.get('/groups', fieldsOnly, getGroupsRouter);
 
+// Get route to get all videos by group ID.
+var getGroupVideos = require('./routes/getGroupVideos');
+app.get('/groups/:id/videos', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.groupId = req.params.id;
+    next();
+}, fieldsOnly, getGroupVideos)
+
 // Post route for users to join a group.
 var joinGroupRouter = require('./routes/joinGroup');
 app.post('/joingroup', fieldsOnly, joinGroupRouter);

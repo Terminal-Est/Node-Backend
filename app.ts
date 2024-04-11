@@ -120,8 +120,9 @@ app.get('/groups', fieldsOnly, getGroupsRouter);
 
 // Get route to get all videos by group ID.
 var getGroupVideos = require('./routes/getGroupVideos');
-app.get('/groups/videos/:id', (req: Request, res: Response, next: NextFunction) => {
+app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.groupId = req.params.id;
+    res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, fieldsOnly, getGroupVideos)
 

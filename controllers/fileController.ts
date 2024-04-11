@@ -105,6 +105,7 @@ async function createVideo(video: Video) {
         .execute();
 }
 
+// Delete a video from the database.
 async function deleteVideo(video: string, uuid: string) {
     return await AppDataSource.createQueryBuilder()
         .delete()
@@ -112,6 +113,14 @@ async function deleteVideo(video: string, uuid: string) {
         .where("videoid = :video", { video: video })
         .andWhere("uuid = :uuid", { uuid: Number(uuid) })
         .execute();
+}
+
+// Get a video from the database based on video ID.
+async function getVideo(videoId: string) {
+    return await AppDataSource.getRepository(Video)
+        .createQueryBuilder("video")
+        .where("videoid = :video", { video: videoId })
+        .getOne();
 }
 
 // Get a blob access url for specific blobs on a container.
@@ -147,5 +156,6 @@ export {
     validateVideo,
     createVideo,
     deleteVideo,
+    getVideo,
     deleteBlobFromContainer
 }

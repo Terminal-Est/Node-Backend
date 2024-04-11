@@ -22,7 +22,7 @@ router.delete('/', (req: Request, res : Response, next: NextFunction) => {
             })
         });
     }).catch((err) => {
-        res.status(400).json({
+        res.status(500).json({
             Message: "Blob Delete Error.",
             Detail: err
         });

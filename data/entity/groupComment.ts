@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional } from "class-validator";
 import { Group } from "./group";
 
 /**
- * User entity class. TypeORM class with validation decorators.
+ * GroupComment entity class. TypeORM class with validation decorators.
  */
 @Entity()
 export class GroupComment {

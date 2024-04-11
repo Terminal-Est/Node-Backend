@@ -22,5 +22,5 @@ export class Group {
     System: number;
 
     @OneToMany(() => GroupComment, (comment) => comment.groupId)
-    comment: Comment[];
+    comments: Comment[];
 }

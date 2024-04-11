@@ -66,11 +66,11 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     const uuid = String(res.locals.uuid);
+    var user = new User();
     var key = "userVideos";
     var object: any = {};
     var userVideos: Video[] = [];
     object[key] = [];
-
     var usersByGroup: User[] = res.locals.usersByGroup;
 
     await getUserVideos(uuid).then((handleFulfilled) => {
@@ -81,19 +81,17 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
             Detail: err
         })
     });
+        
+    await getUserUUID(uuid).then((handleFulfilled) => {
+        user = handleFulfilled;
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Feed Retreival Error.",
+            Detail: err
+        })
+    });
 
     for (var i = 0; i < userVideos.length; i++) {
-
-        var user = new User();
-        
-        await getUserUUID(uuid).then((handleFulfilled) => {
-            user = handleFulfilled;
-        }).catch((err) => {
-            res.status(500).json({
-                Message: "Feed Retreival Error.",
-                Detail: err
-            })
-        });
 
         var vidUrl: string = getBlobSaS("u-" + uuid, userVideos[i].videoId);
         var data = {
@@ -109,6 +107,8 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     for (var i = 0; i < usersByGroup.length; i++) {
         
+        console.log("User by Group = " + usersByGroup[i].uuid)
+
         await getUserVideos(String(usersByGroup[i].uuid)).then((handleFulfilled) => {
             
             var videos: Video[] = handleFulfilled;

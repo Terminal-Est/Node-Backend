@@ -1,6 +1,7 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
 import { IsNotEmpty, IsOptional, Length, MaxLength } from "class-validator";
 import { VideoComment } from "./videoComment";
+import { Group } from "./group";
 
 @Entity()
 export class Video {
@@ -40,4 +41,7 @@ export class Video {
 
     @OneToMany(() => VideoComment, (comment) => comment.videoId)
     comments: VideoComment[];
+
+    @OneToMany(() => Group, (group) => group.ID)
+    groups: Group[]
 }

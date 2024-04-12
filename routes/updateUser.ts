@@ -4,13 +4,10 @@ import { getUserUUID, updateUser, validateUser } from "../controllers/userContro
 import { User } from "../data/entity/user";
 import { unlink } from "fs";
 import { ValidationError } from "class-validator";
-import { UpdateResult } from "typeorm/driver/mongodb/typings";
 var express = require('express');
 var router = express.Router();
 
 router.use((req: Request, res : Response, next: NextFunction) => { 
-
-    const fileName = String(req.file?.filename);
 
     getUserUUID(String(req.body.uuid)).then((handleFulfilled) => {
 

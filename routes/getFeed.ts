@@ -40,8 +40,12 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
         
         for (var j = 0; j < ug.length; j++) {
             
-            var user: User = await getUserUUID(String(ug[j].userid));    
-            usersByGroup.push(user);  
+            if (String(ug[j].userid) == uuid) {
+                continue;
+            } else {
+                var user: User = await getUserUUID(String(ug[j].userid));    
+                usersByGroup.push(user);  
+            }
         }
     }
 
@@ -66,11 +70,11 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     const uuid = String(res.locals.uuid);
+    var user = new User();
     var key = "userVideos";
     var object: any = {};
     var userVideos: Video[] = [];
     object[key] = [];
-
     var usersByGroup: User[] = res.locals.usersByGroup;
 
     await getUserVideos(uuid).then((handleFulfilled) => {
@@ -81,19 +85,17 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
             Detail: err
         })
     });
+        
+    await getUserUUID(uuid).then((handleFulfilled) => {
+        user = handleFulfilled;
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Feed Retreival Error.",
+            Detail: err
+        })
+    });
 
     for (var i = 0; i < userVideos.length; i++) {
-
-        var user = new User();
-        
-        await getUserUUID(uuid).then((handleFulfilled) => {
-            user = handleFulfilled;
-        }).catch((err) => {
-            res.status(500).json({
-                Message: "Feed Retreival Error.",
-                Detail: err
-            })
-        });
 
         var vidUrl: string = getBlobSaS("u-" + uuid, userVideos[i].videoId);
         var data = {
@@ -138,7 +140,6 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
 
     res.status(200).json({
         message: "Feed Data Returned",
-        Token: res.locals.jwt,
         object
     })
 });

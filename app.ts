@@ -95,22 +95,20 @@ app.use(cookieParser());
 var indexRouter = require('./routes/index');
 app.get('/', indexRouter);
 
-// USER routes. Actions on TypeORM user entity.
-// -------------------------------------------- 
 // Post route for adding User.
 var addUserRouter = require('./routes/addUser');
 app.post('/user', avatarUpload.single('avatar'), addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', avatarUpload.single('avatar'), updateUserRouter);
+app.put('/user', jwtHandler.validateJWT, avatarUpload.single('avatar'), updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');
 app.get('/user/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.id;
     next();
-},  getUserRouter);
+}, jwtHandler.validateJWT, getUserRouter);
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/deleteUser');
@@ -119,6 +117,14 @@ app.delete('/user', fieldsOnly, deleteUserRouter);
 // Get route to get all groups.
 var getGroupsRouter = require('./routes/getGroups');
 app.get('/groups', fieldsOnly, getGroupsRouter);
+
+// Get route to get all videos by group ID.
+var getGroupVideos = require('./routes/getGroupVideos');
+app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.groupId = req.params.id;
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, fieldsOnly, getGroupVideos)
 
 // Post route for users to join a group.
 var joinGroupRouter = require('./routes/joinGroup');
@@ -134,26 +140,41 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.post('/video', uploads.single('video'), addVideoRouter);
+app.post('/video', jwtHandler.validateJWT, uploads.single('video'), addVideoRouter);
+
+// Delete video from storage.
+var deleteVideoRouter = require('./routes/deleteVideo');
+app.use('/video/delete', jwtHandler.validateJWT, fieldsOnly, deleteVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
-app.use('/video/get', fieldsOnly, getVideoSas);
+app.get('/video/:id/:fileName', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.id;
+    res.locals.filename = req.params.fileName;
+    next();
+}, jwtHandler.validateJWT, getVideoSas);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
 app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.id;
     next();
-}, jwtHandler.validateJWT, jwtHandler.issueJWT, getUserFeed);
+}, jwtHandler.validateJWT, getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
-app.post('/follow', fieldsOnly, addUserFollow);
+app.post('/follow', jwtHandler.validateJWT, fieldsOnly, addUserFollow);
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
 app.get('/.well-known/jwks', jwksRouter);
+
+// Get JWT Refresh token.
+var getJWTRouter = require('./routes/getJWT');
+app.get('/validate/:id', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.id;
+    next();
+}, jwtHandler.validateJWT, jwtHandler.issueJWT, getJWTRouter)
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);

@@ -7,6 +7,9 @@ import { UserFollows } from './entity/userFollows';
 import { Group } from './entity/group';
 import { UserGroup } from './entity/userGroup'
 import { Categories } from './entity/category'
+import { VideoComment } from './entity/videoComment';
+import { GroupComment } from './entity/groupComment';
+import { GroupVideos } from './entity/groupVideos';
 var logging = require('../utils/logging');
 
 var sqlPort: number = Number(process.env.SQL_SERVER_PORT);
@@ -22,9 +25,9 @@ export const UserDataSource = new DataSource({
     password: process.env.SQL_SERVER_PII_PASSWORD,
     database: process.env.SQL_SERVER_PII_DB,
     entities: [User, Password],
-    logging: ["error", "schema", "query"],
+    logging: ["error", "schema"],
     connectionTimeout: 60000
-})
+});
 
 export const AppDataSource = new DataSource({
     type: "mssql",
@@ -33,8 +36,16 @@ export const AppDataSource = new DataSource({
     username: process.env.SQL_SERVER_DATA_LOGIN,
     password: process.env.SQL_SERVER_DATA_PASSWORD,
     database: process.env.SQL_SERVER_DATA_DB,
-    entities: [Uuid, Video, Group, UserGroup, Categories, UserFollows],
-    logging: ["error", "schema", "query"],
+    entities: [Uuid, 
+        Video, 
+        Group, 
+        UserGroup, 
+        Categories, 
+        UserFollows, 
+        VideoComment, 
+        GroupComment,
+        GroupVideos],
+    logging: ["error", "schema"],
     connectionTimeout: 60000
 });
 
@@ -46,7 +57,7 @@ AppDataSource.initialize()
     .catch((err) => {
         console.log("Error initilizing app data source : " + err);
         logging.logToFile("Error initilizing app data source : " + err);
-    })
+    });
 
 UserDataSource.initialize()
     .then(() => {

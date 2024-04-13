@@ -9,13 +9,14 @@ var bodyParser = require('body-parser');
 var security = require('./controllers/securityController');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
+import { NextFunction, Request, Response } from "express";
 
 // Multer disk storage.
 const storage = multer.diskStorage({
-    fileFilter: function(req: any, file: any, cb: any) {
+    fileFilter: function (req: any, file: any, cb: any) {
         mimeTypeCheck(req, file, cb);
     },
-    destination: function(req: any, file: any, cb: any) {
+    destination: function (req: any, file: any, cb: any) {
         cb(null, './videos');
     },
     filename: function (req: any, file: any, cb: any) {
@@ -27,7 +28,7 @@ const storage = multer.diskStorage({
 // Check video mime types. Must be .mov or .mp4.
 function mimeTypeCheck(req: any, file: any, cb: any) {
 
-    const mimetype: string = file.mimetype; 
+    const mimetype: string = file.mimetype;
 
     if (mimetype.toLowerCase() == "video/mp4" || mimetype.toLowerCase() == "video/quicktime") {
         cb(null, true);
@@ -43,9 +44,9 @@ const uploads = multer({ storage: storage });
 
 var app = express();
 // for parsing application/json
-app.use(bodyParser.json()); 
+app.use(bodyParser.json());
 // for parsing application/xwww-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true })); 
+app.use(bodyParser.urlencoded({ extended: true }));
 // app logger
 app.use(logger('dev'));
 app.use(express.json());
@@ -87,6 +88,21 @@ app.post('/video', uploads.single('video'), addVideoRouter);
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
 app.get('/video', getVideoSas);
+
+// Get likes for a video.
+var getLikesRouter = require("./routes/getLikes");
+app.get('/like/:videoid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.videoid = req.params.videoid;
+    next();
+}, getLikesRouter);
+
+// Add a user like to a video.
+var addLikeRouter = require('./routes/addLike');
+app.post('/like', fieldsOnly, addLikeRouter);
+
+// Remove a user like for a video.
+var deleteLikeRouter = require('./routes/deleteLike');
+app.delete('/like', fieldsOnly, deleteLikeRouter);
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
@@ -130,10 +146,10 @@ var getRSA1 = cron.schedule('20 * * * *', () => {
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
-});            
+});
 
 var getRSA2 = cron.schedule('50 * * * *', () => {
-   getKeyPair2();
+    getKeyPair2();
 }, {
     scheduled: true,
     timezone: "Australia/Melbourne"
@@ -152,5 +168,5 @@ function stopRsaRotation() {
 
 // Start RSA rotation.
 startRsaRotation();
-    
+
 module.exports = app;

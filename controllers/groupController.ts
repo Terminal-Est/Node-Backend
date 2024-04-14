@@ -50,9 +50,19 @@ async function addGroup(tempGroup: Group) {
         return result;
 }
 
+async function updateGroup(tempGroup: Group) {
+    return await AppDataSource
+    .createQueryBuilder()
+    .update(Group)
+    .set({ Background_FileName: tempGroup.Background_FileName })
+    .where("ID = :id", { id: tempGroup.ID })
+    .execute()
+}
+
 export { getGroups, 
     joinGroup, 
     addGroup, 
     getGroupByID, 
-    getGroupByCategoryID 
+    getGroupByCategoryID,
+    updateGroup
 };

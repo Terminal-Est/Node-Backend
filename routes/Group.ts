@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { getGroupByID, getGroups, addGroup, joinGroup, getGroupByCategoryID } from "../controllers/groupController";
+import { getGroupByID, getGroups, addGroup, joinGroup, getGroupByCategoryID, updateGroup } from "../controllers/groupController";
 import { createBlobOnContainer } from "../controllers/fileController";
 import { InsertResult } from "typeorm";
 import { Group } from "../data/entity/group";
@@ -16,11 +16,9 @@ import {
     BlockBlobClient,
     StorageSharedKeyCredential,
     generateBlobSASQueryParameters,
-    BlobSASPermissions
+    BlobSASPermissions,
+    BlobClient
 } from "@azure/storage-blob";
-import { AppDataSource } from "../data/data-source";
-import { validate } from "class-validator";
-import { Video } from "../data/entity/video";
 
 const sasKey = "m9GyAx3fjQ554KzLQd3D5lQQJtElhOM0ZIm1oY6byhaqShGpXgg6ovUUx3M1RT5Bjp4OQEBLXYo8+ASteExa0g==";
 const accountName = "greetikstorage";
@@ -65,8 +63,10 @@ const fieldsOnly = multer().none();
 // Middleware for adding array of images to request of a size of 2.
 const imageUploads = multer({ storage: imageStorage });
 
+// Get all groups.
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
     let listofgroups: Array<any> = new Array<any>();
+
     getGroups().then((values) => {
         values.forEach(function (value) {
             let bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
@@ -82,13 +82,22 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
 
             listofgroups.push(x)
         })
-        res.status(200).json({
-            Message: "Groups Returned Successfully.",
-            listofgroups
+        res.json({
+            Message: "Success",
+            Detail: listofgroups
         })
     });
 });
 
+router.get('/files', (req: Request, res: Response, next: NextFunction) => {
+    const containerClient = blobServiceClient.getContainerClient(
+        'groups'
+    );
+    listBlobsFlatWithPageMarker(containerClient);
+
+})
+
+// Get group by ID.
 router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
     const groupid = parseInt(req.params.id);
     getGroupByID(groupid).then((value) => {
@@ -96,7 +105,7 @@ router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
         const bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
 
         res.status(200).json({
-            Message: "Group Returned Successfully.",
+            Message: "Success",
             GroupDetails: {
                 id: value?.ID,
                 name: value?.Name,
@@ -109,6 +118,30 @@ router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
     })
 });
 
+router.get('/:id/thumbnail', (req: Request, res: Response, next: NextFunction) => {
+    const groupid = parseInt(req.params.id);
+    getGroupByID(groupid).then((value) => {
+        if (value != null) {
+            downloadBlobToFile(value.Background_FileName).then(() => {
+                console.log('File downloaded');
+                var file = path.join('../images/' + value?.Background_FileName);
+                const fileextension = value?.Background_FileName.toString().split(".")[1];
+                const fileName: string = path.join('../images/' + 'group_' + value?.ID + "_thumbnail." + fileextension);
+
+                sharp(file).resize({ width: 100, height: 100, fit: 'fill' }).toFile(fileName)
+
+                res.sendFile(__dirname + '/' + fileName);
+            });
+        }
+    });
+    /*
+    unlink('../images/' + fileName, () => {
+        // Do nothing.
+    });
+    */
+});
+
+// Get group category by ID.
 router.get('/categories/:categoryid', (req: Request, res: Response, next: NextFunction) => {
     const categoryid: number = parseInt(req.params.categoryid);
 
@@ -117,25 +150,32 @@ router.get('/categories/:categoryid', (req: Request, res: Response, next: NextFu
     })
 });
 
+// Post to allow a user to join a group.
 router.post('/:id/join', fieldsOnly, (req: Request, res: Response, next: NextFunction) => {
     const groupid: number = parseInt(req.params.id);
     const userid: number = parseInt(req.body.uuid);
 
-    joinGroup(userid, groupid);
-
-    res.sendStatus(200);
+    joinGroup(userid, groupid).then((handleFullfilled: InsertResult) => {
+        res.json({
+            Message: 'Success',
+            Detail: handleFullfilled
+        })
+    })
 });
 
+// Create a group.
 router.post('/', imageUploads.single('background'), (req: Request, res: Response, next: NextFunction) => {
+
     const ts = String(Date.now());
     const tempGroup = new Group();
+
     tempGroup.Name = req.body.Name;
     tempGroup.Description = req.body.Description;
     tempGroup.System = parseInt("1");
     tempGroup.CategoryID = req.body.categoryid;
     tempGroup.Location = req.body.Location;
+
     if (req.file != null) {
-        //const origFileName: string = req.file?.originalname;
         tempGroup.Background_FileName = req.file.originalname;
         tempGroup.Image_TimeStamp = ts;
     }
@@ -148,30 +188,35 @@ router.post('/', imageUploads.single('background'), (req: Request, res: Response
 // Insert the database record first to get the GroupID to name the image.
 router.use((req: Request, res: Response, next: NextFunction) => {
 
-    const group: Group = res.locals.group;
+    let group: Group = res.locals.group;
 
     addGroup(group).then((handleFullfilled: InsertResult) => {
         res.locals.groupid = handleFullfilled.identifiers[0].ID;
+        // Update group record with ID
+        group.ID = handleFullfilled.identifiers[0].ID;
+        res.locals.group = group;
         next();
     }, (handleRejected: any) => {
         res.status(400).json({
-            Message: "Group Database Update Failed.",
+            Message: "Success",
             Detail: handleRejected
         });
     });
 });
 
+/*
+// Return a thumbnail from an image.
 router.use((req: Request, res: Response, next: NextFunction) => {
-    
+
     var file = './images/' + req.file?.filename;
     const fileextension = req.file?.originalname.toString().split(".")[1];
     const fileName: string = 'group_' + res.locals.groupid + "_thumbnail_" + res.locals.group.Image_TimeStamp + "." + fileextension;
 
-
-    sharp(file).resize({width: 100, height: 100, fit: 'fill'}).toFile('./images/' + fileName).then()
+    sharp(file).resize({ width: 100, height: 100, fit: 'fill' }).toFile('./images/' + fileName).then()
 
     next();
 });
+*/
 
 // Insert the images into the group blob on Azure.
 router.use((req: Request, res: Response, next: NextFunction) => {
@@ -196,8 +241,9 @@ router.use((req: Request, res: Response, next: NextFunction) => {
                     res.locals.requestId = requestId;
                 }
             });
+            updateGroup(x);
+            res.send(x);
         });
-        next();
     } catch (e) {
         res.status(400).json({
             Message: "Upload Failed.",
@@ -207,8 +253,78 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Update the database with the new name for the group background image.
+router.use((req: Request, res: Response, next: NextFunction) => {
+    const tempGroup = res.locals.group;
+    updateGroup(tempGroup);
+    res.json(tempGroup);
+});
 
+async function listBlobsFlatWithPageMarker(containerClient: ContainerClient) {
 
+    // page size - artificially low as example
+    const maxPageSize = 100;
+
+    let i = 1;
+    let marker;
+
+    // some options for filtering list
+    const listOptions = {
+        includeMetadata: false,
+        includeSnapshots: false,
+        includeTags: false,
+        includeVersions: false,
+        prefix: ''
+    };
+
+    let iterator = containerClient.listBlobsFlat(listOptions).byPage({ maxPageSize });
+    let response = (await iterator.next()).value;
+
+    // Prints blob names
+    for (const blob of response.segment.blobItems) {
+        console.log(`Flat listing: ${i++}: ${blob.name}`);
+    }
+
+    // Gets next marker
+    marker = response.continuationToken;
+
+    // Passing next marker as continuationToken    
+    iterator = containerClient.listBlobsFlat().byPage({
+        continuationToken: marker,
+        maxPageSize: maxPageSize * 2
+    });
+    response = (await iterator.next()).value;
+
+    /*
+    // Prints next blob names
+    for (const blob of response.segment.blobItems) {
+        console.log(`Flat listing: ${i++}: ${blob.name}`);
+    }
+    */
+}
+
+async function downloadBlobToFile(blobName: string | undefined) {
+
+    const path = require('path');
+    const { dirname } = require('path');
+    //const appDir = dirname(require.main.filename);
+
+    console.log(path._makeLong('app.ts'));
+
+    //const dirPath = path.join(__dirname, '/images');
+
+    const containerClient = blobServiceClient.getContainerClient(
+        'groups'
+    );
+
+    //const dirPath = path.join('C:\\Users\\Sasse.Mark\\Documents\\Education\\CPT331\\Node-Backend\\images\\', blobName);
+    const dirPath = path.join('../images/', blobName);
+    //const fileNameWithPath: string = ('./images/' + blobName)
+
+    if (blobName) {
+        const blobClient: BlobClient = containerClient.getBlobClient(blobName);
+        await blobClient.downloadToFile(blobName);
+    }
+}
 
 function getBlobSaS(container: string, fileName: string) {
     try {

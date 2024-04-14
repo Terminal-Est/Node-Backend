@@ -17,9 +17,6 @@ import {
     generateBlobSASQueryParameters,
     BlobSASPermissions
 } from "@azure/storage-blob";
-import { AppDataSource } from "../data/data-source";
-import { validate } from "class-validator";
-import { Video } from "../data/entity/video";
 
 const sasKey = "m9GyAx3fjQ554KzLQd3D5lQQJtElhOM0ZIm1oY6byhaqShGpXgg6ovUUx3M1RT5Bjp4OQEBLXYo8+ASteExa0g==";
 const accountName = "greetikstorage";
@@ -62,6 +59,7 @@ function imageMimeTypeCheck(req: any, file: any, cb: any) {
 // Middleware for adding array of images to request of a size of 2.
 const imageUploads = multer({ storage: imageStorage });
 
+// Get all categories.
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
     let listofgroups: Array<any> = new Array<any>();
     getCategories().then((values) => {
@@ -78,14 +76,15 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
             }
 
             listofgroups.push(x)
-        })
-        res.status(200).json({
-            Message: "Groups Returned Successfully.",
-            listofgroups
-        })
+        });
     });
+    res.json({
+        Message: "Success",
+        Detail: listofgroups
+    })
 });
 
+// Get group by id.
 router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
     const categoryid = parseInt(req.params.id)
     getCategoryByID(categoryid).then((value) => {
@@ -105,6 +104,7 @@ router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
     })
 });
 
+// Create a new user group.
 const catimages = imageUploads.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }])
 router.post('/', catimages, (req: Request, res: Response, next: NextFunction) => {
     const ts = String(Date.now());
@@ -122,6 +122,7 @@ router.post('/', catimages, (req: Request, res: Response, next: NextFunction) =>
     next();
 });
 
+// Insert the category into the database to get a categoryid value. This is used for the name of image files.
 router.use((req: Request, res: Response, next: NextFunction) => {
 
     const requestId = res.locals.requestId;
@@ -143,6 +144,7 @@ class GroupImage {
     filename: string;
 }
 
+// Rename image files
 router.use((req: Request, res: Response, next: NextFunction) => {
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };

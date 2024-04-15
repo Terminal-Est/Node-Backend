@@ -44,6 +44,7 @@ async function getVideosByGroup(groupId: number) {
         .getMany();
     return videos;
 }
+
 async function addGroup(tempGroup: Group) {
     const result: InsertResult = await AppDataSource.createQueryBuilder()
         .insert()
@@ -65,5 +66,6 @@ export { getGroups,
     joinGroup, 
     addGroup, 
     getGroupByID, 
-    getGroupByCategoryID 
+    getGroupByCategoryID,
+    getVideosByGroup
 };

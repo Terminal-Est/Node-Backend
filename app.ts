@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const avatarImage = multer.diskStorage({
+const imageStore = multer.diskStorage({
     fileFilter: function(req: any, file: any, cb: any) {
         imageMimeTypeCheck(req, file, cb);
     },
@@ -77,7 +77,7 @@ const fieldsOnly = multer().none();
 // Multer for temp storage of video uploads.
 const uploads = multer({ storage: storage });
 // Middleware for adding array of images to request of a size of 2.
-const avatarUpload = multer({ storage: avatarImage });
+const imageUpload = multer({ storage: imageStore });
 
 var app = express();
 
@@ -97,11 +97,11 @@ app.get('/', indexRouter);
 
 // Post route for adding User.
 var addUserRouter = require('./routes/addUser');
-app.post('/user', avatarUpload.single('avatar'), addUserRouter);
+app.post('/user', imageUpload.single('avatar'), addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', jwtHandler.validateJWT, avatarUpload.single('avatar'), updateUserRouter);
+app.put('/user', jwtHandler.validateJWT, imageUpload.single('avatar'), updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');
@@ -136,6 +136,19 @@ app.use('/groups', GroupRouter);
 // Get route for getting all categories
 var CategoriesRouter = require('./routes/Categories')
 app.use('/categories', CategoriesRouter);
+
+
+
+// Gets a category by id.
+var getCategoryRouter = require('/routes/getCategory');
+app.get('/categories/:id', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.id = req.params.id;
+    next();
+}, jwtHandler.validateJWT, getCategoryRouter);
+
+// Gets all categories.
+var getCategoriesRouter = require('/routes/getCategories');
+app.get('/categories', jwtHandler.validateJWT, getCategoriesRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

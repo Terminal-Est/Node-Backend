@@ -17,9 +17,6 @@ import {
     generateBlobSASQueryParameters,
     BlobSASPermissions
 } from "@azure/storage-blob";
-import { AppDataSource } from "../data/data-source";
-import { validate } from "class-validator";
-import { Video } from "../data/entity/video";
 
 const sasKey = "m9GyAx3fjQ554KzLQd3D5lQQJtElhOM0ZIm1oY6byhaqShGpXgg6ovUUx3M1RT5Bjp4OQEBLXYo8+ASteExa0g==";
 const accountName = "greetikstorage";

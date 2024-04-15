@@ -114,10 +114,6 @@ app.get('/user/:id', (req: Request, res: Response, next: NextFunction) => {
 var deleteUserRouter = require('./routes/deleteUser');
 app.delete('/user', fieldsOnly, deleteUserRouter);
 
-// Get route to get all groups.
-var getGroupsRouter = require('./routes/getGroups');
-app.get('/groups', fieldsOnly, getGroupsRouter);
-
 // Get route to get all videos by group ID.
 var getGroupVideos = require('./routes/getGroupVideos');
 app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
@@ -130,9 +126,16 @@ app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunc
 var joinGroupRouter = require('./routes/joinGroup');
 app.post('/joingroup', fieldsOnly, joinGroupRouter);
 
+const GroupRouter = require('./routes/Group');
+app.use('/groups', GroupRouter);
+
+// Post route to create a group. Allows an upload of 2 images at 5 meg each. See imageUploads multer function.
+// var addGroupRouter = require('./routes/addGroup');
+// app.post('/addgroup', imageUploads.array('imageArray', 2), addGroupRouter);
+
 // Get route for getting all categories
-var getCategoriesRouter = require('./routes/getCategories')
-app.get('/categories', fieldsOnly, getCategoriesRouter);
+var CategoriesRouter = require('./routes/Categories')
+app.use('/categories', CategoriesRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

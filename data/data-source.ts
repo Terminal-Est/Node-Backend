@@ -3,6 +3,7 @@ import { User } from './entity/user';
 import { Password } from './entity/password';
 import { Video } from './entity/video';
 import { Uuid } from './entity/uuid';
+import { Like } from './entity/like';
 import { UserFollows } from './entity/userFollows';
 import { Group } from './entity/group';
 import { UserGroup } from './entity/userGroup'
@@ -36,6 +37,7 @@ export const AppDataSource = new DataSource({
     username: process.env.SQL_SERVER_DATA_LOGIN,
     password: process.env.SQL_SERVER_DATA_PASSWORD,
     database: process.env.SQL_SERVER_DATA_DB,
+
     entities: [Uuid, 
         Video, 
         Group, 
@@ -44,8 +46,10 @@ export const AppDataSource = new DataSource({
         UserFollows, 
         VideoComment, 
         GroupComment,
-        GroupVideos],
+        GroupVideos,
+        Like ],
     logging: ["error", "schema"],
+
     connectionTimeout: 60000
 });
 

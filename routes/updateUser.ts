@@ -12,9 +12,18 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     getUserUUID(String(req.body.uuid)).then((handleFulfilled) => {
 
         var user = new User;
-        user.uuid = handleFulfilled.uuid,
-        user.username = handleFulfilled.username,
-        user.dob = handleFulfilled.dob;
+        user.uuid = handleFulfilled.uuid;
+        user.username = handleFulfilled.username;
+        var dateOfBirth = new Date(handleFulfilled.dob);
+        const year = dateOfBirth.getFullYear().toString();
+        const month = dateOfBirth.getMonth().toString();
+        const day = dateOfBirth.getDay().toString();
+        
+        const dobString: string = `${year}-${month}-${day}`;
+
+        console.log(dobString);
+
+        user.dob = dobString;
 
         if (req.body.email) {
             user.email = req.body.email;

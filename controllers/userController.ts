@@ -1,4 +1,4 @@
-import { UserDataSource } from "../data/data-source";
+import { AppDataSource, UserDataSource } from "../data/data-source";
 import { User } from "../data/entity/user";
 import { Password } from "../data/entity/password";
 import { validate } from "class-validator";
@@ -8,18 +8,34 @@ var bcrypt = require('bcrypt');
 
 // Get user object from email address.
 async function getUserEmail(email: string) {
-    return await UserDataSource.getRepository(User)
+    var promise = await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
         .where("user.email = :id", {id: email})
         .getOne();
+    return new Promise<User>((resolve, reject) => {
+        if (promise != null) {
+            var user: User = promise;
+            return resolve(user);
+        } else {
+            return reject(false);
+        }
+    })
 }
 
 // Get a user object based on UUID.
 async function getUserUUID(uuid: string) {
-    return await UserDataSource.getRepository(User)
+    var promise = await UserDataSource.getRepository(User)
         .createQueryBuilder("user")
         .where("user.uuid = :id", {id: uuid})
         .getOne();
+    return new Promise<User>((resolve, reject) => {
+        if (promise != null) {
+            var user: User = promise;
+            return resolve(user);
+        } else {
+            return reject(false);
+        }
+    })
 }
 
 // Validate user supplied password against class validator parameters.
@@ -112,7 +128,8 @@ async function createUser(user: User) {
                 address: user.address,
                 city: user.city,
                 state: user.state,
-                postcode: user.postcode
+                postcode: user.postcode,
+                avatar: user.avatar
             }
         ])
         .execute();
@@ -120,7 +137,7 @@ async function createUser(user: User) {
 
 // Insert Uuid into user data database.
 async function createDataUser(userId: Uuid) {
-    return await UserDataSource.createQueryBuilder()
+    return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Uuid)
         .values([
@@ -132,11 +149,26 @@ async function createDataUser(userId: Uuid) {
 }
 
 // Set user authenticated based on supplied email.
-async function setUserAthenticated(email: string, auth: boolean) {
+async function setUserAthenticated(uuid: string, auth: boolean) {
     return await UserDataSource.createQueryBuilder()
         .update(User)
         .set({ auth: auth })
-        .where("email = :id", {id: email})
+        .where("uuid = :id", {id: uuid})
+        .execute();
+}
+
+async function updateUser(user: User) {
+    return await UserDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+            email: user.email,
+            address: user.address,
+            city: user.city,
+            state: user.state,
+            postcode: user.postcode,
+            avatar: user.avatar
+        })
+        .where("uuid = :id", {id: user.uuid})
         .execute();
 }
 
@@ -150,4 +182,6 @@ export { getUserEmail,
     createDataUser, 
     setUserAthenticated,
     validateUser,
-    validatePassword }; 
+    validatePassword,
+    updateUser
+ }; 

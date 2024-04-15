@@ -10,13 +10,13 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     removeLike(tempLike).then((handleFullfilled: DeleteResult) => {
         if (handleFullfilled.affected == 0) {
             res.status(404).json({
-                "Message": "No Like Found",
-                "Detail": handleFullfilled
+                Message: "No Like Found",
+                Detail: handleFullfilled
             })
         } else {
             res.json({
-                "Message": "Success",
-                "Detail": handleFullfilled
+                Message: "Success",
+                Detail: handleFullfilled
             })
         }
     })

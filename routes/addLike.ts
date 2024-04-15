@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
-import { Like } from "../data/entity/like";
 import { addLike, getLike } from "../controllers/likeController"
 import { ValidationError } from "class-validator";
 var express = require('express');
@@ -16,8 +15,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             next();
         } else {
             res.json({
-                "Message": "Failed",
-                "Detail": response
+                Message: "Failed",
+                Detail: response
             })
         }
     });
@@ -29,8 +28,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
     addLike(tempLike).then((handleFullfilled: InsertResult) => {
         res.json({
-            "Message": "Success",
-            "Detail": handleFullfilled
+            Message: "Success",
+            Detail: handleFullfilled
         })
     }, (handleRejected: ValidationError) => {
         res.status(400).json({

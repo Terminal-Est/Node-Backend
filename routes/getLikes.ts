@@ -8,7 +8,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     getLikes(ID).then(function (response) {
         if (response.length == 0) {
             res.status(404).json({
-                "Message": "No likes found."
+                Message: "No likes found."
             })
         } else {
             res.json(response);

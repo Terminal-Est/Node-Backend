@@ -12,9 +12,14 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     getUserUUID(String(req.body.uuid)).then((handleFulfilled) => {
 
         var user = new User;
-        user.uuid = handleFulfilled.uuid,
-        user.username = handleFulfilled.username,
-        user.dob = handleFulfilled.dob;
+        user.uuid = handleFulfilled.uuid;
+        user.username = handleFulfilled.username;
+        var dateOfBirth = new Date(handleFulfilled.dob);
+        var dateArray: string[] = dateOfBirth.toISOString().split('T');
+        
+        const dobString: string = dateArray[0];
+
+        user.dob = dobString;
 
         if (req.body.email) {
             user.email = req.body.email;
@@ -120,9 +125,9 @@ router.use((req: Request, res : Response, next: NextFunction) => {
         }
     } else {
         res.status(200).json({
-            Message: "User Added Successfully.",
+            Message: "User Updated Successfully.",
             Detail: res.locals.user.email,
-            containerReq: res.locals.contaierCreateReq,
+            updateRes: res.locals.updateResult
         });
     }
 });

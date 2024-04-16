@@ -4,7 +4,6 @@ import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
-
 router.use((req: Request, res: Response, next: NextFunction) => {
     const categoryid = parseInt(res.locals.id)
     getCategoryByID(categoryid).then((value) => {
@@ -23,3 +22,5 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         });
     });
 });
+
+module.exports = router;

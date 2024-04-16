@@ -1,23 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import { getCategories } from "../controllers/categoryController";
+import { getGroups } from "../controllers/groupController";
 import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
-
 router.use((req: Request, res: Response, next: NextFunction) => {
     let listofgroups: Array<any> = new Array<any>();
-    getCategories().then((values) => {
+    getGroups().then((values) => {
         values.forEach(function (value) {
-
-            let iconUrl = getBlobSaS("categories", String(value?.Icon_FileName));
-            let bgImgUrl = getBlobSaS("categories", String(value?.Background_FileName));
+            let bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
 
             let x = {
-                ID: value.ID,
-                Name: value.Name,
-                iconImg: iconUrl,
-                bgImg: bgImgUrl
+                id: value?.ID,
+                name: value?.Name,
+                description: value?.Description,
+                location: value?.Location,
+                categoryId: value?.CategoryID,
+                backgroundImg: bgImgUrl
             }
 
             listofgroups.push(x)

@@ -48,8 +48,6 @@ const imageStore = multer.diskStorage({
 // check image mime types
 function imageMimeTypeCheck(req: any, file: any, cb: any) {
 
-    const mimetype: string = file.mimetype;
-
     if (file.mimetype.toLowerCase() == "image/png" || 
         file.mimetype.toLowerCase() == "image/jpg" || 
         file.mimetype.toLowerCase == "image/jpeg") {
@@ -120,29 +118,41 @@ app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunc
     res.locals.groupId = req.params.id;
     res.locals.uuid = req.params.uuid;
     next();
-}, jwtHandler.validateJWT, fieldsOnly, getGroupVideos)
+}, jwtHandler.validateJWT, fieldsOnly, getGroupVideos);
 
 // Post route for users to join a group.
-var joinGroupRouter = require('./routes/joinGroup');
-app.post('/joingroup', fieldsOnly, joinGroupRouter);
+var addGroupRouter = require('./routes/addGroup');
+app.post('/groups', jwtHandler.validateJWT, imageUpload.single('background'), addGroupRouter);
 
-const GroupRouter = require('./routes/Group');
-app.use('/groups', GroupRouter);
+// Post group for joining group.
+var joinGroupRouter = require('./routes/joinGroup');
+app.post('/groups/:id/join', jwtHandler.validateJWT, fieldsOnly, joinGroupRouter);
+
+// Get route for getting groups.
+var getGroupsRouter = require('./routes/getGroups');
+app.get('/groups/all', jwtHandler.validateJWT, getGroupsRouter);
+
+// Get route for getting groups by ID
+var getGroupsIdRouter = require('./routes/getGroupsId');
+app.get('/groups/:ID', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.id = req.params.id;
+    next();
+}, jwtHandler.validateJWT, getGroupsIdRouter);
 
 // Post route to add a category.
 const catimages = imageUpload.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }]);
-var addCategoryRouter = require('/routes/addCategory');
+var addCategoryRouter = require('./routes/addCategory');
 app.post('/categories', jwtHandler.validateJWT, catimages, addCategoryRouter);
 
 // Gets a category by id.
-var getCategoryRouter = require('/routes/getCategory');
+var getCategoryRouter = require('./routes/getCategory');
 app.get('/categories/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.id = req.params.id;
     next();
 }, jwtHandler.validateJWT, getCategoryRouter);
 
 // Gets all categories.
-var getCategoriesRouter = require('/routes/getCategories');
+var getCategoriesRouter = require('./routes/getCategories');
 app.get('/categories/all', jwtHandler.validateJWT, getCategoriesRouter);
 
 // Get login route. Returns a JWT.
@@ -200,7 +210,7 @@ var getJWTRouter = require('./routes/getJWT');
 app.get('/validate/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.id;
     next();
-}, jwtHandler.validateJWT, jwtHandler.issueJWT, getJWTRouter)
+}, jwtHandler.validateJWT, jwtHandler.issueJWT, getJWTRouter);
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);

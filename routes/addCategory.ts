@@ -7,12 +7,6 @@ import { unlink } from 'fs';
 var express = require('express');
 var router = express.Router();
 
-// Data class for GroupImage object.
-class GroupImage {
-    file: string;
-    filename: string;
-}
-
 router.use((req: Request, res: Response, next: NextFunction) => {
     const ts = String(Date.now());
     const tempCategory = new Categories();
@@ -43,7 +37,6 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         });
     });
 });
-
 
 router.use((req: Request, res: Response, next: NextFunction) => {
 
@@ -90,3 +83,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         Detail: "Created"
     })
 });
+
+// Data class for GroupImage object.
+class GroupImage {
+    file: string;
+    filename: string;
+}
+
+module.exports = router;

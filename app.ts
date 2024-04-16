@@ -129,15 +129,10 @@ app.post('/joingroup', fieldsOnly, joinGroupRouter);
 const GroupRouter = require('./routes/Group');
 app.use('/groups', GroupRouter);
 
-// Post route to create a group. Allows an upload of 2 images at 5 meg each. See imageUploads multer function.
-// var addGroupRouter = require('./routes/addGroup');
-// app.post('/addgroup', imageUploads.array('imageArray', 2), addGroupRouter);
-
-// Get route for getting all categories
-var CategoriesRouter = require('./routes/Categories')
-app.use('/categories', CategoriesRouter);
-
-
+// Post route to add a category.
+const catimages = imageUpload.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }]);
+var addCategoryRouter = require('/routes/addCategory');
+app.post('/categories', jwtHandler.validateJWT, catimages, addCategoryRouter);
 
 // Gets a category by id.
 var getCategoryRouter = require('/routes/getCategory');
@@ -148,7 +143,7 @@ app.get('/categories/:id', (req: Request, res: Response, next: NextFunction) => 
 
 // Gets all categories.
 var getCategoriesRouter = require('/routes/getCategories');
-app.get('/categories', jwtHandler.validateJWT, getCategoriesRouter);
+app.get('/categories/all', jwtHandler.validateJWT, getCategoriesRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

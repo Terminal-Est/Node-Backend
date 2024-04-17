@@ -13,7 +13,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         } else {
             res.json(response);
         }
-    })
+    });
 });
 
 module.exports = router;

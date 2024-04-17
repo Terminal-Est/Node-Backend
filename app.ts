@@ -106,7 +106,7 @@ var getUserRouter = require('./routes/getUser');
 app.get('/user/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.id;
     next();
-}, jwtHandler.validateJWT, getUserRouter);
+}, /**jwtHandler.validateJWT,**/ getUserRouter);
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/deleteUser');
@@ -161,11 +161,11 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.post('/video', jwtHandler.validateJWT, uploads.single('video'), addVideoRouter);
+app.post('/video', /**jwtHandler.validateJWT,**/ uploads.single('video'), addVideoRouter);
 
 // Delete video from storage.
 var deleteVideoRouter = require('./routes/deleteVideo');
-app.use('/video/delete', jwtHandler.validateJWT, fieldsOnly, deleteVideoRouter);
+app.use('/video/delete', /**jwtHandler.validateJWT,**/ fieldsOnly, deleteVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
@@ -173,18 +173,18 @@ app.get('/video/:id/:fileName', (req: Request, res: Response, next: NextFunction
     res.locals.uuid = req.params.id;
     res.locals.filename = req.params.fileName;
     next();
-}, jwtHandler.validateJWT, getVideoSas);
+}, /**jwtHandler.validateJWT,**/ getVideoSas);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
 app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.id;
     next();
-}, jwtHandler.validateJWT, getUserFeed);
+}, /**jwtHandler.validateJWT,**/ getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
-app.post('/follow', jwtHandler.validateJWT, fieldsOnly, addUserFollow);
+app.post('/follow', /**jwtHandler.validateJWT,**/ fieldsOnly, addUserFollow);
 
 // Get likes for a video.
 var getLikesRouter = require("./routes/getLikes");

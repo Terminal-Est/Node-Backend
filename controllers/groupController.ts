@@ -62,10 +62,25 @@ async function addGroup(tempGroup: Group) {
         return result;
 }
 
-export { getGroups, 
+async function addVideoToGroup(groupVideo: GroupVideos) {
+    return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(GroupVideos)
+        .values([
+            { 
+                groupId: groupVideo.groupId, 
+                videoId: groupVideo.videoId 
+            }
+        ])
+        .execute();
+}
+
+export { 
+    getGroups, 
     joinGroup, 
     addGroup, 
     getGroupByID, 
     getGroupByCategoryID,
-    getVideosByGroup
+    getVideosByGroup,
+    addVideoToGroup
 };

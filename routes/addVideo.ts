@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { createBlobOnContainer, validateVideo, createVideo } from "../controllers/fileController";
 import { Video } from "../data/entity/video";
+import { GroupVideos } from "../data/entity/groupVideos";
 import { unlink } from 'fs';
 import { ValidationError } from "class-validator";
 import { InsertResult } from "typeorm";
+import { addVideoToGroup } from "../controllers/groupController";
 var express = require('express');
 var router = express.Router();
 
@@ -67,6 +69,21 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     const video: Video = res.locals.vid;
 
     createVideo(video).then((handleFullfilled: InsertResult) => {
+        
+        if (req.body.groupId) {
+
+            var groupVideo: GroupVideos = new GroupVideos;
+            groupVideo.groupId = Number(req.body.groupId);
+            groupVideo.videoId = String(req.file?.filename);
+
+            addVideoToGroup(groupVideo).catch((err) => {
+                res.status(500).json({
+                    Message: "Video Add To Group Failed.",
+                    Detail: err
+                });
+            });
+        }
+
         res.status(200).json({
             Message: "Video Upload Successful.",
             Detail: handleFullfilled,

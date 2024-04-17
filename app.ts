@@ -134,10 +134,24 @@ app.get('/groups/all', /**jwtHandler.validateJWT,**/ getGroupsRouter);
 
 // Get route for getting groups by ID
 var getGroupsIdRouter = require('./routes/getGroupsId');
-app.get('/groups/:ID', (req: Request, res: Response, next: NextFunction) => {
+app.get('/groups/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.id = req.params.id;
     next();
 }, /**jwtHandler.validateJWT,/** */ getGroupsIdRouter);
+
+// Get route for getting groups by user ID
+var getGroupsByUserIDRouter = require('./routes/getGroupsByUserID');
+app.get('/groups/user/:userid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.userid = req.params.userid;
+    next();
+}, /**jwtHandler.validateJWT,/** */ getGroupsByUserIDRouter);
+
+// Get route for getting groups by CategoryID
+var getGroupsByCategoryRouter = require('./routes/getGroupsByCategory');
+app.get('/groups/category/:id', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.id = req.params.id;
+    next();
+}, /**jwtHandler.validateJWT,/** */ getGroupsByCategoryRouter);
 
 // Post route to add a category.
 const catimages = imageUpload.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }]);

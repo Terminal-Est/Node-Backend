@@ -118,42 +118,42 @@ app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunc
     res.locals.groupId = req.params.id;
     res.locals.uuid = req.params.uuid;
     next();
-}, jwtHandler.validateJWT, fieldsOnly, getGroupVideos);
+}, /**jwtHandler.validateJWT,**/ fieldsOnly, getGroupVideos);
 
 // Post route for users to join a group.
 var addGroupRouter = require('./routes/addGroup');
-app.post('/groups', jwtHandler.validateJWT, imageUpload.single('background'), addGroupRouter);
+app.post('/groups', /**jwtHandler.validateJWT,**/ imageUpload.single('background'), addGroupRouter);
 
 // Post group for joining group.
 var joinGroupRouter = require('./routes/joinGroup');
-app.post('/groups/:id/join', jwtHandler.validateJWT, fieldsOnly, joinGroupRouter);
+app.post('/groups/:id/join', /**jwtHandler.validateJWT,**/ fieldsOnly, joinGroupRouter);
 
 // Get route for getting groups.
 var getGroupsRouter = require('./routes/getGroups');
-app.get('/groups/all', jwtHandler.validateJWT, getGroupsRouter);
+app.get('/groups/all', /**jwtHandler.validateJWT,**/ getGroupsRouter);
 
 // Get route for getting groups by ID
 var getGroupsIdRouter = require('./routes/getGroupsId');
 app.get('/groups/:ID', (req: Request, res: Response, next: NextFunction) => {
     res.locals.id = req.params.id;
     next();
-}, jwtHandler.validateJWT, getGroupsIdRouter);
+}, /**jwtHandler.validateJWT,/** */ getGroupsIdRouter);
 
 // Post route to add a category.
 const catimages = imageUpload.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }]);
 var addCategoryRouter = require('./routes/addCategory');
-app.post('/categories', jwtHandler.validateJWT, catimages, addCategoryRouter);
+app.post('/categories', /**jwtHandler.validateJWT,**/ catimages, addCategoryRouter);
 
 // Gets a category by id.
 var getCategoryRouter = require('./routes/getCategory');
 app.get('/categories/:id', (req: Request, res: Response, next: NextFunction) => {
     res.locals.id = req.params.id;
     next();
-}, jwtHandler.validateJWT, getCategoryRouter);
+}, /**jwtHandler.validateJWT,**/ getCategoryRouter);
 
 // Gets all categories.
 var getCategoriesRouter = require('./routes/getCategories');
-app.get('/categories/all', jwtHandler.validateJWT, getCategoriesRouter);
+app.get('/categories/all', /**jwtHandler.validateJWT,**/ getCategoriesRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

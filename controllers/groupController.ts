@@ -1,5 +1,5 @@
 import { InsertResult } from "typeorm";
-import { AppDataSource, UserDataSource } from "../data/data-source";
+import { AppDataSource } from "../data/data-source";
 import { Group } from "../data/entity/group";
 import { UserGroup } from "../data/entity/userGroup";
 import { GroupVideos } from "../data/entity/groupVideos";

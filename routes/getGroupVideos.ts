@@ -5,12 +5,14 @@ import { Video } from "../data/entity/video";
 import { User } from "../data/entity/user";
 import { getBlobSaS, getVideo } from "../controllers/fileController";
 import { getUserUUID } from "../controllers/userController";
+import { getCommentsByVideo } from "../controllers/commentController";
 var express = require('express');
 var router = express.Router();
 
-router.use(async (req: Request, res : Response, next: NextFunction) => {
+router.use(async(req: Request, res : Response, next: NextFunction) => {
 
     const videoId = Number(res.locals.groupId);
+    const uuid = Number(res.locals.uuid);
 
     const groupVideos: GroupVideos[] = await getVideosByGroup(videoId).then((handleFulFilled) => {
         return handleFulFilled;
@@ -27,9 +29,15 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
             const video: Video | null = await getVideo(groupVideos[i].videoId).then((handleFulfilled) => {
                 return handleFulfilled;
             });
-            const sasUrl: string = getBlobSaS("u-" + String(), String(video?.videoId));
+            const sasUrl: string = getBlobSaS("u-" + String(uuid), String(video?.videoId));
             const user: User = await getUserUUID(String(video?.uuid)).then((handleFulfilled) => {
                 return handleFulfilled;
+            });
+            
+            const comms = await getCommentsByVideo(groupVideos[i].videoId).then((handleFulfilled) => {
+                return handleFulfilled;
+            }, (handleRejected) => {
+                return handleRejected;
             });
     
             var data = {
@@ -38,6 +46,7 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
                 videoUrl: sasUrl,
                 likes: video?.likes,
                 timestamp: video?.timestamp,
+                comments: comms
             }
        
             videos[key].push(data);

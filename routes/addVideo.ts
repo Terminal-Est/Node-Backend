@@ -12,8 +12,6 @@ var router = express.Router();
 // Validate video data, if video data is ok, got to next function.
 router.use((req: Request, res : Response, next: NextFunction) => {
 
-    console.log(req.body);
-
     const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);
     var video = new Video()
@@ -65,10 +63,9 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 // If video upload is successful, update database with video details.
 router.use((req: Request, res : Response, next: NextFunction) => { 
 
-    const requestId = res.locals.requestId;
     const video: Video = res.locals.vid;
 
-    createVideo(video).then((handleFullfilled: InsertResult) => {
+    createVideo(video).then(async(handleFullfilled: InsertResult) => {
         
         if (req.body.groupId) {
 
@@ -76,7 +73,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             groupVideo.groupId = Number(req.body.groupId);
             groupVideo.videoId = String(req.file?.filename);
 
-            addVideoToGroup(groupVideo).catch((err) => {
+            await addVideoToGroup(groupVideo).catch((err) => {
                 res.status(500).json({
                     Message: "Video Add To Group Failed.",
                     Detail: err

@@ -189,6 +189,16 @@ app.get('/video/:id/:fileName', (req: Request, res: Response, next: NextFunction
     next();
 }, /**jwtHandler.validateJWT,**/ getVideoSas);
 
+// Comments Routes
+
+// Post video comment route.
+var addVideoCommentRouter = require('./routes/addVideoComment');
+app.post('/video/comment', fieldsOnly, addVideoCommentRouter);
+
+// Post video comment route.
+var addGroupCommentRouter = require('./routes/addGroupComment');
+app.post('/groups/comment', fieldsOnly, addGroupCommentRouter);
+
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
 app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {

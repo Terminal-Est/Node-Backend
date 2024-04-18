@@ -6,6 +6,7 @@ import { getUserFollows, getUserVideos, getGroupFollows, getUsersByGroup } from 
 import { getUserUUID } from "../controllers/userController";
 import { getBlobSaS } from "../controllers/fileController";
 import { UserGroup } from "../data/entity/userGroup";
+import { getCommentsByVideo } from "../controllers/commentController";
 var express = require('express');
 var router = express.Router();
 
@@ -54,32 +55,32 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
     next();
 });
 
-router.use(async (req: Request, res : Response, next: NextFunction) => {
+router.use(async(req: Request, res : Response, next: NextFunction) => {
 
-    var key = "userVideos";
+    const key = "userVideos";
     var object: any = {};
     object[key] = [];
     var users: User[] = res.locals.users;
-    var userIds = removeDuplicates(users);
+    const userIds = removeDuplicates(users);
 
     for await (const id of userIds) {
-
-        console.log(id);
-
         var user: User = await getUserUUID(String(id));
-
         var videos: Video[] = await getUserVideos(String(user.uuid));
-
         for (var j = 0; j < videos.length; j++) {
 
             var userContainer = "u-" + String(user.uuid);
-
+            const comms = await getCommentsByVideo(videos[j].videoId).then((handleFulFilled) => {
+                return handleFulFilled;
+            }, (handleRejected) => {
+                return handleRejected;
+            });
             var vidUrl: string = getBlobSaS(userContainer, videos[j].videoId);
             var data = {
                 videoTitle: videos[j].title,
                 username: user.username,
                 videoUrl: vidUrl,
                 likes: videos[j].likes,
+                comments: comms,
                 timestamp: videos[j].timestamp,
             }
             object[key].push(data);

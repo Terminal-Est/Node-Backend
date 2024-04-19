@@ -121,9 +121,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 // Insert User Avatar into blob contaier if it exists. 
 router.use((req: Request, res: Response, next: NextFunction) => {
     
-    const user: User = res.locals.user;
-
-    if (user.avatar) {
+    if (req.file?.filename) {
         
         var file = './images/' + req.file?.filename;
         const fileName: string = String(req.file?.filename);

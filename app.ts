@@ -167,7 +167,7 @@ app.get('/categories/:id', (req: Request, res: Response, next: NextFunction) => 
 
 // Gets all categories.
 var getCategoriesRouter = require('./routes/getCategories');
-app.get('/categories/all', /**jwtHandler.validateJWT,**/ getCategoriesRouter);
+app.get('/categories/get/all', /**jwtHandler.validateJWT,**/ getCategoriesRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');

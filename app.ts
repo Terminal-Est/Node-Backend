@@ -126,7 +126,10 @@ app.post('/groups', /**jwtHandler.validateJWT,**/ imageUpload.single('background
 
 // Post group for joining group.
 var joinGroupRouter = require('./routes/joinGroup');
-app.post('/groups/:id/join', /**jwtHandler.validateJWT,**/ fieldsOnly, joinGroupRouter);
+app.post('/groups/:id/join', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.groupid = req.params.id;
+    next();
+}, /**jwtHandler.validateJWT,**/ fieldsOnly, joinGroupRouter);
 
 // Get route for getting groups.
 var getGroupsRouter = require('./routes/getGroups');

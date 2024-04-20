@@ -1,15 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import { joinGroup } from "../controllers/groupController";
+import { InsertResult } from "typeorm";
 var express = require('express');
 var router = express.Router();
 
 router.use((req: Request, res: Response, next: NextFunction) => {
-    const groupid: number = parseInt(req.params.id);
-    const userid: number = parseInt(req.body.uuid);
+    let groupid: number = Number(res.locals.groupid);
+    let userid: number = Number(req.body.uuid);
 
-    joinGroup(userid, groupid);
-
-    res.sendStatus(200);
+    joinGroup(userid, groupid).then((handleFulFilled: InsertResult) => {
+        res.json({
+            Message: "Success",
+            Details: handleFulFilled
+        });
+    }).catch((e) => {
+        res.json(e);
+    });
 });
 
 module.exports = router;

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
 import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser } from "../controllers/userController";
+import { sendAuthenticationEmail } from "../controllers/emailController";
 import { createBlobStorageContainer, createBlobOnContainer } from "../controllers/fileController";
 import { ValidationError } from "class-validator";
 import { Uuid } from "../data/entity/uuid";
@@ -36,6 +37,14 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         })
     });
 });
+
+router.use((req: Request, res: Response, next: NextFunction) => {
+    const regUser: User = res.locals.user;
+    const subject: string = "Greentik Authentication Email";
+    const htmlcontent: string = "<h1>Greentik Authentication Email";
+    sendAuthenticationEmail(regUser.email, regUser.username, subject, htmlcontent);
+    next();
+})
 
 // Validate password.
 router.use((req: Request, res: Response, next: NextFunction) => {

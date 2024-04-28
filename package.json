@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@azure/communication-email": "^1.0.0",
     "@azure/storage-blob": "^12.17.0",
     "bad-words": "^3.0.4",
     "bcrypt": "^5.1.0",

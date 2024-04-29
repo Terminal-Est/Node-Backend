@@ -8,15 +8,15 @@ This section includes all the routes for the API with what HTTP verbs and parame
 Retruns the landing page for the API.
 
 ### POST /login
-**Desription**\n
-login route for app.\n
-**Multipart/Formdata Body Params**\n
-email\n
-password\n
-**Success Return**\n
-200 status and JSON Success Message with JWT.\n
-**Failure Return**\n
-400 status message with Message.\n
-**Server Error**\n
-500 status with message.\n
+**Desription**  
+login route for app.  
+**Multipart/Formdata Body Params**  
+email  
+password  
+**Success Return**  
+200 status and JSON Success Message with JWT.  
+**Failure Return**  
+400 status message with Message.  
+**Server Error**  
+500 status with message.  
 

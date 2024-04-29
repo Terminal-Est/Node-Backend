@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@azure/communication-email": "^1.0.0",
     "@azure/storage-blob": "^12.17.0",
     "bad-words": "^3.0.4",
     "bcrypt": "^5.1.0",
@@ -31,6 +32,7 @@
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
+    "@azure/communication-email": "^1.0.0",
     "@azure/storage-blob": "^12.17.0",
     "@babel/core": "^7.24.0",
     "@babel/plugin-proposal-decorators": "^7.24.0",

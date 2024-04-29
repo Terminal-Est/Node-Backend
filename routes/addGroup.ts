@@ -8,10 +8,6 @@ var express = require('express');
 var router = express.Router();
 
 router.use((req: Request, res: Response, next: NextFunction) => {
-    console.log("hello, world");
-});
-
-router.use((req: Request, res: Response, next: NextFunction) => {
     const ts = String(Date.now());
     const tempGroup = new Group();
     tempGroup.Name = req.body.Name;
@@ -36,8 +32,15 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     const group: Group = res.locals.group;
 
     addGroup(group).then((handleFullfilled: InsertResult) => {
-        res.locals.groupid = handleFullfilled.identifiers[0].ID;
-        next();
+        if (req.file) {
+            res.locals.groupid = handleFullfilled.identifiers[0].ID;
+            next();
+        } else {
+            res.status(200).json({
+                Message: "Group Added Successfully.",
+                Detail: handleFullfilled.identifiers[0].ID
+            });
+        }
     }, (handleRejected: any) => {
         res.status(400).json({
             Message: "Group Database Update Failed.",
@@ -66,7 +69,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
                         Detail: err
                     });
                 } else {
-                    res.locals.requestId = requestId;
+                    res.status(200).json({
+                        Message: "Group Added Successfully.",
+                        Detail: res.locals.groupid,
+                        blobRequestId: requestId
+                    });
                 }
             });
         });

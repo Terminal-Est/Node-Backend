@@ -50,18 +50,18 @@ function getAuthJWT(uuid: string, key: any, kid: any, exp: any) {
     const alg = 'RS256';
     return new Promise(async function(resolve, reject) {
         const privateKey = await jose.importPKCS8(key, alg);
-        await new jose.SignJWT({ 'iat': true, 'sub': true, 'exp': false, 'kid': kid })
+        await new jose.SignJWT({ 'iat': true, 'sub': true, 'exp': true, 'kid': kid })
         .setProtectedHeader({ alg })
         .setIssuedAt()
         .setSubject(uuid)
-        //.setExpirationTime(exp)
+        .setExpirationTime('30d')
         .sign(privateKey)
         .then((handleFulfilled : any) => { 
             return resolve(handleFulfilled); 
         }, (handleRejected : any) => {
             return reject(handleRejected);
-        })
-    })
+        });
+    });
 }
 
 // Update exposed JWKs.

@@ -1,23 +1,21 @@
 import { NextFunction, Request, Response } from "express";
-import { getGroups } from "../controllers/groupController";
-import { getBlobSaS } from "../controllers/fileController";
+import { getGroupsByCategoryID } from "../controllers/groupController";
 import { getCommentsByGroup } from "../controllers/commentController";
+import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
 router.use(async(req: Request, res: Response, next: NextFunction) => {
+    const categoryid = parseInt(res.locals.id);
     let listofgroups: Array<any> = new Array<any>();
-    await getGroups().then(async(handleFulfilled) => {
-        for await (const value of handleFulfilled) {
-
-            let bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
-            var comms;
-
-            await getCommentsByGroup(value.ID).then((handleFulFilled) => {
-                comms = handleFulFilled;
+    await getGroupsByCategoryID(categoryid).then(async(values) => {
+        for await (const value of values) {
+            const comms = await getCommentsByGroup(value.ID).then((handleFulFilled) => {
+                return handleFulFilled;
             }, (handleRejected) => {
-                comms = handleRejected;
+                return handleRejected;
             });
+            let bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
 
             let x = {
                 id: value?.ID,
@@ -28,12 +26,13 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
                 backgroundImg: bgImgUrl,
                 comments: comms
             }
+
             listofgroups.push(x)
-        }       
-    });
-    res.status(200).json({
-        Message: "Groups Returned Successfully.",
-        listofgroups
+        }
+        res.status(200).json({
+            Message: "Groups Returned Successfully.",
+            listofgroups
+        })
     });
 });
 

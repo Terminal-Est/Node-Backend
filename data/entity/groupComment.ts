@@ -5,7 +5,7 @@ import { Group } from "./group";
 /**
  * GroupComment entity class. TypeORM class with validation decorators.
  */
-@Entity()
+@Entity({ name: "GroupComment" })
 export class GroupComment {
     @PrimaryGeneratedColumn()
     commentId: number;
@@ -29,6 +29,7 @@ export class GroupComment {
     @IsOptional()
     replyId: number;
 
-    @ManyToOne(() => Group, (group) => group.ID)
-    group: Group;
+    @Column()
+    @IsNotEmpty()
+    timestamp: string;
 }

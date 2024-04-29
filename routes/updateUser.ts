@@ -15,13 +15,9 @@ router.use((req: Request, res : Response, next: NextFunction) => {
         user.uuid = handleFulfilled.uuid;
         user.username = handleFulfilled.username;
         var dateOfBirth = new Date(handleFulfilled.dob);
-        const year = dateOfBirth.getFullYear().toString();
-        const month = dateOfBirth.getMonth().toString();
-        const day = dateOfBirth.getDay().toString();
+        var dateArray: string[] = dateOfBirth.toISOString().split('T');
         
-        const dobString: string = `${year}-${month}-${day}`;
-
-        console.log(dobString);
+        const dobString: string = dateArray[0];
 
         user.dob = dobString;
 
@@ -59,6 +55,18 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             user.avatar = req.file.filename;
         } else {
             user.avatar = handleFulfilled.avatar;
+        }
+
+        if (req.body.fname) {
+            user.fname = req.body.fname;
+        } else {
+            user.fname = handleFulfilled.fname;
+        }
+
+        if (req.body.fname) {
+            user.lname = req.body.lname;
+        } else {
+            user.lname = handleFulfilled.lname;
         }
         
         validateUser(user).then((handleFulfilled) => {
@@ -129,9 +137,9 @@ router.use((req: Request, res : Response, next: NextFunction) => {
         }
     } else {
         res.status(200).json({
-            Message: "User Added Successfully.",
+            Message: "User Updated Successfully.",
             Detail: res.locals.user.email,
-            containerReq: res.locals.contaierCreateReq,
+            updateRes: res.locals.updateResult
         });
     }
 });

@@ -15,8 +15,8 @@ export class Video {
     uuid: number;
 
     @Column()
-    @Length(3, 50, {
-        message: "Title must be between 3 and 50 characters."
+    @Length(3, 500, {
+        message: "Title must be between 3 and 500 characters."
     })
     title: string;
 

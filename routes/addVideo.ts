@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { createBlobOnContainer, validateVideo, createVideo } from "../controllers/fileController";
 import { Video } from "../data/entity/video";
+import { GroupVideos } from "../data/entity/groupVideos";
 import { unlink } from 'fs';
 import { ValidationError } from "class-validator";
 import { InsertResult } from "typeorm";
+import { addVideoToGroup } from "../controllers/groupController";
 var express = require('express');
 var router = express.Router();
 
 // Validate video data, if video data is ok, got to next function.
 router.use((req: Request, res : Response, next: NextFunction) => {
-
-    console.log(req.body);
 
     const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);
@@ -63,15 +63,33 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 // If video upload is successful, update database with video details.
 router.use((req: Request, res : Response, next: NextFunction) => { 
 
-    const requestId = res.locals.requestId;
     const video: Video = res.locals.vid;
 
-    createVideo(video).then((handleFullfilled: InsertResult) => {
+    createVideo(video).then(async(handleFullfilled: InsertResult) => {
+        
+        var groupInsertResult: any;
+
+        if (req.body.groupId) {
+
+            var groupVideo: GroupVideos = new GroupVideos;
+            groupVideo.groupId = Number(req.body.groupId);
+            groupVideo.videoId = String(req.file?.filename);
+
+            await addVideoToGroup(groupVideo).then((handleFullfilled) => {
+                groupInsertResult = handleFullfilled;
+            }, (handleRejected) => {
+                groupInsertResult = handleRejected;
+            }).catch((err) => {
+                groupInsertResult = err;
+            });
+        }
+
         res.status(200).json({
             Message: "Video Upload Successful.",
             Detail: handleFullfilled,
             blobReqId: res.locals.requestId,
-            filename: req.file?.filename
+            filename: req.file?.filename,
+            videoToGroup: groupInsertResult,
         });
     }, (handleRejected: any) => {
         res.status(400).json({

@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsNotEmpty, IsOptional, isNotEmpty } from "class-validator";
 import { Video } from "./video";
 
 /**
  * User entity class. TypeORM class with validation decorators.
  */
-@Entity()
+@Entity({ name: "VideoComment" })
 export class VideoComment {
     @PrimaryGeneratedColumn()
     commentId: number;
@@ -29,6 +29,7 @@ export class VideoComment {
     @IsOptional()
     replyId: number;
 
-    @ManyToOne(() => Video, (video) => video.videoId)
-    video: Video;
+    @Column()
+    @IsNotEmpty()
+    timestamp: string;
 }

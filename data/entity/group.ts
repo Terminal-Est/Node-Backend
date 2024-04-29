@@ -21,6 +21,27 @@ export class Group {
     @Column()
     System: number;
 
+    @Column()
+    CategoryID: number;
+
+    @Column({
+        type: "varchar",
+        length: 100
+    })
+    Location: string;
+    
+    @Column({
+        type: "varchar",
+        length: 100
+    })
+    Background_FileName: string;
+
+    @Column({
+        type: "varchar",
+        length: 100
+    })
+    Image_TimeStamp: string;
+
     @OneToMany(() => GroupComment, (comment) => comment.groupId)
     comments: Comment[];
 }

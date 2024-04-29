@@ -6,6 +6,7 @@ import { getUserFollows, getUserVideos, getGroupFollows, getUsersByGroup } from 
 import { getUserUUID } from "../controllers/userController";
 import { getBlobSaS } from "../controllers/fileController";
 import { UserGroup } from "../data/entity/userGroup";
+import { getCommentsByVideo } from "../controllers/commentController";
 var express = require('express');
 var router = express.Router();
 
@@ -13,19 +14,20 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
    
     const uuid = String(res.locals.uuid);
     var userGroup: UserGroup[] = [];
-    var usersByGroup: User[] = [];
+    var userFollows: UserFollows[] = [];
+    var users: User[] = [];
+
+    var ownUser: User = await getUserUUID(uuid);
+    users.push(ownUser);
 
     await getUserFollows(uuid).then((handleFulfilled: UserFollows[]) => {
-
-        var userFollows: UserFollows[] = handleFulfilled;
+        userFollows = handleFulfilled;
         res.locals.userFollows = userFollows;
-    
     }).catch((err) => {
         console.log(err);
     });
 
     await getGroupFollows(uuid).then((handleFulfilled: UserGroup[]) => {
-
         userGroup = handleFulfilled;
     }).catch((err) => {
         res.status(500).json({
@@ -34,114 +36,67 @@ router.use(async (req: Request, res : Response, next: NextFunction) => {
         })
     });
 
+    for (var i = 0; i < userFollows.length; i++) {
+        var userByFollow = await getUserUUID(String(userFollows[i].uuidFollowing));
+        users.push(userByFollow);  
+    }
+
     for (var i = 0; i < userGroup.length; i++) {
 
         var ug: UserGroup[] = await getUsersByGroup(String(userGroup[i].groupid));
-        
+
         for (var j = 0; j < ug.length; j++) {
-            
-            if (String(ug[j].userid) == uuid) {
-                continue;
-            } else {
                 var user: User = await getUserUUID(String(ug[j].userid));    
-                usersByGroup.push(user);  
-            }
+                users.push(user);  
         }
     }
 
-    res.locals.usersByGroup = usersByGroup;
+    res.locals.users = users;
     next();
 });
 
-router.use(async (req: Request, res : Response, next: NextFunction) => {
+router.use(async(req: Request, res : Response, next: NextFunction) => {
 
-    var userFollows: UserFollows[] = res.locals.userFollows;
-    var users: User[] = [];
-
-    for (var i = 0; i < userFollows.length; i++) {
-        var user: User = await getUserUUID(String(userFollows[i].uuidFollowing));
-        users.push(user);
-    }
-
-    res.locals.userFollows = users;
-    next();
-});
-
-router.use(async (req: Request, res : Response, next: NextFunction) => {
-
-    const uuid = String(res.locals.uuid);
-    var user = new User();
-    var key = "userVideos";
+    const key = "userVideos";
     var object: any = {};
-    var userVideos: Video[] = [];
     object[key] = [];
-    var usersByGroup: User[] = res.locals.usersByGroup;
+    var users: User[] = res.locals.users;
+    const userIds = removeDuplicates(users);
 
-    await getUserVideos(uuid).then((handleFulfilled) => {
-        userVideos = handleFulfilled;
-    }).catch((err) => {
-        res.status(500).json({
-            Message: "Feed Retreival Error.",
-            Detail: err
-        })
-    });
-        
-    await getUserUUID(uuid).then((handleFulfilled) => {
-        user = handleFulfilled;
-    }).catch((err) => {
-        res.status(500).json({
-            Message: "Feed Retreival Error.",
-            Detail: err
-        })
-    });
+    for await (const id of userIds) {
+        var user: User = await getUserUUID(String(id));
+        var videos: Video[] = await getUserVideos(String(user.uuid));
+        for (var j = 0; j < videos.length; j++) {
 
-    for (var i = 0; i < userVideos.length; i++) {
-
-        var vidUrl: string = getBlobSaS("u-" + uuid, userVideos[i].videoId);
-        var data = {
-                videoTitle: userVideos[i].title,
+            var userContainer = "u-" + String(user.uuid);
+            const comms = await getCommentsByVideo(videos[j].videoId).then((handleFulFilled) => {
+                return handleFulFilled;
+            }, (handleRejected) => {
+                return handleRejected;
+            });
+            var vidUrl: string = getBlobSaS(userContainer, videos[j].videoId);
+            var data = {
+                videoId: videos[j].videoId,
+                videoTitle: videos[j].title,
                 username: user.username,
                 videoUrl: vidUrl,
-                likes: userVideos[i].likes,
-                timestamp: userVideos[i].timestamp,
-        }
-
-        object[key].push(data);
-    }
-
-    for (var i = 0; i < usersByGroup.length; i++) {
-        
-        await getUserVideos(String(usersByGroup[i].uuid)).then((handleFulfilled) => {
-            
-            var videos: Video[] = handleFulfilled;
-
-            for (var j = 0; j < videos.length; j++) {
-
-                var userContainer = "u-" + String(usersByGroup[i].uuid);
-
-                var vidUrl: string = getBlobSaS(userContainer, videos[j].videoId);
-                var data = {
-                    videoTitle: videos[j].title,
-                    username: usersByGroup[i].username,
-                    videoUrl: vidUrl,
-                    likes: videos[j].likes,
-                    timestamp: videos[j].timestamp,
-                }
-
-                object[key].push(data);
+                likes: videos[j].likes,
+                comments: comms,
+                timestamp: videos[j].timestamp,
             }
-        }).catch((err) => {
-            res.status(500).json({
-                Message: "Feed Retreival Error.",
-                Detail: err
-            })
-        });
-    }
+            object[key].push(data);
+        }
+    }      
 
     res.status(200).json({
         message: "Feed Data Returned",
         object
     })
 });
+
+function removeDuplicates(array: User[]) {
+   const unique = new Set(array.map(item => item.uuid));
+   return unique;
+}
 
 module.exports = router;

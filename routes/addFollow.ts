@@ -42,7 +42,6 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             detail: handleRejected
         });
     });
-
 });
 
 module.exports = router;

@@ -33,6 +33,93 @@ route for adding a user.
 **Server Error**  
 500 status with message.  
 
+### PUT /user
+**Desription**  
+route for editing a user.  
+
+**Headers**  
+Authorization(Attach JWT from login)
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(optional)email  
+(optional)address  
+(optional)city  
+(optional)state  
+(optional)postcode  
+(optional)fname  
+(optional)lname  
+(optional/image file)avatar  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+**Failure Return**  
+400 status message with Message.  
+  
+**Server Error**  
+500 status with message.  
+
+### GET /user/:uuid
+**Desription**  
+route for getting user data.  
+
+**Headers**  
+Authorization(Attach JWT from login)
+  
+**Multipart/Formdata Body Params**  
+nil    
+  
+**Success Return**  
+200 status and JSON Success Message with attached user data.  
+  
+**Failure Return**  
+400 status message with Message.  
+  
+**Server Error**  
+500 status with message.  
+
+### GET /groups/videos/:id/:uuid
+**Desription**  
+route for getting all videos tagged to a group.  
+
+**Headers**  
+Authorization(Attach JWT from login)
+  
+**Multipart/Formdata Body Params**  
+nil    
+  
+**Success Return**  
+200 status and JSON Success Message with attached group video data.  
+  
+**Failure Return**  
+400 status message with Message.  
+  
+**Server Error**  
+500 status with message.  
+
+### POST /groups
+**Desription**  
+route for addin an interest group.  
+
+**Headers**  
+Authorization(Attach JWT from login)
+  
+**Multipart/Formdata Body Params**  
+(required)Name  
+(optional)Description  
+(optional)Location   
+(optional/image file)background      
+  
+**Success Return**  
+200 status and JSON Success Message with attached group video data.  
+  
+**Failure Return**  
+400 status message with Message.  
+  
+**Server Error**  
+500 status with message. 
+
 ### POST /login
 **Desription**  
 login route for app.  
@@ -49,4 +136,5 @@ password
   
 **Server Error**  
 500 status with message.  
+
 

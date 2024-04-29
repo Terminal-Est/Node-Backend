@@ -16,6 +16,9 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             Detail: {
                 email: handleFulfilled.email,
                 username: handleFulfilled.username,
+                fname: handleFulfilled.fname,
+                lname: handleFulfilled.lname,
+                admin: handleFulfilled.admin,
                 dob: handleFulfilled.dob,
                 address: handleFulfilled.address,
                 city: handleFulfilled.city,

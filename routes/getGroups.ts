@@ -7,15 +7,18 @@ var router = express.Router();
 
 router.use(async(req: Request, res: Response, next: NextFunction) => {
     let listofgroups: Array<any> = new Array<any>();
-    await getGroups().then(async(values) => {
-        for await (const value of values) {
+    await getGroups().then(async(handleFulfilled) => {
+        for await (const value of handleFulfilled) {
+
             let bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
             var comms;
+
             await getCommentsByGroup(value.ID).then((handleFulFilled) => {
                 comms = handleFulFilled;
             }, (handleRejected) => {
-                comms =handleRejected;
+                comms = handleRejected;
             });
+
             let x = {
                 id: value?.ID,
                 name: value?.Name,

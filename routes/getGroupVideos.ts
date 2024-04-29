@@ -41,6 +41,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
             });
     
             var data = {
+                videoId: video?.videoId,
                 videoTitle: video?.title,
                 username: user.username,
                 videoUrl: sasUrl,

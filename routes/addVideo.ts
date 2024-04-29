@@ -67,17 +67,20 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 
     createVideo(video).then(async(handleFullfilled: InsertResult) => {
         
+        var groupInsertResult: any;
+
         if (req.body.groupId) {
 
             var groupVideo: GroupVideos = new GroupVideos;
             groupVideo.groupId = Number(req.body.groupId);
             groupVideo.videoId = String(req.file?.filename);
 
-            await addVideoToGroup(groupVideo).catch((err) => {
-                res.status(500).json({
-                    Message: "Video Add To Group Failed.",
-                    Detail: err
-                });
+            await addVideoToGroup(groupVideo).then((handleFullfilled) => {
+                groupInsertResult = handleFullfilled;
+            }, (handleRejected) => {
+                groupInsertResult = handleRejected;
+            }).catch((err) => {
+                groupInsertResult = err;
             });
         }
 
@@ -85,7 +88,8 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             Message: "Video Upload Successful.",
             Detail: handleFullfilled,
             blobReqId: res.locals.requestId,
-            filename: req.file?.filename
+            filename: req.file?.filename,
+            videoToGroup: groupInsertResult,
         });
     }, (handleRejected: any) => {
         res.status(400).json({

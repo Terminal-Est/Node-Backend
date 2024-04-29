@@ -9,12 +9,20 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     let userid: number = Number(req.body.uuid);
 
     joinGroup(userid, groupid).then((handleFulFilled: InsertResult) => {
-        res.json({
+        res.status(200).json({
             Message: "Success",
             Details: handleFulFilled
         });
-    }).catch((e) => {
-        res.json(e);
+    }, (handleRejected) => {
+        res.status(200).json({
+            Message: "Error Joining Group",
+            Details: handleRejected
+        });
+    }).catch((error) => {
+        res.status(500).json({
+            Message: "Server Error",
+            Detail: error
+        });
     });
 });
 

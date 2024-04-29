@@ -13,23 +13,26 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
     }, (handleRejected) => {
         return handleRejected;
     });
-    getGroupByID(groupid).then((value) => {
-        getUsersByGroup(groupid).then((values) => {
-            const bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
-            res.status(200).json({
-                Message: "Group Returned Successfully.",
-                GroupDetails: {
-                    id: value?.ID,
-                    name: value?.Name,
-                    description: value?.Description,
-                    location: value?.Location,
-                    categoryId: value?.CategoryID,
-                    backgroundImg: bgImgUrl,
-                    users: values,
-                    comments: comms
-                }
-            });
-        })
+    getGroupByID(groupid).then(async(handleFulfilled) => {
+        const users: any = await getUsersByGroup(groupid).then((handleFulfilled) => {
+            return handleFulfilled;
+        }, (handleRejected) => {
+            return handleRejected;
+        });
+        const bgImgUrl = getBlobSaS("groups", String(handleFulfilled?.Background_FileName));
+        res.status(200).json({
+            Message: "Group Returned Successfully.",
+            GroupDetails: {
+                id: handleFulfilled?.ID,
+                name: handleFulfilled?.Name,
+                description: handleFulfilled?.Description,
+                location: handleFulfilled?.Location,
+                categoryId: handleFulfilled?.CategoryID,
+                backgroundImg: bgImgUrl,
+                users: users,
+                comments: comms
+            }
+        });
     });
 });
 

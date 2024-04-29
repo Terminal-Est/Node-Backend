@@ -56,6 +56,18 @@ router.use((req: Request, res : Response, next: NextFunction) => {
         } else {
             user.avatar = handleFulfilled.avatar;
         }
+
+        if (req.body.fname) {
+            user.fname = req.body.fname;
+        } else {
+            user.fname = handleFulfilled.fname;
+        }
+
+        if (req.body.fname) {
+            user.lname = req.body.lname;
+        } else {
+            user.lname = handleFulfilled.lname;
+        }
         
         validateUser(user).then((handleFulfilled) => {
             res.locals.user = user;

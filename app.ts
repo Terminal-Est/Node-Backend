@@ -99,18 +99,18 @@ app.post('/user', imageUpload.single('avatar'), addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', jwtHandler.validateJWT, imageUpload.single('avatar'), updateUserRouter);
+app.put('/user', imageUpload.single('avatar'), jwtHandler.validateJWT, updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');
-app.get('/user/:id', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/user/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,**/ getUserRouter);
+}, jwtHandler.validateJWT, getUserRouter);
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/deleteUser');
-app.delete('/user', fieldsOnly, deleteUserRouter);
+//app.delete('/user', fieldsOnly, deleteUserRouter);
 
 // Get route to get all videos by group ID.
 var getGroupVideos = require('./routes/getGroupVideos');
@@ -118,59 +118,69 @@ app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunc
     res.locals.groupId = req.params.id;
     res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,**/ fieldsOnly, getGroupVideos);
+}, jwtHandler.validateJWT, getGroupVideos);
 
 // Post route for users to join a group.
 var addGroupRouter = require('./routes/addGroup');
-app.post('/groups', /**jwtHandler.validateJWT,**/ imageUpload.single('background'), addGroupRouter);
+app.post('/groups', imageUpload.single('background'), jwtHandler.validateJWT , addGroupRouter);
 
 // Post group for joining group.
 var joinGroupRouter = require('./routes/joinGroup');
 app.post('/groups/:id/join', (req: Request, res: Response, next: NextFunction) => {
     res.locals.groupid = req.params.id;
     next();
-}, /**jwtHandler.validateJWT,**/ fieldsOnly, joinGroupRouter);
+}, fieldsOnly, jwtHandler.validateJWT, joinGroupRouter);
 
 // Get route for getting groups.
 var getGroupsRouter = require('./routes/getGroups');
-app.get('/groups/all', /**jwtHandler.validateJWT,**/ getGroupsRouter);
+app.get('/groups/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getGroupsRouter);
 
 // Get route for getting groups by ID
 var getGroupsIdRouter = require('./routes/getGroupsId');
-app.get('/groups/:id', (req: Request, res: Response, next: NextFunction) => {
+app.get('/groups/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.id = req.params.id;
+    res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,/** */ getGroupsIdRouter);
+}, jwtHandler.validateJWT, getGroupsIdRouter);
 
 // Get route for getting groups by user ID
 var getGroupsByUserIDRouter = require('./routes/getGroupsByUserID');
-app.get('/groups/user/:userid', (req: Request, res: Response, next: NextFunction) => {
+app.get('/groups/user/:userid/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.userid = req.params.userid;
+    res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,/** */ getGroupsByUserIDRouter);
+}, jwtHandler.validateJWT, getGroupsByUserIDRouter);
 
 // Get route for getting groups by CategoryID
 var getGroupsByCategoryRouter = require('./routes/getGroupsByCategory');
-app.get('/groups/category/:id', (req: Request, res: Response, next: NextFunction) => {
+app.get('/groups/category/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.id = req.params.id;
+    res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,/** */ getGroupsByCategoryRouter);
+}, jwtHandler.validateJWT, getGroupsByCategoryRouter);
 
 // Post route to add a category.
 const catimages = imageUpload.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }]);
 var addCategoryRouter = require('./routes/addCategory');
-app.post('/categories', /**jwtHandler.validateJWT,**/ catimages, addCategoryRouter);
+app.post('/categories', catimages, jwtHandler.validateJWT, addCategoryRouter);
 
 // Gets a category by id.
 var getCategoryRouter = require('./routes/getCategory');
-app.get('/categories/:id', (req: Request, res: Response, next: NextFunction) => {
+app.get('/categories/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.id = req.params.id;
+    res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,**/ getCategoryRouter);
+}, jwtHandler.validateJWT, getCategoryRouter);
 
 // Gets all categories.
 var getCategoriesRouter = require('./routes/getCategories');
-app.get('/categories/get/all', /**jwtHandler.validateJWT,**/ getCategoriesRouter);
+app.get('/categories/get/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getCategoriesRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');
@@ -178,55 +188,57 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.post('/video', /**jwtHandler.validateJWT,**/ uploads.single('video'), addVideoRouter);
+app.post('/video', uploads.single('video'), /**jwtHandler.validateJWT**/ addVideoRouter);
 
 // Delete video from storage.
 var deleteVideoRouter = require('./routes/deleteVideo');
-app.use('/video/delete', /**jwtHandler.validateJWT,**/ fieldsOnly, deleteVideoRouter);
+app.use('/video/delete', fieldsOnly, jwtHandler.validateJWT, deleteVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
-app.get('/video/:id/:fileName', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/video/:id/:fileName/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.id = req.params.id;
     res.locals.filename = req.params.fileName;
+    res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,**/ getVideoSas);
+}, jwtHandler.validateJWT, getVideoSas);
 
 // Comments Routes
 
 // Post video comment route.
 var addVideoCommentRouter = require('./routes/addVideoComment');
-app.post('/video/comment', fieldsOnly, addVideoCommentRouter);
+app.post('/video/comment', fieldsOnly, jwtHandler.validateJWT, addVideoCommentRouter);
 
 // Post video comment route.
 var addGroupCommentRouter = require('./routes/addGroupComment');
-app.post('/groups/comment', fieldsOnly, addGroupCommentRouter);
+app.post('/groups/comment', fieldsOnly, jwtHandler.validateJWT, addGroupCommentRouter);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
-app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/feed/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,**/ getUserFeed);
+}, jwtHandler.validateJWT, getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
-app.post('/follow', /**jwtHandler.validateJWT,**/ fieldsOnly, addUserFollow);
+app.post('/follow', fieldsOnly, jwtHandler.validateJWT, addUserFollow);
 
 // Get likes for a video.
 var getLikesRouter = require("./routes/getLikes");
-app.get('/like/:videoid', (req: Request, res: Response, next: NextFunction) => {
+app.get('/like/:videoid/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.videoid = req.params.videoid;
+    res.locals.uuid = req.params.uuid;
     next();
-}, getLikesRouter);
+}, jwtHandler.validateJWT, getLikesRouter);
 
 // Add a user like to a video.
 var addLikeRouter = require('./routes/addLike');
-app.post('/like', fieldsOnly, addLikeRouter);
+app.post('/like', fieldsOnly, jwtHandler.validateJWT, addLikeRouter);
 
 // Remove a user like for a video.
 var deleteLikeRouter = require('./routes/deleteLike');
-app.delete('/like', fieldsOnly, deleteLikeRouter);
+app.delete('/like', fieldsOnly, jwtHandler.validateJWT, deleteLikeRouter);
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
@@ -234,8 +246,8 @@ app.get('/.well-known/jwks', jwksRouter);
 
 // Get JWT Refresh token.
 var getJWTRouter = require('./routes/getJWT');
-app.get('/validate/:id', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/validate/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, jwtHandler.issueJWT, getJWTRouter);
 

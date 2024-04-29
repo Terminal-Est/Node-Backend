@@ -76,6 +76,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
             });
             var vidUrl: string = getBlobSaS(userContainer, videos[j].videoId);
             var data = {
+                videoId: videos[j].videoId,
                 videoTitle: videos[j].title,
                 username: user.username,
                 videoUrl: vidUrl,

@@ -92,4 +92,18 @@ export class User {
         message: "Avatar Filename Length Error."
     })
     avatar: string;
+
+    @Column()
+    @IsOptional()
+    @Length(0, 250, {
+        message: "First name must not exceed 250 characters."
+    })
+    fname: boolean;
+
+    @Column()
+    @IsOptional()
+    @Length(0, 250, {
+        message: "Last name must not exceed 250 characters."
+    })
+    lname: boolean;
 }

@@ -16,6 +16,7 @@ const validateJWT = (req: Request, res: Response, next: NextFunction) => {
     } else {
         uuid = String(req.body.uuid);
         res.locals.uuid = uuid;
+        console.log(uuid);
     }
 
     const jwt = req.headers.authorization;

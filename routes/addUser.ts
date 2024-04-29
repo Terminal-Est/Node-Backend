@@ -25,6 +25,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     user.state = req.body.state;
     user.postcode = req.body.postcode;
     user.avatar = fileName;
+    user.fname = req.body.fname;
+    user.lname = req.body.lname;
 
     validateUser(user).then((handleFullfilled: boolean) => {
             res.locals.user = user;

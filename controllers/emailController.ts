@@ -1,11 +1,8 @@
-import { KnownEmailSendStatus } from "@azure/communication-email";
-
-const { EmailClient } = require("@azure/communication-email");
-require("dotenv").config();
+import { KnownEmailSendStatus, EmailClient, EmailSendResponse } from "@azure/communication-email";
 
 // This code demonstrates how to fetch your connection string
 // from an environment variable.
-const connectionString = process.env['COMMUNICATION_SERVICES_CONNECTION_STRING'];
+const connectionString = String(process.env.COMMUNICATION_SERVICES_CONNECTION_STRING);
 const emailClient = new EmailClient(connectionString);
 
 async function sendAuthenticationEmail(userEmail: string, displayName: string, subject: string, htmlcontent: string) {
@@ -27,7 +24,7 @@ async function sendAuthenticationEmail(userEmail: string, displayName: string, s
             },
         };
 
-        const poller = await emailClient.beginSend(message);
+        const poller: any = await emailClient.beginSend(message);
 
         if (!poller.getOperationState().isStarted) {
             throw "Poller was not started."

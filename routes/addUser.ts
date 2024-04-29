@@ -7,6 +7,7 @@ import { createBlobStorageContainer, createBlobOnContainer } from "../controller
 import { ValidationError } from "class-validator";
 import { Uuid } from "../data/entity/uuid";
 import { unlink } from "fs";
+import { getAuthJWT } from "../controllers/securityController";
 var express = require('express');
 var router = express.Router();
 
@@ -39,14 +40,6 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         })
     });
 });
-
-router.use((req: Request, res: Response, next: NextFunction) => {
-    const regUser: User = res.locals.user;
-    const subject: string = "Greentik Authentication Email";
-    const htmlcontent: string = "<h1>Greentik Authentication Email";
-    sendAuthenticationEmail(regUser.email, regUser.username, subject, htmlcontent);
-    next();
-})
 
 // Validate password.
 router.use((req: Request, res: Response, next: NextFunction) => {
@@ -125,9 +118,41 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         res.status(400).json({
             Message: "Error Adding Container.",
             detail: e
-        })
+        });
     }
 });
+
+// Send authentication e-mail.
+router.use(async(req: Request, res: Response, next: NextFunction) => {
+
+    var jwk;
+    var keySet;
+    var kid;
+
+    if(req.app.get('onKey2')) {
+        keySet = req.app.get('KeySet2');
+        jwk = req.app.get('jwk2');
+        kid = jwk.kid;
+    } else {
+        keySet = req.app.get('KeySet1');
+        jwk = req.app.get('jwk1');
+        kid = jwk.kid;
+    }
+
+    const jwt: any = await getAuthJWT('auth', keySet.private, kid, '1d').then((handleFulfilled) => {
+        return handleFulfilled;
+    }, (handleRejected) => {
+        return handleRejected;
+    });
+
+    const regUser: User = res.locals.user;
+    const subject: string = "Greentik Authentication Email";
+    const htmlcontent: string = `<h1>Greentik Authentication Email</h1><br><br>` +
+                                `<p>Please click the following link to authenticate your e-mail address</p><br><br>` + 
+                                `<p>"https://greentikapidev.azurewebsites.net/register/${jwt}"</p>`;
+    sendAuthenticationEmail(regUser.email, regUser.username, subject, htmlcontent);
+    next();
+})
 
 // Insert User Avatar into blob contaier if it exists. 
 router.use((req: Request, res: Response, next: NextFunction) => {

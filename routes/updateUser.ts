@@ -63,7 +63,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             user.fname = handleFulfilled.fname;
         }
 
-        if (req.body.fname) {
+        if (req.body.lname) {
             user.lname = req.body.lname;
         } else {
             user.lname = handleFulfilled.lname;

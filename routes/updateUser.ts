@@ -9,6 +9,8 @@ var router = express.Router();
 
 router.use(async(req: Request, res : Response, next: NextFunction) => { 
 
+    res.locals.uuid = req.body.uuid;
+
     var user: User|null = await getUserUUID(String(req.body.uuid))
     .then((handleFulfilled) => {
         return handleFulfilled;
@@ -122,7 +124,6 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 
         var file = './images/' + req.file.filename;
         const fileName: string = String(req.file.filename);
-        console.log(fileName);
 
         try {
             createBlobOnContainer("u-" + res.locals.uuid, file, fileName)

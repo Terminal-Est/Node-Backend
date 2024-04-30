@@ -40,7 +40,6 @@ const imageStore = multer.diskStorage({
         cb(null, './images');
     },
     filename: function (req: any, file: any, cb: any) {
-        console.log(file.origionalname);
         const tstamp: string = Date.now().toString();
         cb(null, file.fieldname + "_" + tstamp + path.extname(file.originalname));
     }

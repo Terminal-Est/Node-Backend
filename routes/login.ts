@@ -1,37 +1,61 @@
 import { NextFunction, Request, Response } from "express";
 import { userLogin, getAuthJWT } from "../controllers/securityController";
 import { logToFile } from "../utils/logging";
+import { User } from "../data/entity/user";
 var express = require('express');
 var router = express.Router();
+
+/**
+ * Login route requires form data userId and password.
+ * First validates user against database, if user is valid, respond with JWT.
+ * If user email is not authorized, respond with message.
+ * If user is banned, respond with message.
+ */
 
 // First validate user against database.
 router.use((req: Request, res: Response, next: NextFunction) => {
 
     const email = req.body.email;
     const pass = req.body.password;
+    var jwk;
+    var keySet;
+    var kid;
 
-    userLogin(email, pass).then((handleFulfilled: any) => {
-       
-        var jwk;
-        var keySet;
-        var kid;
-        if(req.app.get('onKey2')) {
-            keySet = req.app.get('KeySet2');
-            jwk = req.app.get('jwk2');
-            kid = jwk.kid;
+    userLogin(email, pass).then((handleFulfilled: User) => {
+
+        if (!handleFulfilled.auth) {
+            res.status(400).json({
+                Message: "Email not validated. Check your E-mail Inbox and Spam folders for validation E-mail."
+            });
+            
         } else {
-            keySet = req.app.get('KeySet1');
-            jwk = req.app.get('jwk1');
-            kid = jwk.kid;
-        }
-        res.locals.email = email;
-        res.locals.jwk = jwk;
-        res.locals.keySet = keySet;
-        res.locals.kid = kid;
-        res.locals.uuid = handleFulfilled;
 
-        next();
-       
+            if (handleFulfilled.banned) {
+                res.status(400).json({
+                    Message: "You are banned! Contact GreenTik Administration."
+                });
+
+            } else {
+
+                if(req.app.get('onKey2')) {
+                    keySet = req.app.get('KeySet2');
+                    jwk = req.app.get('jwk2');
+                    kid = jwk.kid;
+                } else {
+                    keySet = req.app.get('KeySet1');
+                    jwk = req.app.get('jwk1');
+                    kid = jwk.kid;
+                }
+        
+                res.locals.email = email;
+                res.locals.jwk = jwk;
+                res.locals.keySet = keySet;
+                res.locals.kid = kid;
+                res.locals.uuid = handleFulfilled.uuid;
+        
+                next();
+            }
+        }
     }, (handleRejected: string) => {
         res.status(400).json({
             Message: "Login Failed.",
@@ -51,13 +75,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     const email = res.locals.uuid;
     const keySet = res.locals.keySet;
     const kid = res.locals.kid;
-    var date = Date.now();
-    var exp;
+    var exp: string;
     const remember: boolean = Boolean(req.body.remember);
 
     if (remember) {
-        exp = date + (30 * 86400000);
-        console.log(exp);
+        exp = '30d'
     } else {
         exp = '30m';
     }
@@ -79,11 +101,6 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-/**
- * Login route requires form data userId and password.
- * 
- * First validates user against database, if user is valid, respond with JWT.
- */
 router.use((req: Request, res: Response) => {
 
     const jwt = res.locals.jwt;

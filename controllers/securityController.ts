@@ -54,7 +54,7 @@ function getAuthJWT(uuid: string, key: any, kid: any, exp: any) {
         .setProtectedHeader({ alg })
         .setIssuedAt()
         .setSubject(uuid)
-        .setExpirationTime('30d')
+        .setExpirationTime(exp)
         .sign(privateKey)
         .then((handleFulfilled : any) => { 
             return resolve(handleFulfilled); 
@@ -83,8 +83,10 @@ async function userLogin(email: string, password : string) {
     var passwordValid: boolean = false;
     var uuid: string;
 
-    const user: User | null = await getUserEmail(email).then((data : User | null) => {
-        return data;
+    const user: any = await getUserEmail(email).then((handleFulfilled) => {
+        return handleFulfilled;
+    }, (handleRejected) => {
+        return handleRejected;
     });
     
     if (user != null) {
@@ -99,7 +101,7 @@ async function userLogin(email: string, password : string) {
         }
     }
 
-    return new Promise<string>(function(resolve, reject) {
+    return new Promise<User>(function(resolve, reject) {
         if (!userExists){
             return reject("Invalid User.");
 
@@ -107,7 +109,7 @@ async function userLogin(email: string, password : string) {
             return reject("Invalid Password");
 
         } else {
-            return resolve(uuid);
+            return resolve(user);
         }
     });
 }

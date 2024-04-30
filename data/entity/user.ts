@@ -33,6 +33,11 @@ export class User {
     auth: boolean;
 
     @Column()
+    @IsOptional()
+    @IsBooleanString()
+    banned: boolean;
+
+    @Column()
     @IsNotEmpty({
         message: "Username field cannot be empty."
     })

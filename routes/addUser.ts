@@ -139,7 +139,7 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
         kid = jwk.kid;
     }
 
-    const jwt: any = await getAuthJWT('auth', keySet.private, kid, '1d').then((handleFulfilled) => {
+    const jwt: any = await getAuthJWT(res.locals.uuid, keySet.private, kid, '1d').then((handleFulfilled) => {
         return handleFulfilled;
     }, (handleRejected) => {
         return handleRejected;
@@ -147,12 +147,12 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
 
     const regUser: User = res.locals.user;
     const subject: string = "Greentik Authentication Email";
-    const htmlcontent: string = `<h1>Greentik Authentication Email</h1><br><br>` +
-                                `<p>Please click the following link to authenticate your e-mail address</p><br><br>` + 
-                                `<p>"https://greentikapidev.azurewebsites.net/register/${jwt}"</p>`;
+    const htmlcontent: string = `<h1>Greentik Authentication Email</h1><br>` +
+                                `<p>Please click the following link to authenticate your e-mail address...</p><br>` + 
+                                `<a href="https://greentikapidev.azurewebsites.net/register/${jwt}">Click here to validate!</a>`;
     sendAuthenticationEmail(regUser.email, regUser.username, subject, htmlcontent);
     next();
-})
+});
 
 // Insert User Avatar into blob contaier if it exists. 
 router.use((req: Request, res: Response, next: NextFunction) => {

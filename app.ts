@@ -218,7 +218,7 @@ var getUserFeed = require('./routes/getFeed');
 app.get('/feed/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.uuid;
     next();
-}, jwtHandler.validateJWT, getUserFeed);
+}, /**jwtHandler.validateJWT**/ getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
@@ -250,6 +250,13 @@ app.get('/validate/:uuid', (req: Request, res: Response, next: NextFunction) => 
     res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, jwtHandler.issueJWT, getJWTRouter);
+
+// Get route for validating e-mail addresses.
+var getEmailValidationRouter = require('./routes/getEmailValidation');
+app.get('/register/:token', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.token = req.params.token;
+    next();
+}, getEmailValidationRouter);
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);

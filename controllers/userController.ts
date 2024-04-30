@@ -129,7 +129,9 @@ async function createUser(user: User) {
                 city: user.city,
                 state: user.state,
                 postcode: user.postcode,
-                avatar: user.avatar
+                avatar: user.avatar,
+                fname: user.fname,
+                lname: user.lname
             }
         ])
         .execute();
@@ -166,7 +168,9 @@ async function updateUser(user: User) {
             city: user.city,
             state: user.state,
             postcode: user.postcode,
-            avatar: user.avatar
+            avatar: user.avatar,
+            fname: user.fname,
+            lname: user.lname
         })
         .where("uuid = :id", {id: user.uuid})
         .execute();

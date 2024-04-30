@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDateString, IsOptional } from "class-validator";
+import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsDateString, IsOptional } from "class-validator";
 
 /**
  * User entity class. TypeORM class with validation decorators.
@@ -24,17 +24,14 @@ export class User {
 
     @Column()
     @IsOptional()
-    @IsBooleanString()
     admin: boolean;
    
     @Column()
     @IsOptional()
-    @IsBooleanString()
     auth: boolean;
 
     @Column()
     @IsOptional()
-    @IsBooleanString()
     banned: boolean;
 
     @Column()
@@ -103,12 +100,12 @@ export class User {
     @Length(0, 250, {
         message: "First name must not exceed 250 characters."
     })
-    fname: boolean;
+    fname: string;
 
     @Column()
     @IsOptional()
     @Length(0, 250, {
         message: "Last name must not exceed 250 characters."
     })
-    lname: boolean;
+    lname: string;
 }

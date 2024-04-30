@@ -7,16 +7,23 @@ import { ValidationError } from "class-validator";
 var express = require('express');
 var router = express.Router();
 
-router.use((req: Request, res : Response, next: NextFunction) => { 
+router.use(async(req: Request, res : Response, next: NextFunction) => { 
 
-    getUserUUID(String(req.body.uuid)).then((handleFulfilled) => {
+    var user: User|null = await getUserUUID(String(req.body.uuid))
+    .then((handleFulfilled) => {
+        return handleFulfilled;
+    }, () => {
+        return null;
+    }).catch((err) => {
+        console.log(err);
+        return null;
+    });
+    
+    if (user) {
 
-        var user = new User;
-        user.uuid = handleFulfilled.uuid;
-        user.username = handleFulfilled.username;
-        var dateOfBirth = new Date(handleFulfilled.dob);
+        var dateOfBirth = new Date(user.dob);
         var dateArray: string[] = dateOfBirth.toISOString().split('T');
-        
+
         const dobString: string = dateArray[0];
 
         user.dob = dobString;
@@ -24,66 +31,71 @@ router.use((req: Request, res : Response, next: NextFunction) => {
         if (req.body.email) {
             user.email = req.body.email;
         } else {
-            user.email = handleFulfilled.email;
+            user.email = user.email;
         }
 
         if (req.body.address) {
             user.address = req.body.address;
         } else {
-            user.address = handleFulfilled.address;
+            user.address = user.address;
         }
 
         if (req.body.city) {
             user.city = req.body.city;
         } else {
-            user.city = handleFulfilled.city;
+            user.city = user.city;
         }
 
         if (req.body.state) {
             user.state = req.body.state;
         } else {
-            user.state = handleFulfilled.state;
+            user.state = user.state;
         }
 
         if (req.body.postcode) {
             user.postcode = req.body.postcode;
         } else {
-            user.postcode = handleFulfilled.postcode;
+            user.postcode = user.postcode;
         }
 
         if (req.file?.filename) {
             user.avatar = req.file.filename;
         } else {
-            user.avatar = handleFulfilled.avatar;
+            user.avatar = user.avatar;
         }
 
         if (req.body.fname) {
             user.fname = req.body.fname;
         } else {
-            user.fname = handleFulfilled.fname;
+            user.fname = user.fname;
         }
 
         if (req.body.lname) {
             user.lname = req.body.lname;
         } else {
-            user.lname = handleFulfilled.lname;
+            user.lname = user.lname;
         }
         
-        validateUser(user).then((handleFulfilled) => {
+        const valid: any = await validateUser(user).then((handleFulFilled) => {
+            return handleFulFilled;
+        }, (handleRejected: ValidationError) => {
+            return handleRejected;
+        });
+
+        if (valid === true) {
             res.locals.user = user;
             next();
-        }, (handleRejected: ValidationError) => {
+        } else {
             res.status(400).json({
                 Message: "Invalid User Details.",
-                Detail: handleRejected
+                Detail: valid
             });
-        })
-    }).catch((error) => {
-        res.status(500).json({
-            Message: "Update User Error.",
-            Detail: error
+        }
+    } else {
+        res.status(400).json({
+            Message: "User Not Found Error."
         });
-    })
+    }
 });
 
 router.use((req: Request, res : Response, next: NextFunction) => {
@@ -99,16 +111,18 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             Detail: error
         })
     });
+        
 });
 
 router.use((req: Request, res : Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
-    if (user.avatar) {
+    if (req.file) {
 
-        var file = './images/' + req.file?.filename;
-        const fileName: string = String(req.file?.filename);
+        var file = './images/' + req.file.filename;
+        const fileName: string = String(req.file.filename);
+        console.log(fileName);
 
         try {
             createBlobOnContainer("u-" + res.locals.uuid, file, fileName)

@@ -141,18 +141,19 @@ router.get('/:id/thumbnail', (req: Request, res: Response, next: NextFunction) =
                     if (err) {
                         console.log(err);
                         res.sendStatus(500);
+                    } else {
+                        unlink(fileNameandPath, (err) => {
+                            if (err) {
+                                console.log(err);
+                            }
+                        });
+    
+                        unlink(file, (err) => {
+                            if (err) {
+                                console.log(err);
+                            }
+                        });
                     }
-                    unlink(fileName, (err) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
-
-                    unlink(file, (err) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
                 });
             });
         };

@@ -16,12 +16,12 @@ const validateJWT = (req: Request, res: Response, next: NextFunction) => {
     } else {
         uuid = String(req.body.uuid);
         res.locals.uuid = uuid;
-        console.log(uuid);
     }
 
     const jwt = req.headers.authorization;
     const jwk1 = req.app.get('jwk1');
     const jwk2 = req.app.get('jwk2');
+
     verifyToken(jwt, jwk1, jwk2).then((handleFulfilled : any) => {
         const payload = handleFulfilled.payload;
         if (uuid != String(payload.sub)) {

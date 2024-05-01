@@ -20,14 +20,14 @@ router.use((req: Request, res: Response, next: NextFunction) => {
                 res.locals.user = handleFulfilled;
                 next();
             } else {
-                res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
+                res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/verifyfailed');
             }
         }, () => {
-            res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
+            res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/verifyfailed');
         });
 
     }, () => {
-        res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
+        res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/verifyfailed');
     }).catch((err) => {
         res.status(500).json({
             Message: "Token Verification Error.",
@@ -41,9 +41,9 @@ router.use((req: Request, res: Response) => {
     const user: User = res.locals.user;
 
     setUserAthenticated(String(user.uuid), true).then(() => {
-        res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
+        res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/verifysuccess');
     }).catch(() => {
-        res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
+        res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/verifyfailed');
     })
 });
 

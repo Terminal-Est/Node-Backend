@@ -10,6 +10,7 @@ var security = require('./controllers/securityController');
 var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 import { NextFunction, Request, Response } from "express";
+import { emailMiddleware } from "./routes/getNewEmailAuth";
 
 // Multer disk storage.
 const storage = multer.diskStorage({
@@ -258,6 +259,22 @@ app.get('/register/:token', (req: Request, res: Response, next: NextFunction) =>
     res.locals.token = req.params.token;
     next();
 }, getEmailValidationRouter);
+
+// Get route for getting new e-mail validation token.
+var validateEmailTokenRouter = require('./routes/validateEmailToken');
+app.get('/register/renew/:token', 
+    (req: Request, res: Response, next: NextFunction) => {
+        res.locals.token = req.params.token;
+        next();
+    }, 
+    validateEmailTokenRouter, 
+    emailMiddleware, 
+    (req: Request, res: Response) => {
+        res.status(200).json({
+            Message: "E-mail Verification Sent."
+        });
+    }, 
+);
 
 // Set app key switchRSA to true.
 app.set('switchRSA', true);

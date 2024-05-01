@@ -97,11 +97,11 @@ app.get('/', indexRouter);
 // Post route for adding User.
 var getIPRouter = require('./routes/validateIP');
 var addUserRouter = require('./routes/addUser');
-app.post('/user', imageUpload.single('avatar'), getIPRouter, addUserRouter);
+app.post('/user', imageUpload.single('avatar'), /**getIPRouter,**/ addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', imageUpload.single('avatar'), /**jwtHandler.validateJWT,**/ updateUserRouter);
+app.put('/user', imageUpload.single('avatar'), jwtHandler.validateJWT, updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');

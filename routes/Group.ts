@@ -94,7 +94,7 @@ router.get('/files', (req: Request, res: Response, next: NextFunction) => {
         'groups'
     );
     listBlobsFlatWithPageMarker(containerClient);
-
+    res.sendStatus(200);
 })
 
 // Get group by ID.
@@ -124,21 +124,39 @@ router.get('/:id/thumbnail', (req: Request, res: Response, next: NextFunction) =
         if (value != null) {
             downloadBlobToFile(value.Background_FileName).then(() => {
                 console.log('File downloaded');
-                var file = path.join('../images/' + value?.Background_FileName);
+                var file = path.join('./images/' + value?.Background_FileName);
                 const fileextension = value?.Background_FileName.toString().split(".")[1];
-                const fileName: string = path.join('../images/' + 'group_' + value?.ID + "_thumbnail." + fileextension);
+                const fileName: string = path.join('group_' + value?.ID + "_thumbnail." + fileextension);
+                const fileNameandPath: string = path.join('./images/' + fileName);
 
-                sharp(file).resize({ width: 100, height: 100, fit: 'fill' }).toFile(fileName)
+                sharp(file).resize({ width: 100, height: 100, fit: 'fill' }).toFile(fileNameandPath)
 
-                res.sendFile(__dirname + '/' + fileName);
+                const test = path.parse(path.resolve(fileNameandPath));
+
+                const options = {
+                    root: test.dir
+                };
+
+                res.sendFile(fileName, options, (err) => {
+                    if (err) {
+                        console.log(err);
+                        res.sendStatus(500);
+                    }
+                    unlink(fileName, (err) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
+
+                    unlink(file, (err) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
+                });
             });
-        }
+        };
     });
-    /*
-    unlink('../images/' + fileName, () => {
-        // Do nothing.
-    });
-    */
 });
 
 // Get group category by ID.
@@ -207,13 +225,13 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 /*
 // Return a thumbnail from an image.
 router.use((req: Request, res: Response, next: NextFunction) => {
-
+ 
     var file = './images/' + req.file?.filename;
     const fileextension = req.file?.originalname.toString().split(".")[1];
     const fileName: string = 'group_' + res.locals.groupid + "_thumbnail_" + res.locals.group.Image_TimeStamp + "." + fileextension;
-
+ 
     sharp(file).resize({ width: 100, height: 100, fit: 'fill' }).toFile('./images/' + fileName).then()
-
+ 
     next();
 });
 */
@@ -317,12 +335,12 @@ async function downloadBlobToFile(blobName: string | undefined) {
     );
 
     //const dirPath = path.join('C:\\Users\\Sasse.Mark\\Documents\\Education\\CPT331\\Node-Backend\\images\\', blobName);
-    const dirPath = path.join('../images/', blobName);
+    const dirPath = path.join('./images/', blobName);
     //const fileNameWithPath: string = ('./images/' + blobName)
 
     if (blobName) {
         const blobClient: BlobClient = containerClient.getBlobClient(blobName);
-        await blobClient.downloadToFile(blobName);
+        await blobClient.downloadToFile(dirPath);
     }
 }
 

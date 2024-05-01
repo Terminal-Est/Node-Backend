@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { getBlobSaS } from "../controllers/fileController";
 
 var express = require('express');
@@ -11,8 +11,8 @@ router.use((req: Request, res : Response) => {
     const url: string = getBlobSaS("u-" + container, filename);
 
     res.status(200).json({
-        Message: "File SaS Url Received",
-        Url: url
+        Message: "File SaS Url Received.",
+        Detail: url
     });
 });
 

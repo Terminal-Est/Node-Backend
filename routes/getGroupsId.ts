@@ -6,6 +6,7 @@ var express = require('express');
 var router = express.Router();
 
 router.use(async(req: Request, res: Response, next: NextFunction) => {
+
     const groupid = parseInt(res.locals.id);
     
     const comms = await getCommentsByGroup(groupid).then((handleFulFilled) => {
@@ -13,6 +14,7 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
     }, (handleRejected) => {
         return handleRejected;
     });
+
     getGroupByID(groupid).then(async(handleFulfilled) => {
         const users: any = await getUsersByGroup(groupid).then((handleFulfilled) => {
             return handleFulfilled;
@@ -32,6 +34,16 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
                 users: users,
                 comments: comms
             }
+        });
+    }, (handleRejected) => {
+        res.status(400).json({
+            Message: "No Groups Found.",
+            Detail: handleRejected
+        });
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Group Retreival Server Error.",
+            Detail: err
         });
     });
 });

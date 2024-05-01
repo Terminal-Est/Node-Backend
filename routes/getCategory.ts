@@ -20,6 +20,16 @@ router.use((req: Request, res: Response, next: NextFunction) => {
                 backgroundImg: imgUrl
             }
         });
+    }, (handleRejected) => {
+        res.status(400).json({
+            Message: "No Category Found.",
+            Detail: handleRejected
+        });
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Get Category Server Error.",
+            Detail: err
+        });
     });
 });
 

@@ -38,26 +38,24 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     var file = './videos/' + req.file?.filename;
     const fileName: string = String(req.file?.filename);
 
-    try {
-        createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
-            unlink(file, (err) => {
-                if (err) {
-                    res.status(500).json({
-                        Message: "File Upload Error.",
-                        Detail: err
-                    });
-                } else {
-                    res.locals.requestId = requestId;
-                    next();
-                }
-            });
+    createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
+        unlink(file, (err) => {
+            if (err) {
+                res.status(500).json({
+                    Message: "Video Unlink Error.",
+                    Detail: err
+                });
+            } else {
+                res.locals.requestId = requestId;
+                next();
+            }
         });
-    } catch (e) {
+    }).catch((err) => {
         res.status(500).json({
-            Message: "Upload Failed.",
-            Detail: e
+            Message: "Blob Creation Error.",
+            Detail: err
         });
-    }
+    });
 });
 
 // If video upload is successful, update database with video details.
@@ -91,6 +89,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             filename: req.file?.filename,
             videoToGroup: groupInsertResult,
         });
+        
     }, (handleRejected: any) => {
         res.status(400).json({
             Message: "Video Database Update Failed.",

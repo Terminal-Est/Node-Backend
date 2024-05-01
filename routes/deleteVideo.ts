@@ -15,11 +15,20 @@ router.delete('/', (req: Request, res : Response, next: NextFunction) => {
                 Message: "Video Deleted Successfully.",
                 Detail: handleFulfilled.affected
             });
+        }, (handleRejected) => {
+            res.status(200).json({
+                Message: "Video Deleted Successfully.",
+                Detail: handleRejected
+            });
         }).catch((err) => {
-            res.status(400).json({
+            res.status(500).json({
                 Message: "Database Delete Error.",
                 Detail: err
             })
+        });
+    }, () => {
+        res.status(400).json({
+            Message: "Blob Not Found.",
         });
     }).catch((err) => {
         res.status(500).json({

@@ -6,6 +6,7 @@ import { User } from "../data/entity/user";
 import { getBlobSaS, getVideo } from "../controllers/fileController";
 import { getUserUUID } from "../controllers/userController";
 import { getCommentsByVideo } from "../controllers/commentController";
+import { logToFile } from "../utils/logging";
 var express = require('express');
 var router = express.Router();
 
@@ -16,6 +17,11 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
 
     const groupVideos: GroupVideos[] = await getVideosByGroup(videoId).then((handleFulFilled) => {
         return handleFulFilled;
+    }, () => {
+        return [];
+    }).catch((err) => {
+        logToFile(err);
+        return [];
     });
 
     var videos: any = {};
@@ -28,8 +34,15 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
         
             const video: Video | null = await getVideo(groupVideos[i].videoId).then((handleFulfilled) => {
                 return handleFulfilled;
+            }, () => {
+                return null;
+            }).catch((err) => {
+                logToFile(err);
+                return null;
             });
+
             const sasUrl: string = getBlobSaS("u-" + String(uuid), String(video?.videoId));
+
             const user: User = await getUserUUID(String(video?.uuid)).then((handleFulfilled) => {
                 return handleFulfilled;
             });
@@ -38,6 +51,8 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
                 return handleFulfilled;
             }, (handleRejected) => {
                 return handleRejected;
+            }).catch((err) => {
+                logToFile(err);
             });
     
             var data = {

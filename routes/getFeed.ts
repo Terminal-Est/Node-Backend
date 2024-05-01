@@ -8,6 +8,7 @@ import { getBlobSaS } from "../controllers/fileController";
 import { UserGroup } from "../data/entity/userGroup";
 import { getCommentsByVideo } from "../controllers/commentController";
 import { VideoComment } from "../data/entity/videoComment";
+import { logToFile } from "../utils/logging";
 var express = require('express');
 var router = express.Router();
 
@@ -28,7 +29,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
     }, () => {
         userFollows = [];
     }).catch((err) => {
-        console.log(err);
+        logToFile(err);
         userGroup = [];
     });
 
@@ -37,7 +38,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
     }, () => {
         userGroup = [];
     }).catch((err) => {
-        console.log(err);
+        logToFile(err);
         userGroup = [];
     });
 
@@ -48,7 +49,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
         }, () => {
             return null;
         }).catch((err) => {
-            console.log(err);
+            logToFile(err);
             return null;
         });
 
@@ -64,7 +65,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
         }, () => {
             return [];
         }).catch((err) => {
-            console.log(err);
+            logToFile(err);
             return [];
         });
 
@@ -75,7 +76,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
             }, () => {
                 return null;
             }).catch((err) => {
-                console.log(err);
+                logToFile(err);
                 return null;
             });
             
@@ -105,7 +106,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
         }, () => {
             return null;
         }).catch((err) => {
-            console.log(err);
+            logToFile(err);
             return null;
         });
 
@@ -114,7 +115,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
         }, () => {
             return [];
         }).catch((err) => {
-            console.log(err);
+            logToFile(err);
             return [];
         });;
 
@@ -128,7 +129,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
             }, () => {
                 return [];
             }).catch((err) => {
-                console.log(err);
+                logToFile(String(err));
                 return [];
             });
 

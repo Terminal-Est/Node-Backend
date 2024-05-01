@@ -5,7 +5,8 @@ import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
-router.use((req: Request, res : Response, next: NextFunction) => { 
+router.use((req: Request, res : Response) => { 
+
     getUserUUID(res.locals.uuid).then((handleFulfilled: User) => {
         var avatarUrl = null;
         if (handleFulfilled.avatar != null) {
@@ -32,7 +33,12 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             Message: "User Not Found.",
             Detail: handleRejected
         })
-    })
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "User Retreival Server Error.",
+            Detail: String(err)
+        });
+    });
 });
 
 module.exports = router;

@@ -20,12 +20,22 @@ router.use((req: Request, res: Response, next: NextFunction) => {
                 bgImg: bgImgUrl
             }
 
-            listofgroups.push(x)
+            listofgroups.push(x);
         })
         res.status(200).json({
-            Message: "Groups Returned Successfully.",
+            Message: "Categories Returned Successfully.",
             listofgroups
-        })
+        });
+    }, (handleRejected) => {
+        res.status(200).json({
+            Message: "Categories Not Found.",
+            Detail: handleRejected
+        });
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Category Retreival Error.",
+            Detail: err
+        });
     });
 });
 

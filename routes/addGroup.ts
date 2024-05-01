@@ -36,7 +36,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             res.locals.groupid = handleFullfilled.identifiers[0].ID;
             next();
         } else {
-            res.status(200).json({
+            res.status(201).json({
                 Message: "Group Added Successfully.",
                 Detail: handleFullfilled.identifiers[0].ID
             });
@@ -60,29 +60,28 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     x.Background_FileName = fileName
     res.locals.group = x;
 
-    try {
-        createBlobOnContainer("groups", file, fileName).then((requestId: string | undefined) => {
-            unlink(file, (err) => {
-                if (err) {
-                    res.status(400).json({
-                        Message: "File Upload Error.",
-                        Detail: err
-                    });
-                } else {
-                    res.status(200).json({
-                        Message: "Group Added Successfully.",
-                        Detail: res.locals.groupid,
-                        blobRequestId: requestId
-                    });
-                }
-            });
+
+    createBlobOnContainer("groups", file, fileName).then((requestId: string | undefined) => {
+        unlink(file, (err) => {
+            if (err) {
+                res.status(500).json({
+                    Message: "Image Unlink Error.",
+                    Detail: err
+                });
+            } else {
+                res.status(200).json({
+                    Message: "Group Added Successfully.",
+                    Detail: res.locals.groupid,
+                    blobRequestId: requestId
+                });
+            }
         });
-    } catch (e) {
-        res.status(400).json({
-            Message: "Upload Failed.",
-            Detail: e
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Blob Creation Error.",
+            Detail: String(err)
         });
-    }
+    });
 });
 
 module.exports = router;

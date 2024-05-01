@@ -36,7 +36,7 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
                     Detail: handleFulfilled
                 });
             }, (handleRejected: any) => {
-                res.status(500).json({
+                res.status(400).json({
                     Message: "Comment Add Failed.",
                     Detail: handleRejected
                 });
@@ -46,7 +46,7 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
         res.status(400).json({
             Message: "Invalid Comment.",
             Detail: valid
-        })
+        });
     }
 });
 

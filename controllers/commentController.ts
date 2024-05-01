@@ -150,7 +150,7 @@ async function getUserGroupComment(uuid: string, commentId: number) {
     });
 }
 
-async function deleteUserVideoComment<DeleteResult>(uuid: string, commentId: number) {
+async function deleteUserVideoComment(uuid: string, commentId: number) {
     var result = await AppDataSource.getRepository(VideoComment)
         .createQueryBuilder("comment")
         .delete()
@@ -161,7 +161,7 @@ async function deleteUserVideoComment<DeleteResult>(uuid: string, commentId: num
     return result;
 }
 
-async function deleteUserGroupComment<DeleteResult>(uuid: string, commentId: number) {
+async function deleteUserGroupComment(uuid: string, commentId: number) {
     var result = await AppDataSource.getRepository(GroupComment)
         .createQueryBuilder("comment")
         .delete()
@@ -194,12 +194,18 @@ async function updateUserVideoComment(uuid: string, commentId: number, comment: 
     return result;
 }
 
-async function addLikeUserVideoComment(uuid: string, commentId: number) {
-
+async function getAllVideoComments() {
+    var comments: VideoComment[] = await AppDataSource.getRepository(VideoComment)
+        .createQueryBuilder("comments")
+        .getMany();
+    return comments;
 }
 
-async function addLikeUserGroupComment(uuid: string, commentId: number) {
-
+async function getAllGroupComments() {
+    var comments: VideoComment[] = await AppDataSource.getRepository(VideoComment)
+        .createQueryBuilder("comments")
+        .getMany();
+    return comments;
 }
 
 export {
@@ -216,5 +222,7 @@ export {
     deleteUserGroupComment,
     deleteUserVideoComment,
     updateUserGroupComment,
-    updateUserVideoComment
+    updateUserVideoComment,
+    getAllGroupComments,
+    getAllVideoComments
 }

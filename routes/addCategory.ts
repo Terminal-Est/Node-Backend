@@ -35,6 +35,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             Message: "Categories Database Update Failed.",
             Detail: handleRejected
         });
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Categories Database Error.",
+            Detail: err
+        });
     });
 });
 
@@ -58,27 +63,26 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     x.push(icoimage);
 
     x.forEach((value) => {
-        try {
-            createBlobOnContainer("categories", value.file, value.filename).then((requestId: string | undefined) => {
-                unlink(value.file, (err) => {
-                    if (err) {
-                        res.status(400).json({
-                            Message: "File Upload Error.",
-                            Detail: err
-                        });
-                    } else {
-                        res.locals.requestId = requestId;
-                    }
-                });
+        createBlobOnContainer("categories", value.file, value.filename).then((requestId: string | undefined) => {
+            unlink(value.file, (err) => {
+                if (err) {
+                    res.status(500).json({
+                        Message: "Image Unlink Error.",
+                        Detail: err
+                    });
+                } else {
+                    res.locals.requestId = requestId;
+                }
             });
-        } catch (e) {
-            res.status(400).json({
-                Message: "Upload Failed.",
-                Detail: e
+        }).catch((err) => {
+            res.status(500).json({
+                Message: "Blob Creation Error.",
+                Detail: err
             });
-        }
+        });
     });
-    res.json({
+    res.status(200).json({
+        Message: "Category Successfully Created",
         CategoryID: res.locals.categoryid,
         Detail: "Created"
     })

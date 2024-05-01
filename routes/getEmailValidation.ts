@@ -22,9 +22,17 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             } else {
                 res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
             }
-        })
-    }, (handleRejected) => {
+        }, () => {
+            res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
+        });
+
+    }, () => {
         res.redirect('https://develop.d1yh0kru3rdga7.amplifyapp.com/login');
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Token Verification Error.",
+            Detail: err
+        });
     });
 });
 

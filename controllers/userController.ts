@@ -176,6 +176,16 @@ async function updateUser(user: User) {
         .execute();
 }
 
+async function updateUserBan(uuid: string, banned: boolean) {
+    return await UserDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+            banned: banned
+        })
+        .where("uuid = :id", {id: uuid})
+        .execute();
+}
+
 export { getUserEmail,
     getUserUUID,
     getUserPassword,
@@ -187,5 +197,6 @@ export { getUserEmail,
     setUserAthenticated,
     validateUser,
     validatePassword,
-    updateUser
+    updateUser,
+    updateUserBan
  }; 

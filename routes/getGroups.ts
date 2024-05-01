@@ -6,8 +6,11 @@ var express = require('express');
 var router = express.Router();
 
 router.use(async(req: Request, res: Response, next: NextFunction) => {
+    
     let listofgroups: Array<any> = new Array<any>();
+    
     await getGroups().then(async(handleFulfilled) => {
+        
         for await (const value of handleFulfilled) {
 
             let bgImgUrl = getBlobSaS("groups", String(value?.Background_FileName));
@@ -29,11 +32,23 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
                 comments: comms
             }
             listofgroups.push(x)
-        }       
-    });
-    res.status(200).json({
-        Message: "Groups Returned Successfully.",
-        listofgroups
+        }
+
+        res.status(200).json({
+            Message: "Groups Returned Successfully.",
+            listofgroups
+        });
+
+    }, (handleRejected) => {    
+        res.status(400).json({
+            Message: "No Groups Found.",
+            Detail: handleRejected
+        });
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Group Retreival Server Error.",
+            Detail: err
+        });
     });
 });
 

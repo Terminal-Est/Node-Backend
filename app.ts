@@ -94,8 +94,9 @@ var indexRouter = require('./routes/index');
 app.get('/', indexRouter);
 
 // Post route for adding User.
+var getIPRouter = require('./routes/validateIP');
 var addUserRouter = require('./routes/addUser');
-app.post('/user', imageUpload.single('avatar'), addUserRouter);
+app.post('/user', imageUpload.single('avatar'), getIPRouter, addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
@@ -106,7 +107,7 @@ var getUserRouter = require('./routes/getUser');
 app.get('/user/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT,**/ getUserRouter);
+}, jwtHandler.validateJWT, getUserRouter);
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/deleteUser');
@@ -218,7 +219,7 @@ var getUserFeed = require('./routes/getFeed');
 app.get('/feed/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.uuid;
     next();
-}, /**jwtHandler.validateJWT**/ getUserFeed);
+}, jwtHandler.validateJWT, getUserFeed);
 
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');

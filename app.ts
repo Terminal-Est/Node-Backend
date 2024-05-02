@@ -233,7 +233,7 @@ app.put('/groups/comment', fieldsOnly, jwtHandler.validateJWT, updateGroupCommen
 
 // Delete group comment from database.
 var deleteGroupCommentRouter = require('./routes/deleteUserGroupComment');
-app.delete('/video/comment', fieldsOnly, jwtHandler.validateJWT, deleteGroupCommentRouter);
+app.delete('/groups/comment', fieldsOnly, jwtHandler.validateJWT, deleteGroupCommentRouter);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');

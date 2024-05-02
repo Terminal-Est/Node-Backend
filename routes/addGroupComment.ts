@@ -23,7 +23,7 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
         return handleRejected;
     });
 
-    if (typeof valid == 'boolean') {
+    if (typeof valid == 'boolean' && valid == true) {
         if (isCommentProfane(comment.comment)) {
             res.status(400).json({
                 Message: "Don't Use Naughty Words."

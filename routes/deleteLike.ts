@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { DeleteResult } from "typeorm";
 import { removeLike } from "../controllers/likeController";
-import { ValidationError } from "class-validator";
 var express = require('express');
 var router = express.Router();
 
-router.use((req: Request, res: Response, next: NextFunction) => {
+router.use((req: Request, res: Response) => {
     const tempLike = { videoid: req.body.videoid, uuid: req.body.uuid };
     removeLike(tempLike).then((handleFullfilled: DeleteResult) => {
         if (handleFullfilled.affected == 0) {
@@ -27,7 +26,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     }).catch((err) => {
         res.status(400).json({
             Message: "Delete Like Server Error.",
-            Detail: String(err)
+            Detail: err
         });
     })
 })

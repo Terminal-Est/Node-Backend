@@ -32,4 +32,8 @@ export class VideoComment {
     @Column()
     @IsNotEmpty()
     timestamp: string;
+
+    @Column()
+    @IsOptional()
+    flagged: boolean;
 }

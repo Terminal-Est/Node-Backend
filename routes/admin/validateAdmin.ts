@@ -27,6 +27,7 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
                 Message: "User Access Denied."
             });
         } else {
+            res.locals.adminUser = true;
             next();
         }
     } else {

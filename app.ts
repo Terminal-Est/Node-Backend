@@ -206,15 +206,34 @@ app.get('/video/:id/:fileName/:uuid', (req: Request, res: Response, next: NextFu
     next();
 }, jwtHandler.validateJWT, getVideoSas);
 
-// Comments Routes
+/**
+ * Comment routes start here
+ * -------------------------
+ */
 
 // Post video comment route.
 var addVideoCommentRouter = require('./routes/addVideoComment');
 app.post('/video/comment', fieldsOnly, jwtHandler.validateJWT, addVideoCommentRouter);
 
-// Post video comment route.
+// Put route for updating video comment.
+var updateVideoCommentRouter = require('./routes/updateUserVideoComment');
+app.put('/video/comment', fieldsOnly, jwtHandler.validateJWT, updateVideoCommentRouter);
+
+// Delete video comment from database.
+var deleteVideoCommentRouter = require('./routes/deleteUserVideoComment');
+app.delete('/video/comment', fieldsOnly, jwtHandler.validateJWT, deleteVideoCommentRouter);
+
+// Post group comment route.
 var addGroupCommentRouter = require('./routes/addGroupComment');
 app.post('/groups/comment', fieldsOnly, jwtHandler.validateJWT, addGroupCommentRouter);
+
+// Put route for updating group comment.
+var updateGroupCommentRouter = require('./routes/updateUserGroupComment');
+app.put('/groups/comment', fieldsOnly, jwtHandler.validateJWT, updateGroupCommentRouter);
+
+// Delete group comment from database.
+var deleteGroupCommentRouter = require('./routes/deleteUserGroupComment');
+app.delete('/video/comment', fieldsOnly, jwtHandler.validateJWT, deleteGroupCommentRouter);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');

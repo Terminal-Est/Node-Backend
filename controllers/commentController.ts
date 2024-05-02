@@ -154,8 +154,8 @@ async function deleteUserVideoComment(uuid: string, commentId: number) {
     var result = await AppDataSource.getRepository(VideoComment)
         .createQueryBuilder("comment")
         .delete()
-        .where("comment.commentId = :id", { id: commentId })
-        .andWhere("comment.uuid = :uuid", { uuid: Number(uuid) })
+        .where("commentId = :id", { id: commentId })
+        .andWhere("uuid = :uuid", { uuid: Number(uuid) })
         .execute();
 
     return result;
@@ -165,31 +165,36 @@ async function deleteUserGroupComment(uuid: string, commentId: number) {
     var result = await AppDataSource.getRepository(GroupComment)
         .createQueryBuilder("comment")
         .delete()
-        .where("comment.commentId = :id", { id: commentId })
-        .andWhere("comment.uuid = :uuid", { uuid: Number(uuid) })
+        .where("commentId = :id", { id: commentId })
+        .andWhere("uuid = :uuid", { uuid: Number(uuid) })
         .execute();
       
     return result;
 }
 
-async function updateUserGroupComment(uuid: string, commentId: number, comment: string) {
+async function updateUserGroupComment(uuid: string, commentId: number, comment: string, timestamp: string) {
     var result = await AppDataSource.createQueryBuilder()
-        .update(VideoComment)
-        .set({ comment: comment })
-        .where("comment.commentId = :id", { id: commentId })
-        .andWhere("comment.uuid = :uuid", { uuid: Number(uuid) })
+        .update(GroupComment)
+        .set({ 
+            comment: comment,
+            timestamp: timestamp
+        })
+        .where("commentId = :id", { id: commentId })
+        .andWhere("uuid = :uuid", { uuid: Number(uuid) })
         .execute();
-
     return result;
 }
 
-async function updateUserVideoComment(uuid: string, commentId: number, comment: string) {
+async function updateUserVideoComment(uuid: string, commentId: number, comment: string, timestamp: string) {
     var result = await AppDataSource.createQueryBuilder()
-        .update(GroupComment)
-        .set({ comment: comment })
-        .where("comment.commentId = :id", { id: commentId })
-        .andWhere("comment.uuid = :uuid", { uuid: Number(uuid) })
-        .execute();
+        .update(VideoComment)
+        .set({ 
+            comment: comment,
+            timestamp: timestamp
+         })
+        .where("commentId = :id", { id: commentId })
+        .andWhere("uuid = :uuid", { uuid: Number(uuid) })
+        .execute()
 
     return result;
 }

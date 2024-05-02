@@ -32,4 +32,8 @@ export class GroupComment {
     @Column()
     @IsNotEmpty()
     timestamp: string;
+
+    @Column()
+    @IsOptional()
+    flagged: boolean;
 }

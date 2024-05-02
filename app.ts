@@ -306,7 +306,10 @@ var adminValidationRouter = require('./routes/admin/validateAdmin');
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/admin/deleteUser');
-app.delete('/user', fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, deleteUserRouter);
+app.delete('/user', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, deleteUserRouter);
 
 
 /**

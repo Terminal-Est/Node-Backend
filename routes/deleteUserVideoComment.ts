@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
 import { DeleteResult } from "typeorm";
 import { deleteUserVideoComment } from "../controllers/commentController";
-import { getUserUUID } from "../controllers/userController";
-import { User } from "../data/entity/user";
 var express = require('express');
 var router = express.Router();
 
-router.use(async(req: Request, res: Response) => {
+router.use((req: Request, res: Response) => {
 
     var uuid: string;
 

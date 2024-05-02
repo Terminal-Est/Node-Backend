@@ -22,12 +22,14 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
     });
 
     if (user) {
-        if (!user.admin) {
+        if (!user.admin && res.locals.adminOnlyRoute) {
             res.status(403).json({
                 Message: "User Access Denied."
             });
-        } else {
+        } else if (user.admin) {
             res.locals.adminUser = true;
+            next();
+        } else {
             next();
         }
     } else {

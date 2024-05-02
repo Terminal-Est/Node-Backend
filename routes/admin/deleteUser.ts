@@ -7,7 +7,7 @@ var router = express.Router();
 
 router.use((req: Request, res : Response, next: NextFunction) => { 
     
-    const idToDelete: string = req.body.id;
+    const idToDelete: string = req.body.userId;
     var deletePii: DeleteResult;
     var deleteDataUuid: DeleteResult;
 

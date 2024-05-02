@@ -95,6 +95,9 @@ app.use(cookieParser());
  * --------------------------
  */
 
+// Admin validation route.
+var adminValidationRouter = require('./routes/admin/validateAdmin');
+
 // Get index router.
 var indexRouter = require('./routes/index');
 app.get('/', indexRouter);
@@ -106,14 +109,14 @@ app.post('/user', imageUpload.single('avatar'), /**getIPRouter,**/ addUserRouter
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', imageUpload.single('avatar'), jwtHandler.validateJWT, updateUserRouter);
+app.put('/user', imageUpload.single('avatar'), adminValidationRouter, jwtHandler.validateJWT, updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');
 app.get('/user/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.uuid;
     next();
-}, jwtHandler.validateJWT, getUserRouter);
+}, jwtHandler.validateJWT, adminValidationRouter, getUserRouter);
 
 // Get route to get all videos by group ID.
 var getGroupVideos = require('./routes/getGroupVideos');
@@ -191,11 +194,11 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.post('/video', uploads.single('video'), jwtHandler.validateJWT, addVideoRouter);
+app.post('/video', uploads.single('video'), adminValidationRouter, jwtHandler.validateJWT, addVideoRouter);
 
 // Delete video from storage.
 var deleteVideoRouter = require('./routes/deleteVideo');
-app.use('/video/delete', fieldsOnly, jwtHandler.validateJWT, deleteVideoRouter);
+app.use('/video/delete', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
@@ -300,9 +303,6 @@ app.get('/register/renew/:token',
  * All Admin Routes go here
  * ------------------------
  */
-
-// Admin validation route.
-var adminValidationRouter = require('./routes/admin/validateAdmin');
 
 // Delete route for deleting a User.
 var deleteUserRouter = require('./routes/admin/deleteUser');

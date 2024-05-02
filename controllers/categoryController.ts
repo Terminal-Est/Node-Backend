@@ -5,9 +5,9 @@ import { Categories } from "../data/entity/category";
 async function getCategories() {
      return await AppDataSource.getRepository(Categories)
           .createQueryBuilder()
-          .getMany();
-
+          .getMany(); 
 }
+
 async function getCategoryByID(categoryid: number) {
      return await AppDataSource.getRepository(Categories)
           .createQueryBuilder("categories")
@@ -28,6 +28,7 @@ async function addCategory(tempCategory: Categories) {
           }
      ])
      .execute();
+
      return result;
  }
 

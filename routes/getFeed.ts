@@ -133,7 +133,7 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
                 return [];
             });
 
-            var vidUrl: string = getBlobSaS(userContainer, videos[j].videoId);
+            var vidUrl: string = String(getBlobSaS(userContainer, videos[j].videoId));
             var data = {
                 videoId: videos[j].videoId,
                 videoTitle: videos[j].title,

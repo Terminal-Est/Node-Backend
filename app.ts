@@ -90,6 +90,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(logger('dev'));
 app.use(cookieParser());
 
+/**
+ * All General Routes go here
+ * --------------------------
+ */
+
 // Get index router.
 var indexRouter = require('./routes/index');
 app.get('/', indexRouter);
@@ -109,10 +114,6 @@ app.get('/user/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, getUserRouter);
-
-// Delete route for deleting a User.
-var deleteUserRouter = require('./routes/deleteUser');
-//app.delete('/user', fieldsOnly, deleteUserRouter);
 
 // Get route to get all videos by group ID.
 var getGroupVideos = require('./routes/getGroupVideos');
@@ -276,6 +277,24 @@ app.get('/register/renew/:token',
     }, 
 );
 
+/**
+ * All Admin Routes go here
+ * ------------------------
+ */
+
+// Admin validation route.
+var adminValidationRouter = require('./routes/admin/validateAdmin');
+
+// Delete route for deleting a User.
+var deleteUserRouter = require('./routes/admin/deleteUser');
+app.delete('/user', fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, deleteUserRouter);
+
+
+/**
+ * App Utility functions go here
+ * -----------------------------
+ */
+
 // Set app key switchRSA to true.
 app.set('switchRSA', true);
 
@@ -283,6 +302,7 @@ app.set('switchRSA', true);
 getKeyPair1();
 getKeyPair2();
 
+// Get KeySet 1 for signing JWTs.
 function getKeyPair1() {
     security.getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
         app.set('KeySet1', handleFulfilled.keyPair);
@@ -294,6 +314,7 @@ function getKeyPair1() {
     });
 }
 
+// Get KeySet 2 for signing JWTs.
 function getKeyPair2() {
     security.getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
         app.set('KeySet2', handleFulfilled.keyPair);
@@ -305,6 +326,7 @@ function getKeyPair2() {
     });
 }
 
+// Chron schedule for renewing Key Pair 1.
 var getRSA1 = cron.schedule('* * * Jan,Mar,May,Jul,Sep,Nov Sun', () => {
     getKeyPair1();
 }, {
@@ -312,6 +334,7 @@ var getRSA1 = cron.schedule('* * * Jan,Mar,May,Jul,Sep,Nov Sun', () => {
     timezone: "Australia/Melbourne"
 });
 
+// Chron schedule for renewing Key Pair 2.
 var getRSA2 = cron.schedule('* * * Feb,Apr,Jun,Aug,Oct,Dec Sun', () => {
    getKeyPair2();
 }, {
@@ -319,12 +342,13 @@ var getRSA2 = cron.schedule('* * * Feb,Apr,Jun,Aug,Oct,Dec Sun', () => {
     timezone: "Australia/Melbourne"
 });
 
-// TODO: Add admin path for stopping starting RSA rotation
+// Start scheduled rotation of RSA keys.
 function startRsaRotation() {
     getRSA1.start();
     getRSA2.start();
 }
 
+// Stop scheduled rotation of RSA keys.
 function stopRsaRotation() {
     getRSA1.stop();
     getRSA2.stop();

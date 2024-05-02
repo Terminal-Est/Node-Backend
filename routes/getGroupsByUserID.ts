@@ -1,10 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { getGroupsByUserID } from "../controllers/groupController";
-import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
-router.use((req: Request, res: Response, next: NextFunction) => {
+router.use((req: Request, res: Response) => {
     const userid = parseInt(res.locals.userid);
     getGroupsByUserID(userid).then((values) => {
         res.status(200).json({

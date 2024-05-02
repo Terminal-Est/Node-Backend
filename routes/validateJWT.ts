@@ -9,18 +9,12 @@ var logFile = require('../utils/logging');
 // These may be split off into independent routes later if independent JWT validation is required.
 const validateJWT = (req: Request, res: Response, next: NextFunction) => {
 
-    var uuid: string;
-
-    if (res.locals.uuid) {
-        uuid = String(res.locals.uuid);
-    } else {
-        uuid = String(req.body.uuid);
-        res.locals.uuid = uuid;
-    }
-
+    var uuid: string = res.locals.uuid ? res.locals.uuid : req.body.uuid;
     const jwt = req.headers.authorization;
     const jwk1 = req.app.get('jwk1');
     const jwk2 = req.app.get('jwk2');
+
+    res.locals.uuid = uuid;
 
     verifyToken(jwt, jwk1, jwk2).then((handleFulfilled : any) => {
         const payload = handleFulfilled.payload;

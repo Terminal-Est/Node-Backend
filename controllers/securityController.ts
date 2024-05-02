@@ -8,7 +8,7 @@ var jose = require('jose');
 
 // Return RSA Keypair.
 function getRSAKeypairs() { 
-    return new Promise(async function(resolve){
+    return new Promise(async(resolve) => {
         const keys = async () => {
             const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
             return { publicKey, privateKey };
@@ -48,7 +48,7 @@ async function verifyToken(jwt: any, jwk1: any, jwk2: any) {
 // Issue new JWT.
 function getAuthJWT(uuid: string, key: any, kid: any, exp: any) {
     const alg = 'RS256';
-    return new Promise(async function(resolve, reject) {
+    return new Promise(async(resolve, reject) => {
         const privateKey = await jose.importPKCS8(key, alg);
         await new jose.SignJWT({ 'iat': true, 'sub': true, 'exp': true, 'kid': kid })
         .setProtectedHeader({ alg })
@@ -101,7 +101,7 @@ async function userLogin(email: string, password : string) {
         }
     }
 
-    return new Promise<User>(function(resolve, reject) {
+    return new Promise<User>((resolve, reject) => {
         if (!userExists){
             return reject("Invalid User.");
 

@@ -186,6 +186,22 @@ async function updateUserBan(uuid: string, banned: boolean) {
         .execute();
 }
 
+async function deleteUserPII(uuid: string) {
+    return await UserDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .delete()
+        .where("uuid = :id", {id: uuid})
+        .execute();
+}
+
+async function deleteUserData(uuid: string) {
+    return await AppDataSource.getRepository(Uuid)
+        .createQueryBuilder("user")
+        .delete()
+        .where("uuid = :id", {id: uuid})
+        .execute();
+}
+
 export { getUserEmail,
     getUserUUID,
     getUserPassword,
@@ -198,5 +214,7 @@ export { getUserEmail,
     validateUser,
     validatePassword,
     updateUser,
-    updateUserBan
+    updateUserBan,
+    deleteUserPII,
+    deleteUserData
  }; 

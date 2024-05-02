@@ -26,7 +26,7 @@ async function addLike(tempLike: any) {
         .values([
             { uuid: tempLike.uuid, videoID: tempLike.videoID }
         ])
-        .execute()
+        .execute();
 }
 
 async function removeLike(tempLike: any) {
@@ -36,7 +36,7 @@ async function removeLike(tempLike: any) {
         .from(Like)
         .where("uuid = :uuid", { uuid: tempLike.uuid })
         .andWhere("videoid = :videoid", { videoid: tempLike.videoid })
-        .execute()
+        .execute();
 }
 
 export { getLikes, addLike, removeLike, getLike }

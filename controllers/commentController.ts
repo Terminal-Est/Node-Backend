@@ -92,7 +92,7 @@ async function getGroupCommentsByUUID(groupid: number, uuid: string) {
         .where("comments.groupId = :id", { id: groupid })
         .andWhere("comments.uuid = :uuid", { uuid: Number(uuid) })
         .getMany();
-
+       
     return new Promise<GroupComment[]>((resolve, reject) => {
         if (comments.length == 0) {
             return reject("No Comments Found");
@@ -167,8 +167,8 @@ async function deleteUserGroupComment(uuid: string, commentId: number) {
         .delete()
         .where("comment.commentId = :id", { id: commentId })
         .andWhere("comment.uuid = :uuid", { uuid: Number(uuid) })
-        .execute()
-
+        .execute();
+      
     return result;
 }
 
@@ -198,6 +198,7 @@ async function getAllVideoComments() {
     var comments: VideoComment[] = await AppDataSource.getRepository(VideoComment)
         .createQueryBuilder("comments")
         .getMany();
+
     return comments;
 }
 
@@ -205,6 +206,7 @@ async function getAllGroupComments() {
     var comments: VideoComment[] = await AppDataSource.getRepository(VideoComment)
         .createQueryBuilder("comments")
         .getMany();
+
     return comments;
 }
 

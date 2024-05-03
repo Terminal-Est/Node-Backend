@@ -7,6 +7,10 @@ var router = express.Router();
 
 router.use((req: Request, res : Response) => { 
 
+    if (res.locals.adminUser) {
+        res.locals.uuid = res.locals.userId;
+    } 
+
     getUserUUID(res.locals.uuid).then((handleFulfilled: User) => {
         var avatarUrl = null;
         if (handleFulfilled.avatar != null) {

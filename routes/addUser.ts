@@ -10,8 +10,6 @@ import { emailMiddleware } from "./getNewEmailAuth";
 var express = require('express');
 var router = express.Router();
 
-//TODO: Documentation needs to be updated for new route checks.
-
 // Validate user first.
 router.use((req: Request, res: Response, next: NextFunction) => {
     

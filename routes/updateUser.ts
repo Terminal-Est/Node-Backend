@@ -9,8 +9,12 @@ var router = express.Router();
 
 router.use(async(req: Request, res : Response, next: NextFunction) => { 
 
-    res.locals.uuid = req.body.uuid;
-
+    if (res.locals.adminUser) {
+        res.locals.uuid = req.body.userId;
+    } else {
+        res.locals.uuid = req.body.uuid;
+    }
+    
     var user: User|null = await getUserUUID(String(req.body.uuid))
     .then((handleFulfilled) => {
         return handleFulfilled;

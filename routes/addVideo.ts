@@ -21,7 +21,11 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     video.description = req.body.description;
     video.timestamp = timestamp;
 
-    validateVideo(video).then((handleFullfilled: Boolean) => {
+    if (res.locals.adminUser) {
+        video.weight = req.body.weight;
+    } 
+
+    validateVideo(video).then(() => {
         res.locals.vid = video;
         next();
     }, (handleRejected: ValidationError) => {

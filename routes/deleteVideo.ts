@@ -5,8 +5,15 @@ var express = require('express');
 var router = express.Router();
 
 router.delete('/', (req: Request, res : Response, next: NextFunction) => { 
-    
-    const uuid: string = req.body.uuid;
+
+    var uuid: string;
+
+    if (res.locals.adminUser) {
+        uuid = req.body.userId;
+    } else {
+        uuid = req.body.uuid;
+    }
+
     const videoId: string = req.body.filename;
 
     deleteBlobFromContainer("u-" + uuid, videoId).then(() => {

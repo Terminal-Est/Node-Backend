@@ -1,31 +1,40 @@
 import { Request, Response } from "express";
 import { DeleteResult } from "typeorm";
-import { removeLike } from "../controllers/likeController";
+import { leaveGroup } from "../controllers/groupController";
 var express = require('express');
 var router = express.Router();
 
 router.use((req: Request, res: Response) => {
-    const tempLike = { videoid: req.body.videoid, uuid: req.body.uuid };
-    removeLike(tempLike).then((handleFullfilled: DeleteResult) => {
+    
+    var uuid: number;
+    const groupid: number = Number(req.body.gourpId);
+
+    if (res.locals.adminUser) {
+        uuid = Number(req.body.userId);
+    } else {
+        uuid = Number(req.body.uuid);
+    }
+
+    leaveGroup(uuid, groupid).then((handleFullfilled: DeleteResult) => {
         if (handleFullfilled.affected == 0) {
             res.status(400).json({
-                Message: "No Like Found",
+                Message: "No User Found",
                 Detail: handleFullfilled
             })
         } else {
             res.status(200).json({
-                Message: "Like Successfully Removed.",
+                Message: "User Successfully Removed From Group.",
                 Detail: handleFullfilled
             })
         }
     }, (hanleRejected) => {
         res.status(400).json({
-            Message: "No Like Found",
+            Message: "No User Found",
             Detail: hanleRejected
         });
     }).catch((err) => {
         res.status(500).json({
-            Message: "Delete Like Server Error.",
+            Message: "Delete UserGroup Server Error.",
             Detail: err
         });
     })

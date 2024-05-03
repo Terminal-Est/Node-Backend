@@ -38,6 +38,14 @@ async function getUserUUID(uuid: string) {
     })
 }
 
+// Get all users in the database.
+async function getAllUsers() {
+    var promise = await UserDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .getMany();
+    return promise;
+}
+
 // Validate user supplied password against class validator parameters.
 async function validatePassword(password: string) {
     var passwordValid = new PasswordValid();
@@ -60,7 +68,7 @@ async function getUserPassword(uuid: number) {
         .getOne();
 }
 
-// TODO: Testing and comments.
+// Insert password into database.
 async function insertPasswordHash(uuid: number, hashPass: string) {
     return await UserDataSource.createQueryBuilder()
         .insert()
@@ -176,7 +184,7 @@ async function updateUser(user: User) {
         .execute();
 }
 
-async function updateUserBan(uuid: string, banned: boolean) {
+async function updateUserBan(uuid: string, banned: number) {
     return await UserDataSource.createQueryBuilder()
         .update(User)
         .set({
@@ -205,6 +213,7 @@ async function deleteUserData(uuid: string) {
 export { getUserEmail,
     getUserUUID,
     getUserPassword,
+    getAllUsers,
     insertPasswordHash,
     updatePasswordHash,
     getHash, 

@@ -32,7 +32,7 @@ export class User {
 
     @Column()
     @IsOptional()
-    banned: boolean;
+    banned: number;
 
     @Column()
     @IsNotEmpty({

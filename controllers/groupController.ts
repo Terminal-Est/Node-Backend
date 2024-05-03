@@ -33,6 +33,14 @@ async function getGroupByID(groupid: number) {
         .getOne();
 }
 
+async function getUserGroupId(userid: number, groupid: number) {
+    return await AppDataSource.getRepository(UserGroup)
+        .createQueryBuilder()
+        .where("groupid = :id", { id: groupid })
+        .andWhere("userid :uuid", { uuid: userid })
+        .getOne();
+}
+
 async function getGroupsByUserID(userid: number) {
     return await AppDataSource.getRepository(UserGroup)
         .createQueryBuilder()
@@ -57,6 +65,26 @@ async function joinGroup(userid: number, groupid: number) {
                 groupid: groupid
             }
         ])
+        .execute();
+}
+
+async function leaveGroup(userid: number, groupid: number) {
+    return await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(UserGroup)
+        .where("userid = :id", { id: userid })
+        .andWhere("groupid = :groupId", { groupId: groupid })
+        .execute();
+}
+
+async function updateUserGroupBan(userid: number, groupid: number, banned: number) {
+    return await AppDataSource.createQueryBuilder()
+        .update(UserGroup)
+        .set({
+            banned: banned
+        })
+        .where("userid = :id", { id: userid })
+        .andWhere("groupid = :groupId", { groupId: groupid })
         .execute();
 }
 
@@ -102,8 +130,11 @@ async function addVideoToGroup(groupVideo: GroupVideos) {
 export {
     getGroups,
     joinGroup,
+    leaveGroup,
+    updateUserGroupBan,
     addGroup,
     getGroupByID,
+    getUserGroupId,
     getVideosByGroup,
     addVideoToGroup,
     getUsersByGroup,

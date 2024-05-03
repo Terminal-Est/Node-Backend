@@ -9,32 +9,41 @@ var router = express.Router();
  */
 router.use((req: Request, res: Response, next: NextFunction) => {
     
-    const ipAddress = req.header('x-forwarded-for') || req.socket.remoteAddress;
-    const path: string = `/${ipAddress}/json/`;
-    const options = {
-        path: path,
-        host: 'ipapi.co',
-        port: 443,
-        headers: { 'User-Agent': 'nodejs-ipapi-v1.02' }
-    };
+    const ipAddress = req.header('x-forwarded-for')?.split(',');
+    if (ipAddress) {
+        const path: string = `/${ipAddress[0]}/json/`;
+        const options = {
+            path: path,
+            host: 'ipapi.co',
+            port: 443,
+            headers: { 'User-Agent': 'nodejs-ipapi-v1.02' }
+        };
+        
+        https.get(options, function (resp: any) {
+            var body = ''
+            resp.on('data', function (data: any) {
+                body += data;
+            });
 
-    https.get(options, function (resp: any) {
-        var body = ''
-        resp.on('data', function (data: any) {
-            body += data;
+            resp.on('end', function () {
+                var loc = JSON.parse(body);
+                if (String(loc.country_code) != 'AU') {
+                    res.status(400).json({
+                        Message: "Only users from Australia may register."
+                    });
+                } else {
+                    res.status(200).json({
+                        loc
+                    });
+                    // next();
+                }
+            });
         });
-
-        resp.on('end', function () {
-            var loc = JSON.parse(body);
-            if (String(loc.country_code) != 'AU') {
-                res.status(400).json({
-                    Message: "Only users from Australia may register."
-                });
-            } else {
-                next();
-            }
+    } else {
+        res.status(500).json({
+            Message: "Forward Header Undefined."
         });
-    });
+    }
 });
 
 module.exports = router;

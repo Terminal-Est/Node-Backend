@@ -2,6 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { GroupComment } from "../data/entity/groupComment";
 import { addUserGroupComment, validateComment, isCommentProfane } from "../controllers/commentController";
 import { InsertResult } from "typeorm";
+import { UserGroup } from "../data/entity/userGroup";
+import { getUserGroupId } from "../controllers/groupController";
+import { logToFile } from "../utils/logging";
 var express = require('express');
 var router = express.Router();
 
@@ -17,36 +20,56 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
 
     comment.timestamp = String(Date.now());
 
-    const valid: any = await validateComment(comment).then((handleFulfilled) => {
+    const userGroup: UserGroup|null = await getUserGroupId(Number(comment.uuid), Number(comment.groupId))
+    .then((handleFulfilled) => {
         return handleFulfilled;
-    }, (handleRejected) => {
-        return handleRejected;
-    });
+    }, () => {
+        return null
+    }).catch((err) => {
+        logToFile(err);
+        return null;
+    })
 
-    if (typeof valid == 'boolean' && valid == true) {
-        if (isCommentProfane(comment.comment)) {
-            res.status(400).json({
-                Message: "Don't Use Naughty Words."
-            });
-        } else {
-            addUserGroupComment(comment).then((handleFulfilled: InsertResult) => {
-                res.status(200).json({
-                    Message: "Comment Added Successfully.",
-                    Comment: comment.comment,
-                    Detail: handleFulfilled
-                });
-            }, (handleRejected: any) => {
+    if (!userGroup) {
+        res.status(400).json({
+            Message: "You do not belong to this group."
+        });
+    } else if (userGroup.banned) {
+        res.status(400).json({
+            Message: "You are banned from this group."
+        });
+    } else {
+        const valid: any = await validateComment(comment).then((handleFulfilled) => {
+            return handleFulfilled;
+        }, (handleRejected) => {
+            return handleRejected;
+        });
+
+        if (typeof valid == 'boolean' && valid == true) {
+            if (isCommentProfane(comment.comment)) {
                 res.status(400).json({
-                    Message: "Comment Add Failed.",
-                    Detail: handleRejected
+                    Message: "Don't Use Naughty Words."
                 });
+            } else {
+                addUserGroupComment(comment).then((handleFulfilled: InsertResult) => {
+                    res.status(200).json({
+                        Message: "Comment Added Successfully.",
+                        Comment: comment.comment,
+                        Detail: handleFulfilled
+                    });
+                }, (handleRejected: any) => {
+                    res.status(400).json({
+                        Message: "Comment Add Failed.",
+                        Detail: handleRejected
+                    });
+                });
+            }
+        } else {
+            res.status(400).json({
+                Message: "Invalid Comment.",
+                Detail: valid
             });
         }
-    } else {
-        res.status(400).json({
-            Message: "Invalid Comment.",
-            Detail: valid
-        });
     }
 });
 

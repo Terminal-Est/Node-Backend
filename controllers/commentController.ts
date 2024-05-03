@@ -208,7 +208,7 @@ async function getAllVideoComments() {
 }
 
 async function getAllGroupComments() {
-    var comments: VideoComment[] = await AppDataSource.getRepository(VideoComment)
+    var comments: GroupComment[] = await AppDataSource.getRepository(GroupComment)
         .createQueryBuilder("comments")
         .getMany();
 

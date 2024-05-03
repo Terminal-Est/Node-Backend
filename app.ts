@@ -24,8 +24,11 @@ const storage = multer.diskStorage({
         cb(null, './videos');
     },
     filename: function (req: any, file: any, cb: any) {
+       
         const tstamp: string = Date.now().toString();
-        cb(null, file.fieldname + "_" + tstamp + path.extname(file.originalname));
+        var fname: string = file.fieldname;
+
+        cb(null, fname + "_" + tstamp + path.extname(file.originalname));
     }
 });
 
@@ -116,7 +119,7 @@ var getUserRouter = require('./routes/getUser');
 app.get('/user/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.uuid = req.params.uuid;
     next();
-}, jwtHandler.validateJWT, adminValidationRouter, getUserRouter);
+}, jwtHandler.validateJWT, getUserRouter);
 
 // Get route to get all videos by group ID.
 var getGroupVideos = require('./routes/getGroupVideos');
@@ -159,6 +162,10 @@ app.get('/groups/user/:userid/:uuid', (req: Request, res: Response, next: NextFu
     res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, getGroupsByUserIDRouter);
+
+// Delete route to delete a user from a group.
+var deleteUserGroupRouter = require('./routes/deleteUserFromGroup');
+app.delete('/groups/user', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteUserGroupRouter);
 
 // Get route for getting groups by CategoryID
 var getGroupsByCategoryRouter = require('./routes/getGroupsByCategory');
@@ -311,6 +318,44 @@ app.delete('/user', (req: Request, res: Response, next: NextFunction) => {
     next();
 }, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, deleteUserRouter);
 
+// Get route for getting a User (admin).
+var getUserRouter = require('./routes/getUser');
+app.get('/user/:uuid/:userId', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.userId = req.params.userId;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getUserRouter);
+
+// Get route to get all users.
+var getAllUsersRouter = require('./routes/admin/getAllUsers');
+app.get('/users/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getAllUsersRouter);
+
+// Put route to ban user from app.
+var userBanRouter = require('./routes/admin/updateUserBan')
+app.put('/users/ban', fieldsOnly, (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, userBanRouter);
+
+// Put route to ban user from a group.
+var updateUserGroupBanRouter = require('./routes/admin/updateUserGroupBan');
+app.put('/users/ban/group', fieldsOnly, (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, updateUserGroupBanRouter);
+
+// Get route to get all posts
+var getAllCommentsRouter =  require('./routes/admin/getAllComments')
+app.get('/comments/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getAllCommentsRouter);
 
 /**
  * App Utility functions go here

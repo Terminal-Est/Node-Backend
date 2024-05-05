@@ -8,7 +8,7 @@ var jose = require('jose');
 
 // Return RSA Keypair.
 function getRSAKeypairs() { 
-    return new Promise(async(resolve) => {
+    return new Promise<{keyPair: any, jwk: any}>(async(resolve) => {    
         const keys = async () => {
             const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
             return { publicKey, privateKey };
@@ -22,7 +22,7 @@ function getRSAKeypairs() {
         const keyPair = {
             public: pemPubKey,
             private: pemPrivateKey
-        }
+        } 
         return resolve({ keyPair: keyPair, jwk: pubKeyJwk });
     }); 
 }

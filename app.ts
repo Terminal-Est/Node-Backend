@@ -4,13 +4,12 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var multer = require('multer');
-var cron = require('node-cron');
 var bodyParser = require('body-parser');
-var security = require('./controllers/securityController');
-var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 import { NextFunction, Request, Response } from "express";
 import { emailMiddleware } from "./routes/getNewEmailAuth";
+import { getRSAKeypairs, updateJWKendpoint } from "./controllers/securityController";
+import { logToFile } from "./utils/logging";
 
 // Multer disk storage.
 const storage = multer.diskStorage({
@@ -357,73 +356,61 @@ app.get('/comments/:uuid', (req: Request, res: Response, next: NextFunction) => 
     next();
 }, jwtHandler.validateJWT, adminValidationRouter, getAllCommentsRouter);
 
+
 /**
  * App Utility functions go here
  * -----------------------------
  */
 
-// Set app key switchRSA to true.
-app.set('switchRSA', true);
-
-// Init RSA keypairs.
-getKeyPair1();
-getKeyPair2();
-
-// Get KeySet 1 for signing JWTs.
-function getKeyPair1() {
-    security.getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
-        app.set('KeySet1', handleFulfilled.keyPair);
-        app.set('jwk1', handleFulfilled.jwk);
-        app.set('onKey2', false);
-        security.updateJWKendpoint(handleFulfilled.jwk, 0);
+function appKeyPair (keySet: string, jwk: string) {
+    getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
+        app.set(keySet, handleFulfilled.keyPair);
+        app.set(jwk, handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 0);
+        logToFile(app.get(jwk));
     }).catch((error: any) => {
-        fileLogging.logToFile(error);
+        logToFile(error);
+    });
+}
+
+appKeyPair('KeySet1', 'jwk1');
+appKeyPair('KeySet2', 'jwk2');
+
+const getKeyPair1 = (req: Request, res: Response, next: NextFunction) => {
+    getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
+        req.app.set('KeySet1', handleFulfilled.keyPair);
+        req.app.set('jwk1', handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 0);
+        logToFile(app.get('jwk1'));
+        next();
+    }).catch((error: any) => {
+        logToFile(error);
     });
 }
 
 // Get KeySet 2 for signing JWTs.
-function getKeyPair2() {
-    security.getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
-        app.set('KeySet2', handleFulfilled.keyPair);
-        app.set('jwk2', handleFulfilled.jwk);
-        app.set('onKey2', true);
-        security.updateJWKendpoint(handleFulfilled.jwk, 1);
+const getKeyPair2 = (req: Request, res: Response, next: NextFunction) => {
+    getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
+        req.app.set('KeySet2', handleFulfilled.keyPair);
+        req.app.set('jwk2', handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 1);
+        logToFile(app.get('jwk2'));
+        next();
     }).catch((error: any) => {
-        fileLogging.logToFile(error);
+        logToFile(error);
     });
 }
 
-/**
-// Chron schedule for renewing Key Pair 1.
-var getRSA1 = cron.schedule('* * * Jan,Mar,May,Jul,Sep,Nov Sun', () => {
-    getKeyPair1();
-}, {
-    scheduled: true,
-    timezone: "Australia/Melbourne"
+const refreshJWKs = ((req: Request, res: Response) => {
+    res.status(200).json({
+        Message: "JWKs Refreshed."
+    })
 });
 
-// Chron schedule for renewing Key Pair 2.
-var getRSA2 = cron.schedule('* * * Feb,Apr,Jun,Aug,Oct,Dec Sun', () => {
-   getKeyPair2();
-}, {
-    scheduled: true,
-    timezone: "Australia/Melbourne"
-});
+app.put('/jwk/refresh', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, getKeyPair1, getKeyPair2, refreshJWKs);
 
-// Start scheduled rotation of RSA keys.
-function startRsaRotation() {
-    getRSA1.start();
-    getRSA2.start();
-}
-
-// Stop scheduled rotation of RSA keys.
-function stopRsaRotation() {
-    getRSA1.stop();
-    getRSA2.stop();
-}
-
-// Start RSA rotation.
-startRsaRotation();
-**/
 
 module.exports = app;

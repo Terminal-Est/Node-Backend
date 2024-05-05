@@ -37,7 +37,10 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
             } else {
 
-                if(req.app.get('onKey2')) {
+                const randomInt = Math.floor(Math.random() * 2);
+                console.log(randomInt);
+
+                if(randomInt > 0) {
                     keySet = req.app.get('KeySet2');
                     jwk = req.app.get('jwk2');
                     kid = jwk.kid;

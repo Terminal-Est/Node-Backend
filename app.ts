@@ -393,6 +393,7 @@ function getKeyPair2() {
     });
 }
 
+/**
 // Chron schedule for renewing Key Pair 1.
 var getRSA1 = cron.schedule('* * * Jan,Mar,May,Jul,Sep,Nov Sun', () => {
     getKeyPair1();
@@ -423,5 +424,6 @@ function stopRsaRotation() {
 
 // Start RSA rotation.
 startRsaRotation();
+**/
 
 module.exports = app;

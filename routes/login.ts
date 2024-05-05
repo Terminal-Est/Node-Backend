@@ -38,7 +38,6 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             } else {
 
                 const randomInt = Math.floor(Math.random() * 2);
-                console.log(randomInt);
 
                 if(randomInt > 0) {
                     keySet = req.app.get('KeySet2');

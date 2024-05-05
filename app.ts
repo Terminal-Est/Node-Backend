@@ -362,6 +362,7 @@ app.get('/comments/:uuid', (req: Request, res: Response, next: NextFunction) => 
  * -----------------------------
  */
 
+// Set keypairs on Start Up.
 function appKeyPair (keySet: string, jwk: string) {
     getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
         app.set(keySet, handleFulfilled.keyPair);
@@ -376,6 +377,7 @@ function appKeyPair (keySet: string, jwk: string) {
 appKeyPair('KeySet1', 'jwk1');
 appKeyPair('KeySet2', 'jwk2');
 
+// Get KeySet 1 for signing JWTs.
 const getKeyPair1 = (req: Request, res: Response, next: NextFunction) => {
     getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
         req.app.set('KeySet1', handleFulfilled.keyPair);
@@ -401,12 +403,14 @@ const getKeyPair2 = (req: Request, res: Response, next: NextFunction) => {
     });
 }
 
+
 const refreshJWKs = ((req: Request, res: Response) => {
     res.status(200).json({
         Message: "JWKs Refreshed."
     })
 });
 
+// Route for refreshing JWKS.
 app.put('/jwk/refresh', (req: Request, res: Response, next: NextFunction) => {
     res.locals.adminOnlyRoute = true;
     next();

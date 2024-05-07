@@ -36,51 +36,35 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
 
         if (req.body.email) {
             user.email = req.body.email;
-        } else {
-            user.email = user.email;
-        }
+        } 
 
         if (req.body.address) {
             user.address = req.body.address;
-        } else {
-            user.address = user.address;
-        }
+        } 
 
         if (req.body.city) {
             user.city = req.body.city;
-        } else {
-            user.city = user.city;
-        }
+        } 
 
         if (req.body.state) {
             user.state = req.body.state;
-        } else {
-            user.state = user.state;
-        }
+        } 
 
         if (req.body.postcode) {
             user.postcode = req.body.postcode;
-        } else {
-            user.postcode = user.postcode;
-        }
+        } 
 
         if (req.file?.filename) {
             user.avatar = req.file.filename;
-        } else {
-            user.avatar = user.avatar;
         }
 
         if (req.body.fname) {
             user.fname = req.body.fname;
-        } else {
-            user.fname = user.fname;
         }
 
         if (req.body.lname) {
             user.lname = req.body.lname;
-        } else {
-            user.lname = user.lname;
-        }
+        } 
         
         const valid: any = await validateUser(user).then((handleFulFilled) => {
             return handleFulFilled;

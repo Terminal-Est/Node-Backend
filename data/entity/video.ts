@@ -39,6 +39,10 @@ export class Video {
     @IsNotEmpty()
     timestamp: string;
 
+    @Column()
+    @IsOptional()
+    sid: number;
+
     @OneToMany(() => VideoComment, (comment) => comment.videoId)
     comments: VideoComment[];
 

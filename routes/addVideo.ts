@@ -21,9 +21,13 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     video.description = req.body.description;
     video.timestamp = timestamp;
 
-    if (res.locals.adminUser) {
-        video.weight = req.body.weight;
+    if (res.locals.adminUser && req.body.weight) {
+        video.weight = Number(req.body.weight);
     } 
+
+    if (res.locals.adminUser && req.body.sid) {
+        video.sid = req.body.sid;
+    }
 
     validateVideo(video).then(() => {
         res.locals.vid = video;

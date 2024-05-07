@@ -4,7 +4,7 @@ import { DeleteResult } from "typeorm";
 var express = require('express');
 var router = express.Router();
 
-router.delete('/', (req: Request, res : Response, next: NextFunction) => { 
+router.use((req: Request, res : Response, next: NextFunction) => { 
 
     var uuid: string;
 

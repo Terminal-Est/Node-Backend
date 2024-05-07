@@ -204,7 +204,7 @@ app.post('/video', uploads.single('video'), adminValidationRouter, jwtHandler.va
 
 // Delete video from storage.
 var deleteVideoRouter = require('./routes/deleteVideo');
-app.use('/video/delete', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteVideoRouter);
+app.delete('/video/delete', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
@@ -356,6 +356,54 @@ app.get('/comments/:uuid', (req: Request, res: Response, next: NextFunction) => 
     next();
 }, jwtHandler.validateJWT, adminValidationRouter, getAllCommentsRouter);
 
+// Post route for adding a sponsor
+var addSponsorRouter = require('./routes/admin/addSponsor');
+app.post('/sponsor', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, addSponsorRouter);
+
+// Delete route for deleting sponsor
+var deleteSponsorRouter = require('./routes/admin/deleteSponsor');
+app.delete('/sponsor', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, deleteSponsorRouter);
+
+// Get route to get all sponsors
+var getAllSponsorsRouter = require('./routes/admin/getAllSponsors')
+app.get('/sponsor/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getAllSponsorsRouter);
+
+// Get route to get sponsor by name
+var getSponsorNameRouter = require('./routes/admin/getSponsorName')
+app.get('/sponsor/name/:name/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.name = req.params.name;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getSponsorNameRouter);
+
+// Get route to get sponsor by SID
+var getSponsorSIDRouter = require('./routes/admin/getSponsorSID')
+app.get('/sponsor/sid/:sid/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.sid = req.params.sid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getSponsorSIDRouter);
+
+// Get route to get sponsor by SID
+var getSponsorVideosRouter = require('./routes/admin/getSponsorVideos')
+app.get('/sponsor/videos/:sid/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.sid = req.params.sid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getSponsorVideosRouter);
 
 /**
  * App Utility functions go here

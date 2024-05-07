@@ -27,7 +27,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     user.fname = req.body.fname;
     user.lname = req.body.lname;
 
-    validateUser(user).then((handleFullfilled: boolean) => {
+    validateUser(user).then(() => {
             res.locals.user = user;
             next();
     }, (handleRejected: ValidationError) => {

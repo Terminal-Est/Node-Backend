@@ -9,12 +9,9 @@ import { AppDataSource } from "../data/data-source";
 import { validate } from "class-validator";
 import { Video } from "../data/entity/video";
 
-// move these to env variables.
-const sasKey = "m9GyAx3fjQ554KzLQd3D5lQQJtElhOM0ZIm1oY6byhaqShGpXgg6ovUUx3M1RT5Bjp4OQEBLXYo8+ASteExa0g==";
-const accountName = "greetikstorage";
-
+const sasKey: string = String(process.env.SAS_KEY);
+const accountName: string = String(process.env.ACCOUNT_NAME);
 var connString: string = String(process.env.AZURE_BLOB_STORAGE);
-
 const blobServiceClient = BlobServiceClient.fromConnectionString(connString);
 
 // Get a named container client.
@@ -37,8 +34,6 @@ async function createBlobStorageContainer(containerName: string) {
         throw e;
     }
 }
-
-
 
 // Delete a blob storage container.
 async function deleteBlobStorageContainer(containerName: string) {
@@ -99,7 +94,8 @@ async function createVideo(video: Video) {
                 uuid: video.uuid,
                 title: video.title,
                 description: video.description,
-                timestamp: video.timestamp
+                timestamp: video.timestamp,
+                sid: video.sid
             }
         ])
         .execute();

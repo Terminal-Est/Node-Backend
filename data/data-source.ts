@@ -11,6 +11,7 @@ import { Categories } from './entity/category'
 import { VideoComment } from './entity/videoComment';
 import { GroupComment } from './entity/groupComment';
 import { GroupVideos } from './entity/groupVideos';
+import { Sponsor } from './entity/sponsor';
 var logging = require('../utils/logging');
 
 var sqlPort: number = Number(process.env.SQL_SERVER_PORT);
@@ -47,7 +48,8 @@ export const AppDataSource = new DataSource({
         VideoComment, 
         GroupComment,
         GroupVideos,
-        Like ],
+        Like,
+        Sponsor ],
     logging: ["error", "schema"],
 
     connectionTimeout: 60000

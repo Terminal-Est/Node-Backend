@@ -64,7 +64,7 @@ Route for getting user data.
 Authorization(Attach JWT from login)
   
 **Multipart/Formdata Body Params**  
-nil    
+Nil    
   
 **Success Return**  
 200 status and JSON Success Message with attached user data.  
@@ -77,7 +77,7 @@ Route for getting all videos tagged to a group.
 Authorization(Attach JWT from login)
   
 **Multipart/Formdata Body Params**  
-nil    
+Nil    
   
 **Success Return**  
 200 status and JSON Success Message with attached group video data.  
@@ -93,7 +93,102 @@ Authorization(Attach JWT from login)
 (required)Name  
 (optional)Description  
 (optional)Location   
-(optional/image file)background      
+(optional/image file)background  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+
+### POST /groups/:id/join
+**Desription**  
+Route for joining an interest group.  
+
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### GET /groups/all/:uuid
+**Desription**  
+Route for getting all groups.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil    
+  
+**Success Return**  
+200 status and JSON Success Message with all groups.  
+  
+### GET /groups/:id/:uuid
+**Desription**  
+Route for getting a specific group by ID.  
+
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil    
+  
+**Success Return**  
+200 status and JSON Success Message with attached group data.  
+  
+### GET /groups/user/:userid/:uuid
+**Desription**  
+Route for getting all groups a specific user has joined.  
+
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil    
+  
+**Success Return**  
+200 status and JSON Success Message with attached user group data.  
+  
+### DELETE /groups/user
+**Desription**  
+Route for deleteing a user from a group.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+   
+**Multipart/Formdata Body Params**  
+(admin, required)userId  
+(required)uuid  
+(required)groupId  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### GET /groups/category/:id/:uuid
+**Desription**  
+Route for getting category by cat id.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil  
+  
+**Success Return**  
+200 status and JSON Success Message with category data.  
+  
+### POST /categories
+**Desription**  
+Route add a new category.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)Name   
+(optional/image file)bgimage  
+(optional/image file)iconimage  
   
 **Success Return**  
 200 status and JSON Success Message.  
@@ -163,7 +258,7 @@ Returns all sponsors.
 Authorization(Attach JWT from login)  
   
 **Multipart/Formdata Body Params**  
-nil  
+Nil  
   
 **Success Return**  
 200 status and JSON Success Message and all Sponsors data.  
@@ -176,7 +271,7 @@ Gets a sponsor by id.
 Authorization(Attach JWT from login)  
   
 **Multipart/Formdata Body Params**  
-nil  
+Nil  
   
 **Success Return**  
 200 status and JSON Success Message and a single Sponsors data.  
@@ -189,8 +284,8 @@ Gets a sponsor by name.
 Authorization(Attach JWT from login)  
   
 **Multipart/Formdata Body Params** 
-nil  
-
+Nil  
+  
 **Success Return**  
 200 status and JSON Success Message and a single Sponsors data.  
   
@@ -202,8 +297,8 @@ Gets all sponsor videos.
 Authorization(Attach JWT from login)  
   
 **Multipart/Formdata Body Params** 
-nil  
-
+Nil  
+  
 **Success Return**  
 200 status and JSON Success Message and a single Sponsors video data.  
   
@@ -214,8 +309,8 @@ Deletes a sponsor.
 **Headers**  
 Authorization(Attach JWT from login)  
   
-**Multipart/Formdata Body Params** 
-(required)uuid
+**Multipart/Formdata Body Params**  
+(required)uuid  
 (optional)sid  
   
 **Success Return**  

@@ -16,8 +16,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             let x = {
                 ID: value.ID,
                 Name: value.Name,
-                iconImg: iconUrl,
-                bgImg: bgImgUrl
+                iconImage: iconUrl,
+                backgroundImage: bgImgUrl
             }
 
             listofgroups.push(x);

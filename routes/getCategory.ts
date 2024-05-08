@@ -16,8 +16,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             CategoryDetails: {
                 id: value?.ID,
                 name: value?.Name,
-                iconImg: iconUrl,
-                backgroundImg: imgUrl
+                iconImage: iconUrl,
+                backgroundImage: imgUrl
             }
         });
     }, (handleRejected) => {

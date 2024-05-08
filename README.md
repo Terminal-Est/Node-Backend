@@ -243,7 +243,7 @@ Authorization(Attach JWT from login)
 **Multipart/Formdata Body Params**  
 (admin, user, required)uuid  
 (admin, user, required)title  
-(admin, user, optional)description 
+(admin, user, optional)description  
 (admin, user, optional)groupId  
 (admin, optional)weight  
 (admin, optional)sid  

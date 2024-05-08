@@ -6,7 +6,15 @@ var router = express.Router();
 
 router.use((req: Request, res : Response) => { 
     
-    const container: string = String(res.locals.uuid);
+    var uuid: string;
+    
+    if (res.locals.adminUser) {
+        uuid = res.locals.userId;
+    } else {
+        uuid = res.locals.uuid;
+    }
+
+    const container: string = String(uuid);
     const filename: string = String(res.locals.filename);
     const url: string = getBlobSaS("u-" + container, filename);
 

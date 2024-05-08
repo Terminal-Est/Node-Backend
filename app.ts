@@ -93,8 +93,8 @@ app.use(logger('dev'));
 app.use(cookieParser());
 
 /**
- * All General Routes go here
- * --------------------------
+ * All General Routes go here.
+ * ---------------------------
  */
 
 // Admin validation route.
@@ -208,16 +208,15 @@ app.delete('/video/delete', fieldsOnly, adminValidationRouter, jwtHandler.valida
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
-app.get('/video/:id/:fileName/:uuid', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.id = req.params.id;
+app.get('/video/:fileName/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.filename = req.params.fileName;
     res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, getVideoSas);
 
 /**
- * Comment routes start here
- * -------------------------
+ * Comment routes start here.
+ * --------------------------
  */
 
 // Post video comment route.
@@ -230,7 +229,7 @@ app.put('/video/comment', fieldsOnly, jwtHandler.validateJWT, updateVideoComment
 
 // Delete video comment from database.
 var deleteVideoCommentRouter = require('./routes/deleteUserVideoComment');
-app.delete('/video/comment', fieldsOnly, jwtHandler.validateJWT, deleteVideoCommentRouter);
+app.delete('/video/comment', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteVideoCommentRouter);
 
 // Post group comment route.
 var addGroupCommentRouter = require('./routes/addGroupComment');
@@ -242,7 +241,7 @@ app.put('/groups/comment', fieldsOnly, jwtHandler.validateJWT, updateGroupCommen
 
 // Delete group comment from database.
 var deleteGroupCommentRouter = require('./routes/deleteUserGroupComment');
-app.delete('/groups/comment', fieldsOnly, jwtHandler.validateJWT, deleteGroupCommentRouter);
+app.delete('/groups/comment', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteGroupCommentRouter);
 
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
@@ -251,9 +250,19 @@ app.get('/feed/:uuid', (req: Request, res: Response, next: NextFunction) => {
     next();
 }, jwtHandler.validateJWT, getUserFeed);
 
+/**
+ * User follow routes go here.
+ * ---------------------------
+ */
+
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
 app.post('/follow', fieldsOnly, jwtHandler.validateJWT, addUserFollow);
+
+/**
+ * Like routes go here.
+ * --------------------
+ */
 
 // Get likes for a video.
 var getLikesRouter = require("./routes/getLikes");
@@ -270,6 +279,11 @@ app.post('/like', fieldsOnly, jwtHandler.validateJWT, addLikeRouter);
 // Remove a user like for a video.
 var deleteLikeRouter = require('./routes/deleteLike');
 app.delete('/like', fieldsOnly, jwtHandler.validateJWT, deleteLikeRouter);
+
+/**
+ * JWT an e-mail validation routes go here.
+ * ----------------------------------------
+ */
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
@@ -404,6 +418,15 @@ app.get('/sponsor/videos/:sid/:uuid', (req: Request, res: Response, next: NextFu
     res.locals.adminOnlyRoute = true;
     next();
 }, jwtHandler.validateJWT, adminValidationRouter, getSponsorVideosRouter);
+
+// Get Video SaS url admin.
+var getVideoSas = require('./routes/getVideoSas');
+app.get('/video/:fileName/:userId/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.filename = req.params.fileName;
+    res.locals.userId = req.params.userId;
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getVideoSas);
 
 /**
  * App Utility functions go here

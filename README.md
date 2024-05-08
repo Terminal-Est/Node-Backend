@@ -167,7 +167,7 @@ Authorization(Attach JWT from login)
   
 ### GET /groups/category/:id/:uuid
 **Desription**  
-Route for getting category by cat id.  
+Route for getting a groups category by cat id.  
   
 **Headers**  
 Authorization(Attach JWT from login)  
@@ -193,6 +193,32 @@ Authorization(Attach JWT from login)
 **Success Return**  
 200 status and JSON Success Message.  
   
+### GET /categories/:id/:uuid
+**Desription**  
+Route to get a category by id.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil
+  
+**Success Return**  
+200 status and JSON Success Message with category data.  
+  
+### GET /categories/get/all/:uuid
+**Desription**  
+Route to get all categories by id.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil
+  
+**Success Return**  
+200 status and JSON Success Message with all category data.  
+  
 ### POST /login
 **Desription**  
 login route for app.  
@@ -207,8 +233,272 @@ Nil
 **Success Return**  
 200 status and JSON Success Message.  
   
-## Admin Routes
+### POST /video
+**Desription**  
+Route upload a user or sponsor video.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(admin, user, required)uuid  
+(admin, user, required)title  
+(admin, user, optional)description 
+(admin, user, optional)groupId  
+(admin, optional)weight  
+(admin, optional)sid  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### DELETE /video
+**Desription**  
+Route for deleting a user video.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(admin, user, required)uuid  
+(admin, user, required)filename  
+(admin, required)userId  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### GET /categories/get/all/:uuid
+**Desription**  
+Route to get all categories by id.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil  
+  
+**Success Return**  
+200 status and JSON Success Message with all category data.  
+  
+### DELETE /video
+**Desription**  
+Route for deleting a user video.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(admin, user, required)uuid  
+(admin, user, required)filename  
+(admin, required)userId  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### GET /video/:fileName/:uuid
+**Desription**  
+Route to get a single user video.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil  
+  
+**Success Return**  
+200 status and JSON Success Message with a file SaS url.  
+  
+### POST /video/comment
+**Desription**  
+Route for adding a video comment.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)videoId  
+(required)comment  
+(optional)replyId - ID of comment replying to  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### PUT /video/comment
+**Desription**  
+Route for updating a video comment.   
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)commentId
+(required)videoId  
+(required)comment  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### DELETE /video/comment
+**Desription**  
+Route for adding a video comment.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params** 
+(admin, required)userId  
+(required)uuid  
+(required)commentId  
+  
+**Success Return**  
+200 status and JSON Success Message.  
 
+### POST /groups/comment
+**Desription**  
+Route for adding a group comment.   
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)groupId
+(required)comment  
+(optional)replyId - ID of comment replying to  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### PUT /groups/comment
+**Desription**  
+Route for updating a group comment.   
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)groupId
+(required)commentId  
+(required)comment  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### DELETE /groups/comment
+**Desription**  
+Route for adding a video comment.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params** 
+(admin, required)userId  
+(required)uuid  
+(required)commentId  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### GET /feed/:uuid
+**Desription**  
+Route to get a user post feed.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+Nil  
+  
+**Success Return**  
+200 status and JSON Success Message with a user feed JSON.  
+  
+### POST /follow
+**Desription**  
+Route for adding a user follow.   
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)uuidFollowing
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### POST /like
+**Desription**  
+Route for adding a video like.   
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)videoId  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+
+### DELETE /like
+**Desription**  
+Route for deleting a video like.   
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)videoId  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+## JWK and E-Mail validation routes
+  
+### GET /validate/:uuid
+**Desription**  
+Route for validating a user JWT.  
+  
+**Headers**  
+Authorization(Attach JWT from login)
+  
+**Multipart/Formdata Body Params**  
+Nil    
+  
+**Success Return**  
+200 status and JSON Success Message with attached refreshed JWT.  
+  
+### GET /register/:token
+**Desription**  
+Route for validating a user E-Mail address the token must be the JWT sent in the E-Mail.  
+  
+**Headers**  
+Nil  
+  
+**Multipart/Formdata Body Params**  
+Nil  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+ 
+### GET /register/renew/:token
+**Desription**  
+Route for sending a new E-Mail with validation URL. You must send the old token in the :token route param.
+  
+**Headers**  
+Nil  
+  
+**Multipart/Formdata Body Params**  
+Nil  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+## Admin specific Routes
+  
 ### POST /sponsor  
 **Desription**  
 Adds sponsor.  
@@ -315,3 +605,16 @@ Authorization(Attach JWT from login)
   
 **Success Return**  
 200 status and JSON Success Message.  
+  
+### GET /video/:fileName/:userId/:uuid
+**Desription**  
+Gets a user video SaS URL.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params** 
+Nil  
+  
+**Success Return**  
+200 status and JSON Success Message and a single user video SaS url.  

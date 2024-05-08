@@ -14,7 +14,7 @@ router.use((req: Request, res: Response) => {
         uuid = req.body.uuid;
     }
 
-    deleteUserVideoComment(String(req.body.uuid), Number(req.body.commentId))
+    deleteUserVideoComment(uuid, Number(req.body.commentId))
     .then((handleFullfilled: DeleteResult) => {
         if (handleFullfilled.affected == 0) {
             res.status(400).json({

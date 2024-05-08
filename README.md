@@ -1,6 +1,14 @@
 # Welcome to the GreenTik API
 This repository is the API for the GreenTik video sharing app. This readme will outline the routes, route parameters and various other functions of the API. A guide to deploy the app in a docker container is also included.
 
+## Common route failure responses
+  
+**Failure Return**  
+400 status message with Message.  
+  
+**Server Error**  
+500 status with message.  
+
 ## Routes
 This section includes all the routes for the API with what HTTP verbs and parameters are expected. The routes are ordered as they appear in the app.js file.
 
@@ -27,16 +35,10 @@ route for adding a user.
 **Success Return**  
 200 status and JSON Success Message.  
   
-**Failure Return**  
-400 status message with Message.  
-  
-**Server Error**  
-500 status with message.  
-
 ### PUT /user
 **Desription**  
 route for editing a user.  
-
+  
 **Headers**  
 Authorization(Attach JWT from login)
   
@@ -54,15 +56,9 @@ Authorization(Attach JWT from login)
 **Success Return**  
 200 status and JSON Success Message.  
   
-**Failure Return**  
-400 status message with Message.  
-  
-**Server Error**  
-500 status with message.  
-
 ### GET /user/:uuid
 **Desription**  
-route for getting user data.  
+Route for getting user data.  
 
 **Headers**  
 Authorization(Attach JWT from login)
@@ -73,15 +69,9 @@ nil
 **Success Return**  
 200 status and JSON Success Message with attached user data.  
   
-**Failure Return**  
-400 status message with Message.  
-  
-**Server Error**  
-500 status with message.  
-
 ### GET /groups/videos/:id/:uuid
 **Desription**  
-route for getting all videos tagged to a group.  
+Route for getting all videos tagged to a group.  
 
 **Headers**  
 Authorization(Attach JWT from login)
@@ -92,15 +82,9 @@ nil
 **Success Return**  
 200 status and JSON Success Message with attached group video data.  
   
-**Failure Return**  
-400 status message with Message.  
-  
-**Server Error**  
-500 status with message.  
-
 ### POST /groups
 **Desription**  
-route for addin an interest group.  
+Route for adding an interest group.  
 
 **Headers**  
 Authorization(Attach JWT from login)
@@ -112,29 +96,127 @@ Authorization(Attach JWT from login)
 (optional/image file)background      
   
 **Success Return**  
-200 status and JSON Success Message with attached group video data.  
+200 status and JSON Success Message.  
   
-**Failure Return**  
-400 status message with Message.  
-  
-**Server Error**  
-500 status with message. 
-
 ### POST /login
 **Desription**  
 login route for app.  
   
+**Headers**  
+Nil
+  
 **Multipart/Formdata Body Params**  
-email  
-password  
+(required)email  
+(required)password  
   
 **Success Return**  
-200 status and JSON Success Message with JWT.  
+200 status and JSON Success Message.  
   
-**Failure Return**  
-400 status message with Message.  
+## Admin Routes
+
+### POST /sponsor  
+**Desription**  
+Adds sponsor.  
   
-**Server Error**  
-500 status with message.  
+**Headers**  
+Authorization(Attach JWT from login)
+  
+**Multipart/Formdata Body Params**  
+(required)uuid  
+(required)email  
+(required)name  
+(required)city  
+(required)address  
+(required)postcode  
+(optional)pnumber  
+(optional)descrition  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+ 
+### PUT /sponsor  
+**Desription**  
+Updates sponsor.  
+  
+**Headers**  
+Authorization(Attach JWT from login)
+  
+**Multipart/Formdata Body Params** 
+(required)uuid
+(optional)sid  
+(optional)email  
+(optional)name  
+(optional)description  
+(optional)city  
+(optional)postcode  
+(optional)address  
+(optional)pnumber  
+  
+**Success Return**  
+200 status and JSON Success Message.  
+  
+### GET /sponsor/all/:uuid  
+**Desription**  
+Returns all sponsors.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+nil  
+  
+**Success Return**  
+200 status and JSON Success Message and all Sponsors data.  
+  
+### GET /sponsor/:sid/:uuid  
+**Desription**  
+Gets a sponsor by id. 
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params**  
+nil  
+  
+**Success Return**  
+200 status and JSON Success Message and a single Sponsors data.  
+  
+### GET /sponsor/name/:name/:uuid  
+**Desription**  
+Gets a sponsor by name.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params** 
+nil  
 
+**Success Return**  
+200 status and JSON Success Message and a single Sponsors data.  
+  
+### GET /sponsor/videos/:sid/:uuid  
+**Desription**  
+Gets all sponsor videos.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params** 
+nil  
 
+**Success Return**  
+200 status and JSON Success Message and a single Sponsors video data.  
+  
+### DELETE /sponsor  
+**Desription**  
+Deletes a sponsor.  
+  
+**Headers**  
+Authorization(Attach JWT from login)  
+  
+**Multipart/Formdata Body Params** 
+(required)uuid
+(optional)sid  
+  
+**Success Return**  
+200 status and JSON Success Message.  

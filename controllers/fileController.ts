@@ -95,6 +95,7 @@ async function createVideo(video: Video) {
                 title: video.title,
                 description: video.description,
                 timestamp: video.timestamp,
+                weight: video.weight,
                 sid: video.sid
             }
         ])

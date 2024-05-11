@@ -11,16 +11,18 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     const ts = String(Date.now());
     const tempCategory = new Categories();
     tempCategory.Name = req.body.Name;
-    if (req.files != null) {
+    if (req.files) {
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
         tempCategory.Background_FileName = files['bgimage'][0].originalname;
         tempCategory.Icon_FileName = files['iconimage'][0].originalname;
+        tempCategory.Image_TimeStamp = ts;
+        res.locals.category = tempCategory;
+        next();
+    } else {
+        res.status(400).json({
+            Message: "Please include images with request."
+        })
     }
-    tempCategory.Image_TimeStamp = ts;
-
-    res.locals.category = tempCategory;
-
-    next();
 });
 
 router.use((req: Request, res: Response, next: NextFunction) => {

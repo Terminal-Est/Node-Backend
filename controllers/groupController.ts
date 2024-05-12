@@ -106,6 +106,7 @@ async function addGroup(tempGroup: Group) {
                 Description: tempGroup.Description,
                 System: tempGroup.System,
                 Location: tempGroup.Location,
+                CategoryID: tempGroup.CategoryID,
                 Background_FileName: tempGroup.Background_FileName,
                 Image_TimeStamp: tempGroup.Image_TimeStamp
             }

@@ -187,8 +187,8 @@ Authorization(Attach JWT from login)
   
 **Multipart/Formdata Body Params**  
 (required)Name   
-(optional/image file)bgimage  
-(optional/image file)iconimage  
+(image file)bgimage  
+(image file)iconimage  
   
 **Success Return**  
 200 status and JSON Success Message.  

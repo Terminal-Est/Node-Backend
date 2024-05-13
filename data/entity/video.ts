@@ -43,6 +43,10 @@ export class Video {
     @IsOptional()
     sid: number;
 
+    @Column()
+    @IsOptional()
+    flagged: boolean
+
     @OneToMany(() => VideoComment, (comment) => comment.videoId)
     comments: VideoComment[];
 

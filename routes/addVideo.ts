@@ -1,16 +1,18 @@
 import { NextFunction, Request, Response } from "express";
-import { createBlobOnContainer, validateVideo, createVideo } from "../controllers/fileController";
+import { createBlobOnContainer, validateVideo, createVideo, getBlobSaS } from "../controllers/fileController";
 import { Video } from "../data/entity/video";
 import { GroupVideos } from "../data/entity/groupVideos";
 import { unlink } from 'fs';
 import { ValidationError } from "class-validator";
 import { InsertResult } from "typeorm";
 import { addVideoToGroup } from "../controllers/groupController";
+import { _transcribe } from "../controllers/transcribeController";
+import { moderate } from "../controllers/contentModeratorController";
 var express = require('express');
 var router = express.Router();
 
 // Validate video data, if video data is ok, got to next function.
-router.use((req: Request, res : Response, next: NextFunction) => {
+router.use((req: Request, res: Response, next: NextFunction) => {
 
     const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);
@@ -23,7 +25,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 
     if (res.locals.adminUser && req.body.weight) {
         video.weight = Number(req.body.weight);
-    } 
+    }
 
     if (res.locals.adminUser && req.body.sid) {
         video.sid = req.body.sid;
@@ -41,12 +43,12 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 });
 
 // Upload video to Blob Storage, delete local file from api server.
-router.use((req: Request, res : Response, next: NextFunction) => { 
+router.use((req: Request, res: Response, next: NextFunction) => {
 
     var file = './videos/' + req.file?.filename;
     const fileName: string = String(req.file?.filename);
 
-    createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
+    createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => {
         unlink(file, (err) => {
             if (err) {
                 res.status(500).json({
@@ -67,12 +69,12 @@ router.use((req: Request, res : Response, next: NextFunction) => {
 });
 
 // If video upload is successful, update database with video details.
-router.use((req: Request, res : Response, next: NextFunction) => { 
+router.use((req: Request, res: Response, next: NextFunction) => {
 
     const video: Video = res.locals.vid;
 
-    createVideo(video).then(async(handleFullfilled: InsertResult) => {
-        
+    createVideo(video).then(async (handleFullfilled: InsertResult) => {
+
         var groupInsertResult: any;
 
         if (req.body.groupId) {
@@ -90,6 +92,20 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             });
         }
 
+        const videoSasURL: string = getBlobSaS(video.uuid.toString(), video.videoId);
+
+        // _transcribe(videoSasURL);
+
+        moderate("This is some seriously shitty crap!").then((result) => {
+            if (result.Terms.Count > 0) {
+                console.log(true);
+                /* Change the flag for a video */
+            } else {
+                console.log(false);
+                /* Change the flag for a video */
+            }
+        })
+
         res.status(200).json({
             Message: "Video Upload Successful.",
             Detail: handleFullfilled,
@@ -97,7 +113,7 @@ router.use((req: Request, res : Response, next: NextFunction) => {
             filename: req.file?.filename,
             videoToGroup: groupInsertResult,
         });
-        
+
     }, (handleRejected: any) => {
         res.status(400).json({
             Message: "Video Database Update Failed.",

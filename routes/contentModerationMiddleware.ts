@@ -1,9 +1,15 @@
-var SpeechToTextApiV30 = require('speech_to_text_api_v30');
+import { NextFunction, Request, Response } from "express";
+import { getBlobSaS } from "../controllers/fileController";
+import { _transcribe } from "../controllers/transcribeController";
+var express = require('express');
+var router = express.Router();
 
-var defaultClient = SpeechToTextApiV30.ApiClient.instance;
-var apiKeyHeader = defaultClient.authentications['apiKeyHeader'];
-apiKeyHeader.apiKey = process.env.API_KEY;
-var apiKeyQuery = defaultClient.authentications['apiKeyQuery'];
-apiKeyQuery.apiKey = process.env.API_KEY;
+router.use(async(req: Request, res: Response, next: NextFunction) => {
+    var sasURL = getBlobSaS("u-112", "video_1715162479694.mp4")
+    var result = await _transcribe(sasURL);
+    res.status(200).json({
+        Result: result
+    })
+}) 
 
-var api = new SpeechToTextApiV30.DefaultApi();
+module.exports = router;

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { addCategory } from "../controllers/categoryController";
+import { addCategory, updateCategory } from "../controllers/categoryController";
 import { createBlobOnContainer } from "../controllers/fileController";
 import { Categories } from "../data/entity/category";
-import { InsertResult } from "typeorm";
+import { InsertResult, UpdateResult } from "typeorm";
 import { unlink } from 'fs';
 var express = require('express');
 var router = express.Router();
@@ -27,10 +27,10 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
 router.use((req: Request, res: Response, next: NextFunction) => {
 
-    const tempCategory: Categories = res.locals.category
+    let tempCategory: Categories = res.locals.category
 
     addCategory(tempCategory).then((handleFullfilled: InsertResult) => {
-        res.locals.categoryid = handleFullfilled.identifiers[0].ID;
+        tempCategory.ID = handleFullfilled.identifiers[0].ID;
         next();
     }, (handleRejected: any) => {
         res.status(400).json({
@@ -47,21 +47,23 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
 router.use((req: Request, res: Response, next: NextFunction) => {
 
+    let tempCategory: Categories = res.locals.category;
+
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     let x: Array<GroupImage> = new Array<GroupImage>();
 
     var bgfile = './images/' + files['bgimage'][0].filename;
     const bgfileextension = files['bgimage'][0].originalname.toString().split(".")[1];
-    const bgfileName: string = 'category_' + res.locals.categoryid + "_bg_" + res.locals.category.Image_TimeStamp + "." + bgfileextension;
-    let bgimage: GroupImage = { file: bgfile, filename: bgfileName}
+    const bgfileName: string = 'category_' + tempCategory.ID + "_bg_" + res.locals.category.Image_TimeStamp + "." + bgfileextension;
+    let bgimage: GroupImage = { file: bgfile, filename: bgfileName }
 
     x.push(bgimage);
 
     var icofile = './images/' + files['iconimage'][0].filename;
     const icofileextension = files['iconimage'][0].originalname.toString().split(".")[1];
-    const icofileName: string = 'category_' + res.locals.categoryid + "_ico_" + res.locals.category.Image_TimeStamp + "." + icofileextension;
-    let icoimage: GroupImage = { file: icofile, filename: icofileName}
+    const icofileName: string = 'category_' + tempCategory.ID + "_ico_" + res.locals.category.Image_TimeStamp + "." + icofileextension;
+    let icoimage: GroupImage = { file: icofile, filename: icofileName }
     x.push(icoimage);
 
     x.forEach((value) => {
@@ -83,10 +85,40 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             });
         });
     });
+    tempCategory.Background_FileName = bgfileName;
+    tempCategory.Icon_FileName = icofileName;
+
+    res.locals.category = tempCategory;
+    next();
+    /*
     res.status(200).json({
         Message: "Category Successfully Created",
         CategoryID: res.locals.categoryid,
         Detail: "Created"
+    })
+    */
+});
+
+
+router.use((req: Request, res: Response, next: NextFunction) => {
+
+    const tempCategory: Categories = res.locals.category
+
+    updateCategory(tempCategory).then((handleFulfilled: UpdateResult) => {
+        res.status(200).json({
+            Message: "Category Created.",
+            Detail: tempCategory
+        });
+    }, (handleRejected: any) => {
+        res.status(400).json({
+            Message: "Image Update Failed.",
+            Detail: handleRejected
+        })
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Categories Database Error.",
+            Detail: err
+        })
     })
 });
 

@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { DeleteResult } from "typeorm";
 import { GroupComment } from "../data/entity/groupComment";
-import { updateUserGroupComment, validateComment, isCommentProfane } from "../controllers/commentController";
+import { moderate } from "../controllers/contentModeratorController";
+import { updateUserGroupComment, validateComment } from "../controllers/commentController";
 var express = require('express');
 var router = express.Router();
 
@@ -21,7 +22,10 @@ router.use(async(req: Request, res: Response) => {
     });
 
     if (typeof valid == 'boolean' && valid == true) {
-        if (isCommentProfane(comment.comment)) {
+        
+        var screen = await moderate(comment.comment);
+
+        if (screen.classification.reviewRecommended) {
             res.status(400).json({
                 Message: "Don't Use Naughty Words."
             });

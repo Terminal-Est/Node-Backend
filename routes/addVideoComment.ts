@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { VideoComment } from "../data/entity/videoComment";
-import { addUserVideoComment, validateComment, isCommentProfane } from "../controllers/commentController";
+import { addUserVideoComment, validateComment } from "../controllers/commentController";
 import { InsertResult } from "typeorm";
+import { moderate } from "../controllers/contentModeratorController";
 var express = require('express');
 var router = express.Router();
 
@@ -24,7 +25,10 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
     });
 
     if (typeof valid == 'boolean' && valid == true) {
-        if (isCommentProfane(comment.comment)) {
+
+        var screen = await moderate(comment.comment);
+
+        if (screen.classification.reviewRecommended) {
             res.status(400).json({
                 Message: "Don't Use Naughty Words."
             });

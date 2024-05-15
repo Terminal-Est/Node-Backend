@@ -11,9 +11,9 @@
   "dependencies": {
     "@azure/cognitiveservices-contentmoderator": "^5.0.1",
     "@azure/communication-email": "^1.0.0",
-    "@azure/ms-rest-js": "github:azure/ms-rest-js",
+    "@azure/ms-rest-azure-js": "^2.1.0",
+    "@azure/ms-rest-js": "^2.7.0",
     "@azure/storage-blob": "^12.17.0",
-    "bad-words": "^3.0.4",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "class-validator": "^0.14.1",

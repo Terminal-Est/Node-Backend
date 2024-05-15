@@ -144,6 +144,16 @@ function getBlobSaS(container: string, fileName: string) {
     }
 }
 
+async function flagVideo(vid: string, flag: boolean) {
+    return await AppDataSource.createQueryBuilder()
+    .update(Video)
+    .set({
+        flagged: flag
+    })
+    .where("videoid = :id", {id: vid})
+    .execute();
+}
+
 export {
     getBlobContainerClient,
     getBlobSaS,
@@ -154,5 +164,6 @@ export {
     createVideo,
     deleteVideo,
     getVideo,
-    deleteBlobFromContainer
+    deleteBlobFromContainer,
+    flagVideo
 }

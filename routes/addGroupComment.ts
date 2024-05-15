@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { GroupComment } from "../data/entity/groupComment";
-import { addUserGroupComment, validateComment, isCommentProfane } from "../controllers/commentController";
+import { addUserGroupComment, validateComment } from "../controllers/commentController";
+import { moderate } from "../controllers/contentModeratorController";
 import { InsertResult } from "typeorm";
 import { UserGroup } from "../data/entity/userGroup";
 import { getUserGroupId } from "../controllers/groupController";
@@ -46,7 +47,10 @@ router.use(async(req: Request, res: Response, next: NextFunction) => {
         });
 
         if (typeof valid == 'boolean' && valid == true) {
-            if (isCommentProfane(comment.comment)) {
+
+            var screen = await moderate(comment.comment);
+
+            if (screen.classification.reviewRecommended) {
                 res.status(400).json({
                     Message: "Don't Use Naughty Words."
                 });

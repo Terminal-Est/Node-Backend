@@ -2,12 +2,6 @@ import { validate } from "class-validator";
 import { GroupComment } from "../data/entity/groupComment";
 import { VideoComment } from "../data/entity/videoComment";
 import { AppDataSource } from "../data/data-source";
-var Filter = require("bad-words");
-
-function isCommentProfane(comment: string) {
-    const filter = new Filter();
-    return filter.isProfane(comment);
-}
 
 async function validateComment(comment: any) {
     var errors = await validate(comment);
@@ -216,7 +210,6 @@ async function getAllGroupComments() {
 }
 
 export {
-    isCommentProfane,
     validateComment,
     addUserGroupComment,
     addUserVideoComment,

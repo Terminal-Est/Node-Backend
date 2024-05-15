@@ -1,4 +1,4 @@
-const auth = require("@azure/ms-rest-js");
+const CognitiveServicesCredentials = require("@azure/ms-rest-js");
 const ContentModerator = require("@azure/cognitiveservices-contentmoderator")
 
 /**
@@ -35,7 +35,7 @@ export async function moderate(unmoderatedText: string) {
      * Using your subscription key and endpoint, a client is created that is used call the API.
      */
     // Set CONTENT_MODERATOR_SUBSCRIPTION_KEY and CONTENT_MODERATOR_ENDPOINT in your environment variables.
-    let credentials = new auth.ApiKeyCredentials({ inHeader: { 'Ocp-Apim-Subscription-Key': process.env.CONTENT_MODERATOR_SUBSCRIPTION_KEY } });
+    let credentials = new CognitiveServicesCredentials.ApiKeyCredentials({ inHeader: { 'Ocp-Apim-Subscription-Key': process.env.CONTENT_MODERATOR_SUBSCRIPTION_KEY } });
     let client = new ContentModerator.ContentModeratorClient(credentials, process.env.CONTENT_MODERATOR_ENDPOINT);
 
     let screenResult = await client.textModeration.screenText("text/plain", unmoderatedText, { classify: true });

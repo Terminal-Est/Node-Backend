@@ -428,9 +428,6 @@ app.get('/video/:fileName/:userId/:uuid', (req: Request, res: Response, next: Ne
     next();
 }, jwtHandler.validateJWT, adminValidationRouter, getVideoSas);
 
-var getAModResult = require('./routes/contentModerationMiddleware');
-app.get('/video/moderate', getAModResult);
-
 /**
  * App Utility functions go here
  * -----------------------------

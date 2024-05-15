@@ -6,6 +6,8 @@ import { unlink } from 'fs';
 import { ValidationError } from "class-validator";
 import { InsertResult } from "typeorm";
 import { addVideoToGroup } from "../controllers/groupController";
+import { _transcribe } from "../controllers/transcribeController";
+import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
@@ -89,6 +91,9 @@ router.use((req: Request, res : Response, next: NextFunction) => {
                 groupInsertResult = err;
             });
         }
+
+        var sasURL = getBlobSaS("u-" + video.uuid, String(req.file?.filename));
+        _transcribe(sasURL, String(req.file?.filename));
 
         res.status(200).json({
             Message: "Video Upload Successful.",

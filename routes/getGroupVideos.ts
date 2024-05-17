@@ -12,10 +12,10 @@ var router = express.Router();
 
 router.use(async(req: Request, res : Response, next: NextFunction) => {
 
-    const videoId = Number(res.locals.groupId);
+    const groupId = Number(res.locals.groupId);
     const uuid = Number(res.locals.uuid);
 
-    const groupVideos: GroupVideos[] = await getVideosByGroup(videoId).then((handleFulFilled) => {
+    const groupVideos: GroupVideos[] = await getVideosByGroup(groupId).then((handleFulFilled) => {
         return handleFulFilled;
     }, () => {
         return [];

@@ -377,6 +377,13 @@ app.post('/sponsor', (req: Request, res: Response, next: NextFunction) => {
     next();
 }, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, addSponsorRouter);
 
+// Put route to ban user from app.
+var updateSponsorRouter = require('./routes/admin/updateSponsor');
+app.put('/sponsor', fieldsOnly, (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, updateSponsorRouter);
+
 // Delete route for deleting sponsor
 var deleteSponsorRouter = require('./routes/admin/deleteSponsor');
 app.delete('/sponsor', (req: Request, res: Response, next: NextFunction) => {

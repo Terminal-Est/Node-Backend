@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
-import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser } from "../controllers/userController";
+import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser, getUserUsername } from "../controllers/userController";
 import { createBlobStorageContainer, createBlobOnContainer } from "../controllers/fileController";
 import { ValidationError } from "class-validator";
 import { Uuid } from "../data/entity/uuid";
@@ -70,35 +70,47 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 })
 
 // Insert user into PII database.
-router.use((req: Request, res: Response, next: NextFunction) => {
+router.use(async(req: Request, res: Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
-    createUser(user).then((handleFulfilled: InsertResult) => {
-        var userId: Uuid = new Uuid();
-        userId.uuid = handleFulfilled.identifiers[0].uuid;
-        res.locals.uuid = handleFulfilled.identifiers[0].uuid;
+    const userNameExists = await getUserUsername(user.username).then((handleFulfilled) => {
+        return handleFulfilled;
+    }, (handleRejected) => {
+        return handleRejected;
+    });
 
-        createDataUser(userId).then(() => {
-            next();
-        }, (handleRejected) => {
-            res.status(500).json({
-                Message: "User Data UUID Create Error.",
-                Detail: handleRejected
+    if (userNameExists) {
+        res.status(400).json({
+            Message: "Username Already Exists"
+        });
+    } else {
+        createUser(user).then((handleFulfilled: InsertResult) => {
+            var userId: Uuid = new Uuid();
+            userId.uuid = handleFulfilled.identifiers[0].uuid;
+            res.locals.uuid = handleFulfilled.identifiers[0].uuid;
+
+            createDataUser(userId).then(() => {
+                next();
+            }, (handleRejected) => {
+                res.status(500).json({
+                    Message: "User Data UUID Create Error.",
+                    Detail: handleRejected
+                });
+            }).catch((err) => {
+                res.status(500).json({
+                    Message: "User UUID on Data Server Error.",
+                    Detail: err
+                });
             });
+
         }).catch((err) => {
             res.status(500).json({
-                Message: "User UUID on Data Server Error.",
+                Message: "User Creation Server Error.",
                 Detail: err
             });
         });
-
-    }).catch((err) => {
-        res.status(500).json({
-            Message: "User Creation Server Error.",
-            Detail: err
-        });
-    });
+    }
 });
 
 // Insert hashed password into database. 

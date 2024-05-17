@@ -38,6 +38,22 @@ async function getUserUUID(uuid: string) {
     })
 }
 
+// Get a user object based on UserName.
+async function getUserUsername(username: string) {
+    var promise = await UserDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .where("user.username = :id", {id: username})
+        .getOne();
+    return new Promise<User>((resolve, reject) => {
+        if (promise != null) {
+            var user: User = promise;
+            return resolve(user);
+        } else {
+            return reject(false);
+        }
+    })
+}
+
 // Get all users in the database.
 async function getAllUsers() {
     var promise = await UserDataSource.getRepository(User)
@@ -214,6 +230,7 @@ export { getUserEmail,
     getUserUUID,
     getUserPassword,
     getAllUsers,
+    getUserUsername,
     insertPasswordHash,
     updatePasswordHash,
     getHash, 

@@ -58,6 +58,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     }
 
     validateSponsor(sponsor).then(() => {
+            res.locals.sponsor = sponsor;
             next();
     }, (handleRejected: ValidationError) => {
         res.status(400).json({

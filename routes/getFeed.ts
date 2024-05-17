@@ -9,6 +9,7 @@ import { UserGroup } from "../data/entity/userGroup";
 import { getCommentsByVideo } from "../controllers/commentController";
 import { VideoComment } from "../data/entity/videoComment";
 import { logToFile } from "../utils/logging";
+import { getSponsorSID } from "../controllers/sponsorController";
 var express = require('express');
 var router = express.Router();
 
@@ -132,6 +133,11 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
                 logToFile(String(err));
                 return [];
             });
+
+            if (videos[j].sid  && user != null) {
+                var sponsor = await getSponsorSID(videos[j].sid);
+                user.username = sponsor.name
+            }
 
             var vidUrl: string = String(getBlobSaS(userContainer, videos[j].videoId));
             var data = {

@@ -7,6 +7,7 @@ import { getBlobSaS, getVideo } from "../controllers/fileController";
 import { getUserUUID } from "../controllers/userController";
 import { getCommentsByVideo } from "../controllers/commentController";
 import { logToFile } from "../utils/logging";
+import { getSponsorSID } from "../controllers/sponsorController";
 var express = require('express');
 var router = express.Router();
 
@@ -54,6 +55,11 @@ router.use(async(req: Request, res : Response, next: NextFunction) => {
             }).catch((err) => {
                 logToFile(err);
             });
+
+            if (video?.sid  && user != null) {
+                var sponsor = await getSponsorSID(video.sid);
+                user.username = sponsor.name
+            }
     
             var data = {
                 videoId: video?.videoId,

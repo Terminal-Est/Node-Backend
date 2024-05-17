@@ -72,9 +72,13 @@ var callbackGetTransFiles = function (error, data, response) {
           } else {
             var response = JSON.stringify(body);
             var trJSON = JSON.parse(response);
-            var screen = await moderate(trJSON.body.combinedRecognizedPhrases[0].lexical);
-            if (screen.classification.reviewRecommended) {
-                _flagVideoForReview();
+            try {
+              var screen = await moderate(trJSON.body.combinedRecognizedPhrases[0].lexical);
+              if (screen.classification.reviewRecommended) {
+                  _flagVideoForReview();
+              }
+            } catch {
+              console.log("Transcribe returned no hits.");
             }
           } // end else
         }); // end request

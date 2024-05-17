@@ -7,7 +7,7 @@ var router = express.Router();
 router.use((req: Request, res: Response) => {
     
     var uuid: number;
-    const groupid: number = Number(req.body.groupId);
+    const groupid: number = Number(req.body.groupid);
 
     if (res.locals.adminUser) {
         uuid = Number(req.body.userId);

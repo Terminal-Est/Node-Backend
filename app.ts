@@ -200,7 +200,7 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.post('/video', uploads.single('video'), /**adminValidationRouter, jwtHandler.validateJWT,**/ addVideoRouter);
+app.post('/video', uploads.single('video'), adminValidationRouter, jwtHandler.validateJWT, addVideoRouter);
 
 // Delete video from storage.
 var deleteVideoRouter = require('./routes/deleteVideo');

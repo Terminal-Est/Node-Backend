@@ -20,8 +20,8 @@ router.use((req: Request, res : Response, next: NextFunction) => {
         next();
     }, (handleRejected: ValidationError) => {
         res.status(400).json({
-            message: "Invalid Follow Parameters.",
-            detail: handleRejected
+            Message: "Invalid Follow Parameters.",
+            Detail: handleRejected
         })
     })
 });
@@ -33,16 +33,20 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     creatUserFollow(String(userFollows.uuid), String(userFollows.uuidFollowing))
     .then((handleFullfilled: InsertResult) => {
         res.status(200).json({
-            message: "User Followed.",
-            detail: handleFullfilled.identifiers
+            Message: "User Followed.",
+            Detail: handleFullfilled.identifiers
         });
     }, (handleRejected) => {
         res.status(400).json({
-            message: "User Follow Error.",
-            detail: handleRejected
+            Message: "User Follow Error.",
+            Detail: handleRejected
+        });
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "User Follow Server Error.",
+            Detail: err
         });
     });
-
 });
 
 module.exports = router;

@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { InsertResult } from "typeorm";
 import { User } from "../data/entity/user";
-import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser } from "../controllers/userController";
+import { createUser, validatePassword, validateUser, insertPasswordHash, getHash, createDataUser, getUserUsername } from "../controllers/userController";
 import { createBlobStorageContainer, createBlobOnContainer } from "../controllers/fileController";
 import { ValidationError } from "class-validator";
 import { Uuid } from "../data/entity/uuid";
 import { unlink } from "fs";
+import { emailMiddleware } from "./getNewEmailAuth";
 var express = require('express');
 var router = express.Router();
-
-//TODO: Documentation needs to be updated for new route checks.
 
 // Validate user first.
 router.use((req: Request, res: Response, next: NextFunction) => {
@@ -25,8 +24,10 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     user.state = req.body.state;
     user.postcode = req.body.postcode;
     user.avatar = fileName;
+    user.fname = req.body.fname;
+    user.lname = req.body.lname;
 
-    validateUser(user).then((handleFullfilled: boolean) => {
+    validateUser(user).then(() => {
             res.locals.user = user;
             next();
     }, (handleRejected: ValidationError) => {
@@ -40,14 +41,14 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 // Validate password.
 router.use((req: Request, res: Response, next: NextFunction) => {
 
-    validatePassword(req.body.password).then((handleFullfilled: boolean) => {
+    validatePassword(req.body.password).then(() => {
         next();
     }, (handleRejected: ValidationError) => {
         res.status(400).json({
             Message: "Invalid User Details",
             Detail: handleRejected
-        })
-    })
+        });
+    });
 });
 
 // If password is valid, create password hash.
@@ -60,28 +61,56 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     }, (handleFulfilled: string) => {
         res.locals.hashPass = handleFulfilled;
         next()
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Password Hash Server Error.",
+            Detail: err
+        });
     });
 })
 
 // Insert user into PII database.
-router.use((req: Request, res: Response, next: NextFunction) => {
+router.use(async(req: Request, res: Response, next: NextFunction) => {
 
     const user: User = res.locals.user;
 
-    createUser(user).then((handleFulfilled: InsertResult) => {
-        var userId: Uuid = new Uuid();
-        userId.uuid = handleFulfilled.identifiers[0].uuid;
-        res.locals.uuid = handleFulfilled.identifiers[0].uuid;
-
-        createDataUser(userId).then((handleFulfilled: InsertResult) => {
-            next();
-        })
-    }).catch((error) => {
-        res.status(400).json({
-            Message: "Database Update Error.",
-            Detail: error
-        });
+    const userNameExists = await getUserUsername(user.username).then((handleFulfilled) => {
+        return handleFulfilled;
+    }, (handleRejected) => {
+        return handleRejected;
     });
+
+    if (userNameExists) {
+        res.status(400).json({
+            Message: "Username Already Exists"
+        });
+    } else {
+        createUser(user).then((handleFulfilled: InsertResult) => {
+            var userId: Uuid = new Uuid();
+            userId.uuid = handleFulfilled.identifiers[0].uuid;
+            res.locals.uuid = handleFulfilled.identifiers[0].uuid;
+
+            createDataUser(userId).then(() => {
+                next();
+            }, (handleRejected) => {
+                res.status(500).json({
+                    Message: "User Data UUID Create Error.",
+                    Detail: handleRejected
+                });
+            }).catch((err) => {
+                res.status(500).json({
+                    Message: "User UUID on Data Server Error.",
+                    Detail: err
+                });
+            });
+
+        }).catch((err) => {
+            res.status(500).json({
+                Message: "User Creation Server Error.",
+                Detail: err
+            });
+        });
+    }
 });
 
 // Insert hashed password into database. 
@@ -90,10 +119,10 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     const uuid = res.locals.uuid;
     const password = res.locals.hashPass;
 
-    insertPasswordHash(uuid, password).then((handleFulfilled : any) => {
+    insertPasswordHash(uuid, password).then(() => {
         next();
     }).catch((error: any) => {
-        res.status(400).json({
+        res.status(500).json({
             Message: "Hashing Password Error", 
             Stack: error
         });
@@ -105,53 +134,50 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
     const uuid: string = res.locals.uuid;
 
-    try {
-        createBlobStorageContainer("u-" + uuid).then((responseId) => {
-            res.locals.contaierCreateReq = responseId
-            next();
+    createBlobStorageContainer("u-" + uuid).then((responseId) => {
+        res.locals.contaierCreateReq = responseId
+        next();
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Server Error Adding Container.",
+            detail: err
         });
-    } catch (e) {
-        res.status(400).json({
-            Message: "Error Adding Container.",
-            detail: e
-        })
-    }
+    });
 });
+
+// Send authentication e-mail.
+router.use(emailMiddleware);
 
 // Insert User Avatar into blob contaier if it exists. 
 router.use((req: Request, res: Response, next: NextFunction) => {
     
-    const user: User = res.locals.user;
-
-    if (user.avatar) {
+    if (req.file?.filename) {
         
         var file = './images/' + req.file?.filename;
         const fileName: string = String(req.file?.filename);
 
-        try {
-            createBlobOnContainer("u-" + res.locals.uuid, file, fileName).then((requestId: string | undefined) => { 
-                unlink(file, (err) => {
-                    if (err) {
-                        res.status(400).json({
-                            Message: "Image Upload Error.",
-                            Detail: err
-                        });
-                    } else {
-                        res.status(200).json({
-                            Message: "User Added Successfully.",
-                            Detail: res.locals.user.email,
-                            containerReq: res.locals.contaierCreateReq,
-                            imageReq: requestId
-                        });
-                    }
-                });
+        createBlobOnContainer("u-" + res.locals.uuid, file, fileName).then((requestId: string | undefined) => { 
+            unlink(file, (err) => {
+                if (err) {
+                    res.status(500).json({
+                        Message: "Image Unlink Error.",
+                        Detail: err
+                    });
+                } else {
+                    res.status(200).json({
+                        Message: "User Added Successfully.",
+                        Detail: res.locals.user.email,
+                        containerReq: res.locals.contaierCreateReq,
+                        imageReq: requestId
+                    });
+                }
             });
-        } catch (e) {
+        }).catch((err) => {
             res.status(500).json({
-                Message: "Upload Failed.",
-                Detail: e
+                Message: "Blob Creation Error",
+                Detail: err
             });
-        }
+        });
     } else {
         res.status(200).json({
             Message: "User Added Successfully.",

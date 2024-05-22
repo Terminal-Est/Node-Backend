@@ -4,12 +4,12 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var multer = require('multer');
-var cron = require('node-cron');
 var bodyParser = require('body-parser');
-var security = require('./controllers/securityController');
-var fileLogging = require('./utils/logging');
 var jwtHandler = require('./routes/validateJWT');
 import { NextFunction, Request, Response } from "express";
+import { emailMiddleware } from "./routes/getNewEmailAuth";
+import { getRSAKeypairs, updateJWKendpoint } from "./controllers/securityController";
+import { logToFile } from "./utils/logging";
 
 // Multer disk storage.
 const storage = multer.diskStorage({
@@ -23,12 +23,15 @@ const storage = multer.diskStorage({
         cb(null, './videos');
     },
     filename: function (req: any, file: any, cb: any) {
+       
         const tstamp: string = Date.now().toString();
-        cb(null, file.fieldname + "_" + tstamp + path.extname(file.originalname));
+        var fname: string = file.fieldname;
+
+        cb(null, fname + "_" + tstamp + path.extname(file.originalname));
     }
 });
 
-const avatarImage = multer.diskStorage({
+const imageStore = multer.diskStorage({
     fileFilter: function(req: any, file: any, cb: any) {
         imageMimeTypeCheck(req, file, cb);
     },
@@ -47,8 +50,6 @@ const avatarImage = multer.diskStorage({
 
 // check image mime types
 function imageMimeTypeCheck(req: any, file: any, cb: any) {
-
-    const mimetype: string = file.mimetype;
 
     if (file.mimetype.toLowerCase() == "image/png" || 
         file.mimetype.toLowerCase() == "image/jpg" || 
@@ -77,7 +78,7 @@ const fieldsOnly = multer().none();
 // Multer for temp storage of video uploads.
 const uploads = multer({ storage: storage });
 // Middleware for adding array of images to request of a size of 2.
-const avatarUpload = multer({ storage: avatarImage });
+const imageUpload = multer({ storage: imageStore });
 
 var app = express();
 
@@ -91,32 +92,33 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(logger('dev'));
 app.use(cookieParser());
 
+/**
+ * All General Routes go here.
+ * ---------------------------
+ */
+
+// Admin validation route.
+var adminValidationRouter = require('./routes/admin/validateAdmin');
+
 // Get index router.
 var indexRouter = require('./routes/index');
 app.get('/', indexRouter);
 
 // Post route for adding User.
+var getIPRouter = require('./routes/validateIP');
 var addUserRouter = require('./routes/addUser');
-app.post('/user', avatarUpload.single('avatar'), addUserRouter);
+app.post('/user', imageUpload.single('avatar'), /**getIPRouter,**/ addUserRouter);
 
 // Put route for updating User.
 var updateUserRouter = require('./routes/updateUser');
-app.put('/user', jwtHandler.validateJWT, avatarUpload.single('avatar'), updateUserRouter);
+app.put('/user', imageUpload.single('avatar'), adminValidationRouter, jwtHandler.validateJWT, updateUserRouter);
 
 // Get route for getting a User.
 var getUserRouter = require('./routes/getUser');
-app.get('/user/:id', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/user/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, getUserRouter);
-
-// Delete route for deleting a User.
-var deleteUserRouter = require('./routes/deleteUser');
-app.delete('/user', fieldsOnly, deleteUserRouter);
-
-// Get route to get all groups.
-var getGroupsRouter = require('./routes/getGroups');
-app.get('/groups', fieldsOnly, getGroupsRouter);
 
 // Get route to get all videos by group ID.
 var getGroupVideos = require('./routes/getGroupVideos');
@@ -124,15 +126,73 @@ app.get('/groups/videos/:id/:uuid', (req: Request, res: Response, next: NextFunc
     res.locals.groupId = req.params.id;
     res.locals.uuid = req.params.uuid;
     next();
-}, jwtHandler.validateJWT, fieldsOnly, getGroupVideos)
+}, jwtHandler.validateJWT, getGroupVideos);
 
 // Post route for users to join a group.
-var joinGroupRouter = require('./routes/joinGroup');
-app.post('/joingroup', fieldsOnly, joinGroupRouter);
+var addGroupRouter = require('./routes/addGroup');
+app.post('/groups', imageUpload.single('background'), jwtHandler.validateJWT , addGroupRouter);
 
-// Get route for getting all categories
-var getCategoriesRouter = require('./routes/getCategories')
-app.get('/categories', fieldsOnly, getCategoriesRouter);
+// Post group for joining group.
+var joinGroupRouter = require('./routes/joinGroup');
+app.post('/groups/:id/join', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.groupid = req.params.id;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, joinGroupRouter);
+
+// Get route for getting groups.
+var getGroupsRouter = require('./routes/getGroups');
+app.get('/groups/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getGroupsRouter);
+
+// Get route for getting groups by ID
+var getGroupsIdRouter = require('./routes/getGroupsId');
+app.get('/groups/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.id = req.params.id;
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getGroupsIdRouter);
+
+// Get route for getting groups by user ID
+var getGroupsByUserIDRouter = require('./routes/getGroupsByUserID');
+app.get('/groups/user/:userid/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.userid = req.params.userid;
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getGroupsByUserIDRouter);
+
+// Delete route to delete a user from a group.
+var deleteUserGroupRouter = require('./routes/deleteUserFromGroup');
+app.delete('/groups/user', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteUserGroupRouter);
+
+// Get route for getting groups by CategoryID
+var getGroupsByCategoryRouter = require('./routes/getGroupsByCategory');
+app.get('/groups/category/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.id = req.params.id;
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getGroupsByCategoryRouter);
+
+// Post route to add a category.
+const catimages = imageUpload.fields([{ name: 'bgimage', maxcount: 1 }, { name: 'iconimage', maxcount: 1 }]);
+var addCategoryRouter = require('./routes/addCategory');
+app.post('/categories', catimages, jwtHandler.validateJWT, addCategoryRouter);
+
+// Gets a category by id.
+var getCategoryRouter = require('./routes/getCategory');
+app.get('/categories/:id/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.id = req.params.id;
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getCategoryRouter);
+
+// Gets all categories.
+var getCategoriesRouter = require('./routes/getCategories');
+app.get('/categories/get/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, getCategoriesRouter);
 
 // Get login route. Returns a JWT.
 var loginRouter = require('./routes/login');
@@ -140,45 +200,90 @@ app.post('/login', fieldsOnly, loginRouter);
 
 // Post route for video upload
 var addVideoRouter = require('./routes/addVideo');
-app.post('/video', jwtHandler.validateJWT, uploads.single('video'), addVideoRouter);
+app.post('/video', uploads.single('video'), adminValidationRouter, jwtHandler.validateJWT, addVideoRouter);
 
 // Delete video from storage.
 var deleteVideoRouter = require('./routes/deleteVideo');
-app.use('/video/delete', jwtHandler.validateJWT, fieldsOnly, deleteVideoRouter);
+app.delete('/video/delete', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteVideoRouter);
 
 // Get Video SaS url.
 var getVideoSas = require('./routes/getVideoSas');
-app.get('/video/:id/:fileName', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/video/:fileName/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.filename = req.params.fileName;
+    res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, getVideoSas);
 
+/**
+ * Comment routes start here.
+ * --------------------------
+ */
+
+// Post video comment route.
+var addVideoCommentRouter = require('./routes/addVideoComment');
+app.post('/video/comment', fieldsOnly, jwtHandler.validateJWT, addVideoCommentRouter);
+
+// Put route for updating video comment.
+var updateVideoCommentRouter = require('./routes/updateUserVideoComment');
+app.put('/video/comment', fieldsOnly, jwtHandler.validateJWT, updateVideoCommentRouter);
+
+// Delete video comment from database.
+var deleteVideoCommentRouter = require('./routes/deleteUserVideoComment');
+app.delete('/video/comment', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteVideoCommentRouter);
+
+// Post group comment route.
+var addGroupCommentRouter = require('./routes/addGroupComment');
+app.post('/groups/comment', fieldsOnly, jwtHandler.validateJWT, addGroupCommentRouter);
+
+// Put route for updating group comment.
+var updateGroupCommentRouter = require('./routes/updateUserGroupComment');
+app.put('/groups/comment', fieldsOnly, jwtHandler.validateJWT, updateGroupCommentRouter);
+
+// Delete group comment from database.
+var deleteGroupCommentRouter = require('./routes/deleteUserGroupComment');
+app.delete('/groups/comment', fieldsOnly, adminValidationRouter, jwtHandler.validateJWT, deleteGroupCommentRouter);
+
 // Get user feed JSON.
 var getUserFeed = require('./routes/getFeed');
-app.get('/feed/:id', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/feed/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
     next();
 }, jwtHandler.validateJWT, getUserFeed);
 
+/**
+ * User follow routes go here.
+ * ---------------------------
+ */
+
 // Add a user follow.
 var addUserFollow = require('./routes/addFollow');
-app.post('/follow', jwtHandler.validateJWT, fieldsOnly, addUserFollow);
+app.post('/follow', fieldsOnly, jwtHandler.validateJWT, addUserFollow);
+
+/**
+ * Like routes go here.
+ * --------------------
+ */
 
 // Get likes for a video.
 var getLikesRouter = require("./routes/getLikes");
-app.get('/like/:videoid', (req: Request, res: Response, next: NextFunction) => {
+app.get('/like/:videoid/:uuid', (req: Request, res: Response, next: NextFunction) => {
     res.locals.videoid = req.params.videoid;
+    res.locals.uuid = req.params.uuid;
     next();
-}, getLikesRouter);
+}, jwtHandler.validateJWT, getLikesRouter);
 
 // Add a user like to a video.
 var addLikeRouter = require('./routes/addLike');
-app.post('/like', fieldsOnly, addLikeRouter);
+app.post('/like', fieldsOnly, jwtHandler.validateJWT, addLikeRouter);
 
 // Remove a user like for a video.
 var deleteLikeRouter = require('./routes/deleteLike');
-app.delete('/like', fieldsOnly, deleteLikeRouter);
+app.delete('/like', fieldsOnly, jwtHandler.validateJWT, deleteLikeRouter);
+
+/**
+ * JWT an e-mail validation routes go here.
+ * ----------------------------------------
+ */
 
 // Get router for JWKS.
 var jwksRouter = require('./routes/jwks');
@@ -186,66 +291,208 @@ app.get('/.well-known/jwks', jwksRouter);
 
 // Get JWT Refresh token.
 var getJWTRouter = require('./routes/getJWT');
-app.get('/validate/:id', (req: Request, res: Response, next: NextFunction) => {
-    res.locals.uuid = req.params.id;
+app.get('/validate/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
     next();
-}, jwtHandler.validateJWT, jwtHandler.issueJWT, getJWTRouter)
+}, jwtHandler.validateJWT, jwtHandler.issueJWT, getJWTRouter);
 
-// Set app key switchRSA to true.
-app.set('switchRSA', true);
+// Get route for validating e-mail addresses.
+var getEmailValidationRouter = require('./routes/getEmailValidation');
+app.get('/register/:token', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.token = req.params.token;
+    next();
+}, getEmailValidationRouter);
 
-// Init RSA keypairs.
-getKeyPair1();
-getKeyPair2();
+// Get route for getting new e-mail validation token.
+var validateEmailTokenRouter = require('./routes/validateEmailToken');
+app.get('/register/renew/:token', 
+    (req: Request, res: Response, next: NextFunction) => {
+        res.locals.token = req.params.token;
+        next();
+    }, 
+    validateEmailTokenRouter, 
+    emailMiddleware, 
+    (req: Request, res: Response) => {
+        res.status(200).json({
+            Message: "E-mail Verification Sent."
+        });
+    }, 
+);
 
-function getKeyPair1() {
-    security.getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
-        app.set('KeySet1', handleFulfilled.keyPair);
-        app.set('jwk1', handleFulfilled.jwk);
-        app.set('onKey2', false);
-        security.updateJWKendpoint(handleFulfilled.jwk, 0);
+/**
+ * All Admin Routes go here
+ * ------------------------
+ */
+
+// Delete route for deleting a User.
+var deleteUserRouter = require('./routes/admin/deleteUser');
+app.delete('/user', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, deleteUserRouter);
+
+// Get route for getting a User (admin).
+var getUserRouter = require('./routes/getUser');
+app.get('/user/:uuid/:userId', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.userId = req.params.userId;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getUserRouter);
+
+// Get route to get all users.
+var getAllUsersRouter = require('./routes/admin/getAllUsers');
+app.get('/users/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getAllUsersRouter);
+
+// Put route to ban user from app.
+var userBanRouter = require('./routes/admin/updateUserBan')
+app.put('/users/ban', fieldsOnly, (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, userBanRouter);
+
+// Put route to ban user from a group.
+var updateUserGroupBanRouter = require('./routes/admin/updateUserGroupBan');
+app.put('/users/ban/group', fieldsOnly, (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, updateUserGroupBanRouter);
+
+// Get route to get all posts
+var getAllCommentsRouter =  require('./routes/admin/getAllComments')
+app.get('/comments/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getAllCommentsRouter);
+
+// Post route for adding a sponsor
+var addSponsorRouter = require('./routes/admin/addSponsor');
+app.post('/sponsor', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, addSponsorRouter);
+
+// Put route to ban user from app.
+var updateSponsorRouter = require('./routes/admin/updateSponsor');
+app.put('/sponsor', fieldsOnly, (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, updateSponsorRouter);
+
+// Delete route for deleting sponsor
+var deleteSponsorRouter = require('./routes/admin/deleteSponsor');
+app.delete('/sponsor', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, deleteSponsorRouter);
+
+// Get route to get all sponsors
+var getAllSponsorsRouter = require('./routes/admin/getAllSponsors')
+app.get('/sponsor/all/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getAllSponsorsRouter);
+
+// Get route to get sponsor by name
+var getSponsorNameRouter = require('./routes/admin/getSponsorName')
+app.get('/sponsor/name/:name/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.name = req.params.name;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getSponsorNameRouter);
+
+// Get route to get sponsor by SID
+var getSponsorSIDRouter = require('./routes/admin/getSponsorSID')
+app.get('/sponsor/sid/:sid/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.sid = req.params.sid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getSponsorSIDRouter);
+
+// Get route to get sponsor by SID
+var getSponsorVideosRouter = require('./routes/admin/getSponsorVideos')
+app.get('/sponsor/videos/:sid/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.uuid = req.params.uuid;
+    res.locals.sid = req.params.sid;
+    res.locals.adminOnlyRoute = true;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getSponsorVideosRouter);
+
+// Get Video SaS url admin.
+var getVideoSas = require('./routes/getVideoSas');
+app.get('/video/:fileName/:userId/:uuid', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.filename = req.params.fileName;
+    res.locals.userId = req.params.userId;
+    res.locals.uuid = req.params.uuid;
+    next();
+}, jwtHandler.validateJWT, adminValidationRouter, getVideoSas);
+
+/**
+ * App Utility functions go here
+ * -----------------------------
+ */
+
+// Set keypairs on Start Up.
+function appKeyPair (keySet: string, jwk: string) {
+    getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
+        app.set(keySet, handleFulfilled.keyPair);
+        app.set(jwk, handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 0);
+        logToFile(app.get(jwk));
     }).catch((error: any) => {
-        fileLogging.logToFile(error);
+        logToFile(error);
     });
 }
 
-function getKeyPair2() {
-    security.getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
-        app.set('KeySet2', handleFulfilled.keyPair);
-        app.set('jwk2', handleFulfilled.jwk);
-        app.set('onKey2', true);
-        security.updateJWKendpoint(handleFulfilled.jwk, 1);
+appKeyPair('KeySet1', 'jwk1');
+appKeyPair('KeySet2', 'jwk2');
+
+// Get KeySet 1 for signing JWTs.
+const getKeyPair1 = (req: Request, res: Response, next: NextFunction) => {
+    getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
+        req.app.set('KeySet1', handleFulfilled.keyPair);
+        req.app.set('jwk1', handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 0);
+        logToFile(app.get('jwk1'));
+        next();
     }).catch((error: any) => {
-        fileLogging.logToFile(error);
+        logToFile(error);
     });
 }
 
-var getRSA1 = cron.schedule('* * * Jan,Mar,May,Jul,Sep,Nov Sun', () => {
-    getKeyPair1();
-}, {
-    scheduled: true,
-    timezone: "Australia/Melbourne"
-});
-
-var getRSA2 = cron.schedule('* * * Feb,Apr,Jun,Aug,Oct,Dec Sun', () => {
-   getKeyPair2();
-}, {
-    scheduled: true,
-    timezone: "Australia/Melbourne"
-});
-
-// TODO: Add admin path for stopping starting RSA rotation
-function startRsaRotation() {
-    getRSA1.start();
-    getRSA2.start();
+// Get KeySet 2 for signing JWTs.
+const getKeyPair2 = (req: Request, res: Response, next: NextFunction) => {
+    getRSAKeypairs().then((handleFulfilled: { keyPair: any; jwk: any; }) => {
+        req.app.set('KeySet2', handleFulfilled.keyPair);
+        req.app.set('jwk2', handleFulfilled.jwk);
+        updateJWKendpoint(handleFulfilled.jwk, 1);
+        logToFile(app.get('jwk2'));
+        next();
+    }).catch((error: any) => {
+        logToFile(error);
+    });
 }
 
-function stopRsaRotation() {
-    getRSA1.stop();
-    getRSA2.stop();
-}
 
-// Start RSA rotation.
-startRsaRotation();
+const refreshJWKs = ((req: Request, res: Response) => {
+    res.status(200).json({
+        Message: "JWKs Refreshed."
+    })
+});
+
+// Route for refreshing JWKS.
+app.put('/jwk/refresh', (req: Request, res: Response, next: NextFunction) => {
+    res.locals.adminOnlyRoute = true;
+    next();
+}, fieldsOnly, jwtHandler.validateJWT, adminValidationRouter, getKeyPair1, getKeyPair2, refreshJWKs);
+
 
 module.exports = app;

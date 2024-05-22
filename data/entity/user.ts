@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsBooleanString, IsDateString, IsOptional } from "class-validator";
+import { Length, IsNotEmpty, IsEmail, IsPostalCode, IsDateString, IsOptional } from "class-validator";
 
 /**
  * User entity class. TypeORM class with validation decorators.
@@ -24,13 +24,15 @@ export class User {
 
     @Column()
     @IsOptional()
-    @IsBooleanString()
     admin: boolean;
    
     @Column()
     @IsOptional()
-    @IsBooleanString()
     auth: boolean;
+
+    @Column()
+    @IsOptional()
+    banned: number;
 
     @Column()
     @IsNotEmpty({
@@ -92,4 +94,18 @@ export class User {
         message: "Avatar Filename Length Error."
     })
     avatar: string;
+
+    @Column()
+    @IsOptional()
+    @Length(0, 250, {
+        message: "First name must not exceed 250 characters."
+    })
+    fname: string;
+
+    @Column()
+    @IsOptional()
+    @Length(0, 250, {
+        message: "Last name must not exceed 250 characters."
+    })
+    lname: string;
 }

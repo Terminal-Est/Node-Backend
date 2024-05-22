@@ -1,16 +1,18 @@
 import { NextFunction, Request, Response } from "express";
 import { createBlobOnContainer, validateVideo, createVideo } from "../controllers/fileController";
 import { Video } from "../data/entity/video";
+import { GroupVideos } from "../data/entity/groupVideos";
 import { unlink } from 'fs';
 import { ValidationError } from "class-validator";
 import { InsertResult } from "typeorm";
+import { addVideoToGroup } from "../controllers/groupController";
+import { _transcribe } from "../controllers/transcribeController";
+import { getBlobSaS } from "../controllers/fileController";
 var express = require('express');
 var router = express.Router();
 
 // Validate video data, if video data is ok, got to next function.
 router.use((req: Request, res : Response, next: NextFunction) => {
-
-    console.log(req.body);
 
     const timestamp = String(Date.now());
     const fileName: string = String(req.file?.filename);
@@ -21,7 +23,15 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     video.description = req.body.description;
     video.timestamp = timestamp;
 
-    validateVideo(video).then((handleFullfilled: Boolean) => {
+    if (res.locals.adminUser && req.body.weight) {
+        video.weight = Number(req.body.weight);
+    } 
+
+    if (res.locals.adminUser && req.body.sid) {
+        video.sid = req.body.sid;
+    }
+
+    validateVideo(video).then(() => {
         res.locals.vid = video;
         next();
     }, (handleRejected: ValidationError) => {
@@ -38,41 +48,61 @@ router.use((req: Request, res : Response, next: NextFunction) => {
     var file = './videos/' + req.file?.filename;
     const fileName: string = String(req.file?.filename);
 
-    try {
-        createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
-            unlink(file, (err) => {
-                if (err) {
-                    res.status(500).json({
-                        Message: "File Upload Error.",
-                        Detail: err
-                    });
-                } else {
-                    res.locals.requestId = requestId;
-                    next();
-                }
-            });
+    createBlobOnContainer("u-" + req.body.uuid, file, fileName).then((requestId: string | undefined) => { 
+        unlink(file, (err) => {
+            if (err) {
+                res.status(500).json({
+                    Message: "Video Unlink Error.",
+                    Detail: err
+                });
+            } else {
+                res.locals.requestId = requestId;
+                next();
+            }
         });
-    } catch (e) {
+    }).catch((err) => {
         res.status(500).json({
-            Message: "Upload Failed.",
-            Detail: e
+            Message: "Blob Creation Error.",
+            Detail: err
         });
-    }
+    });
 });
 
 // If video upload is successful, update database with video details.
 router.use((req: Request, res : Response, next: NextFunction) => { 
 
-    const requestId = res.locals.requestId;
     const video: Video = res.locals.vid;
 
-    createVideo(video).then((handleFullfilled: InsertResult) => {
+    createVideo(video).then(async(handleFullfilled: InsertResult) => {
+        
+        var groupInsertResult: any;
+
+        if (req.body.groupId) {
+
+            var groupVideo: GroupVideos = new GroupVideos;
+            groupVideo.groupId = Number(req.body.groupId);
+            groupVideo.videoId = String(req.file?.filename);
+
+            await addVideoToGroup(groupVideo).then((handleFullfilled) => {
+                groupInsertResult = handleFullfilled;
+            }, (handleRejected) => {
+                groupInsertResult = handleRejected;
+            }).catch((err) => {
+                groupInsertResult = err;
+            });
+        }
+
+        var sasURL = getBlobSaS("u-" + video.uuid, String(req.file?.filename));
+        _transcribe(sasURL, String(req.file?.filename));
+
         res.status(200).json({
             Message: "Video Upload Successful.",
             Detail: handleFullfilled,
             blobReqId: res.locals.requestId,
-            filename: req.file?.filename
+            filename: req.file?.filename,
+            videoToGroup: groupInsertResult,
         });
+        
     }, (handleRejected: any) => {
         res.status(400).json({
             Message: "Video Database Update Failed.",

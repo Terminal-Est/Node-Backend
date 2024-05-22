@@ -4,5 +4,4 @@ import { Entity, PrimaryColumn } from "typeorm";
 export class Uuid {
     @PrimaryColumn()
     uuid: number;
-
 }

@@ -38,6 +38,30 @@ async function getUserUUID(uuid: string) {
     })
 }
 
+// Get a user object based on UserName.
+async function getUserUsername(username: string) {
+    var promise = await UserDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .where("user.username = :id", {id: username})
+        .getOne();
+    return new Promise<User>((resolve, reject) => {
+        if (promise != null) {
+            var user: User = promise;
+            return resolve(user);
+        } else {
+            return reject(false);
+        }
+    })
+}
+
+// Get all users in the database.
+async function getAllUsers() {
+    var promise = await UserDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .getMany();
+    return promise;
+}
+
 // Validate user supplied password against class validator parameters.
 async function validatePassword(password: string) {
     var passwordValid = new PasswordValid();
@@ -60,7 +84,7 @@ async function getUserPassword(uuid: number) {
         .getOne();
 }
 
-// TODO: Testing and comments.
+// Insert password into database.
 async function insertPasswordHash(uuid: number, hashPass: string) {
     return await UserDataSource.createQueryBuilder()
         .insert()
@@ -129,7 +153,9 @@ async function createUser(user: User) {
                 city: user.city,
                 state: user.state,
                 postcode: user.postcode,
-                avatar: user.avatar
+                avatar: user.avatar,
+                fname: user.fname,
+                lname: user.lname
             }
         ])
         .execute();
@@ -166,15 +192,45 @@ async function updateUser(user: User) {
             city: user.city,
             state: user.state,
             postcode: user.postcode,
-            avatar: user.avatar
+            avatar: user.avatar,
+            fname: user.fname,
+            lname: user.lname
         })
         .where("uuid = :id", {id: user.uuid})
+        .execute();
+}
+
+async function updateUserBan(uuid: string, banned: number) {
+    return await UserDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+            banned: banned
+        })
+        .where("uuid = :id", {id: uuid})
+        .execute();
+}
+
+async function deleteUserPII(uuid: string) {
+    return await UserDataSource.getRepository(User)
+        .createQueryBuilder("user")
+        .delete()
+        .where("uuid = :id", {id: uuid})
+        .execute();
+}
+
+async function deleteUserData(uuid: string) {
+    return await AppDataSource.getRepository(Uuid)
+        .createQueryBuilder("user")
+        .delete()
+        .where("uuid = :id", {id: uuid})
         .execute();
 }
 
 export { getUserEmail,
     getUserUUID,
     getUserPassword,
+    getAllUsers,
+    getUserUsername,
     insertPasswordHash,
     updatePasswordHash,
     getHash, 
@@ -183,5 +239,8 @@ export { getUserEmail,
     setUserAthenticated,
     validateUser,
     validatePassword,
-    updateUser
+    updateUser,
+    updateUserBan,
+    deleteUserPII,
+    deleteUserData
  }; 

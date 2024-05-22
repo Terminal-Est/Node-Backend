@@ -9,16 +9,23 @@ var router = express.Router();
 router.use((req: Request, res: Response, next: NextFunction) => {
     const tempLike = { uuid: req.body.uuid, videoID: req.body.videoid };
 
-    getLike(tempLike).then(function(response) {
+    getLike(tempLike).then((response) => {
         if (response == null) {
             // Proceed to create the like if one does not exist.
             next();
         } else {
-            res.json({
-                Message: "Failed",
+            res.status(200).json({
+                Message: "Like Already Exists.",
                 Detail: response
-            })
+            });
         }
+    }, () => {
+        next();
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Like Update Server Error.",
+            Detail: err
+        });
     });
 })
 
@@ -27,8 +34,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     const tempLike = { uuid: req.body.uuid, videoID: req.body.videoid };
 
     addLike(tempLike).then((handleFullfilled: InsertResult) => {
-        res.json({
-            Message: "Success",
+        res.status(200).json({
+            Message: "Like Successfully Added.",
             Detail: handleFullfilled
         })
     }, (handleRejected: ValidationError) => {
@@ -36,6 +43,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
             Message: "Invalid Like Details",
             Detail: handleRejected
         })
+    }).catch((err) => {
+        res.status(500).json({
+            Message: "Like Update Server Error.",
+            Detail: err
+        });
     });
 })
 

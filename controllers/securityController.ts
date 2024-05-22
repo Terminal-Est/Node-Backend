@@ -8,7 +8,7 @@ var jose = require('jose');
 
 // Return RSA Keypair.
 function getRSAKeypairs() { 
-    return new Promise(async function(resolve){
+    return new Promise<{keyPair: any, jwk: any}>(async(resolve) => {    
         const keys = async () => {
             const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
             return { publicKey, privateKey };
@@ -22,7 +22,7 @@ function getRSAKeypairs() {
         const keyPair = {
             public: pemPubKey,
             private: pemPrivateKey
-        }
+        } 
         return resolve({ keyPair: keyPair, jwk: pubKeyJwk });
     }); 
 }
@@ -48,20 +48,20 @@ async function verifyToken(jwt: any, jwk1: any, jwk2: any) {
 // Issue new JWT.
 function getAuthJWT(uuid: string, key: any, kid: any, exp: any) {
     const alg = 'RS256';
-    return new Promise(async function(resolve, reject) {
+    return new Promise(async(resolve, reject) => {
         const privateKey = await jose.importPKCS8(key, alg);
-        await new jose.SignJWT({ 'iat': true, 'sub': true, 'exp': false, 'kid': kid })
+        await new jose.SignJWT({ 'iat': true, 'sub': true, 'exp': true, 'kid': kid })
         .setProtectedHeader({ alg })
         .setIssuedAt()
         .setSubject(uuid)
-        //.setExpirationTime(exp)
+        .setExpirationTime(exp)
         .sign(privateKey)
         .then((handleFulfilled : any) => { 
             return resolve(handleFulfilled); 
         }, (handleRejected : any) => {
             return reject(handleRejected);
-        })
-    })
+        });
+    });
 }
 
 // Update exposed JWKs.
@@ -83,8 +83,10 @@ async function userLogin(email: string, password : string) {
     var passwordValid: boolean = false;
     var uuid: string;
 
-    const user: User | null = await getUserEmail(email).then((data : User | null) => {
-        return data;
+    const user: any = await getUserEmail(email).then((handleFulfilled) => {
+        return handleFulfilled;
+    }, (handleRejected) => {
+        return handleRejected;
     });
     
     if (user != null) {
@@ -99,7 +101,7 @@ async function userLogin(email: string, password : string) {
         }
     }
 
-    return new Promise<string>(function(resolve, reject) {
+    return new Promise<User>((resolve, reject) => {
         if (!userExists){
             return reject("Invalid User.");
 
@@ -107,7 +109,7 @@ async function userLogin(email: string, password : string) {
             return reject("Invalid Password");
 
         } else {
-            return resolve(uuid);
+            return resolve(user);
         }
     });
 }

@@ -4,3 +4,4 @@ CREATE TABLE [dbo].[Likes] (
     [videoid] VARCHAR (450) NOT NULL,
     CONSTRAINT [PK_Likes] PRIMARY KEY CLUSTERED ([ID] ASC)
 );
+

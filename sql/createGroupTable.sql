@@ -8,5 +8,6 @@ CREATE TABLE [dbo].[Group] (
     [Background_FileName] VARCHAR (100) NULL,
     [Image_TimeStamp]     VARCHAR (100) NULL,
     CONSTRAINT [PK_Group] PRIMARY KEY CLUSTERED ([ID] ASC),
-    CONSTRAINT [FK_Group_Categories] FOREIGN KEY ([CategoryID]) REFERENCES [dbo].[Categories] ([ID])
+    CONSTRAINT [FK_Group_Categories] FOREIGN KEY ([CategoryID]) REFERENCES [dbo].[Categories] ([ID]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+

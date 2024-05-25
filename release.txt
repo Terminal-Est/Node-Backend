@@ -1,0 +1,48 @@
+March 13
+Added in user and password validation
+Provisioned back end development resources.
+
+March 23
+User and E-mail routes added.
+Video uploads working to blob storage.
+
+April 6
+Group routes added.
+Video comment routes added.
+
+April 13
+User profile updates.
+Get user details.
+Get user videos.
+Remember me functionality.
+Categories routes added.
+
+April 20
+Several admin end points added.
+E-mail authentication end point working.
+Like posts end point added.
+Endpoint for JWT authentication added.
+
+April 27
+More admin end points added.
+AI transcription for posts and comments testing phase.
+
+May 4
+More admin end points added.
+Fixing bugs reported by front end team.
+
+May 11
+Bug fixes.
+AI transcription feature implemented.
+
+May 18
+Bug fixes.
+
+Known bugs
+Console.log() functions to be removed accross several features, forces synchronus operation. 
+Unlinking video/image files will sometimes not occour. 
+
+Features not currently implemented.
+User image uploading for posts.
+IP screening for users outside Australia.
+
